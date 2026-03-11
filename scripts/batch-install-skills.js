@@ -2,6 +2,8 @@
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+const path = require('path');
+const os = require('os');
 const ProgressReporter = require('../utils/progress-reporter');
 
 // ClawdHub 热门技能列表 (基于下载量排序)
@@ -58,7 +60,8 @@ async function batchInstall() {
     // 检查已安装
     const installedSkills = new Set();
     try {
-        const { stdout } = await execAsync('ls "C:\\Users\\zhouk\\openclaw-data\\skills" -Name', { shell: 'powershell.exe' });
+        const skillsDir = path.join(os.homedir(), 'openclaw-data', 'skills');
+        const { stdout } = await execAsync(`ls "${skillsDir}" -Name`, { shell: 'powershell.exe' });
         stdout.split('\n').forEach(line => {
             const skill = line.trim();
             if (skill) installedSkills.add(skill);

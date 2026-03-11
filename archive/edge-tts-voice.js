@@ -10,7 +10,7 @@ class EdgeTTSVoice {
         this.isSpeaking = false;
         this.tempDir = path.join(__dirname, 'temp');
         this.voice = 'zh-CN-XiaoxiaoNeural'; // 晓晓(活泼女声)
-        this.edgeTtsPath = 'C:\\Users\\zhouk\\AppData\\Roaming\\Python\\Python313\\Scripts\\edge-tts.exe';
+        this.edgeTtsPath = process.env.EDGE_TTS_PATH || 'edge-tts';
         this.initTempDir();
     }
 

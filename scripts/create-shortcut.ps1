@@ -1,8 +1,9 @@
 $WshShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\Claw 桌面宠物.lnk")
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
 $Shortcut.TargetPath = "cmd.exe"
-$Shortcut.Arguments = '/c cd /d "C:\Users\zhouk\Desktop\02_开发项目\desktop-pet" && npm start'
-$Shortcut.WorkingDirectory = "C:\Users\zhouk\Desktop\02_开发项目\desktop-pet"
+$Shortcut.Arguments = "/c cd /d `"$ProjectRoot`" && npm start"
+$Shortcut.WorkingDirectory = $ProjectRoot
 $Shortcut.Description = "Claw 桌面宠物 - OpenClaw AI 助手"
 $Shortcut.WindowStyle = 7
 $Shortcut.Save()

@@ -26,7 +26,7 @@ await message({
     channel: 'lark',
     target: 'KK',
     message: '这是Excel报表',
-    filePath: 'C:\\Users\\zhouk\\Desktop\\report.xlsx'
+    filePath: path.join(os.homedir(), 'Desktop', 'report.xlsx')
 });
 ```
 
@@ -37,7 +37,7 @@ const uploader = new LarkUploader();
 
 // 上传文件
 const result = await uploader.uploadToLark(
-    'C:\\Users\\zhouk\\Desktop\\data.xlsx',
+    'path/to/data.xlsx',
     '这是本月销售数据'
 );
 
@@ -73,7 +73,7 @@ await uploader.uploadToLark(pdfPath, '技术文档PDF版');
 ```javascript
 // 发送源代码
 await uploader.uploadToLark(
-    'C:\\Users\\zhouk\\Desktop\\project\\main.js',
+    'path/to/project/main.js',
     '最新的main.js代码'
 );
 ```
@@ -122,7 +122,7 @@ detectFileType(filepath) {
 ### 示例1: 发送Excel
 ```javascript
 await uploader.uploadToLark(
-    'C:\\Users\\zhouk\\Desktop\\sales.xlsx',
+    'path/to/sales.xlsx',
     '2026年2月销售数据'
 );
 ```
@@ -130,7 +130,7 @@ await uploader.uploadToLark(
 ### 示例2: 发送PDF
 ```javascript
 await uploader.uploadToLark(
-    'C:\\Users\\zhouk\\Documents\\report.pdf',
+    'path/to/report.pdf',
     '项目总结报告'
 );
 ```
@@ -138,7 +138,7 @@ await uploader.uploadToLark(
 ### 示例3: 发送Word文档
 ```javascript
 await uploader.uploadToLark(
-    'C:\\Users\\zhouk\\Desktop\\contract.docx',
+    'path/to/contract.docx',
     '合同草稿'
 );
 ```

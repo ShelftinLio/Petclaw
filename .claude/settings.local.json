@@ -46,7 +46,24 @@
       "Bash(head:*)",
       "Bash(gh api:*)",
       "mcp__chrome-devtools__navigate_page",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(openclaw skills:*)",
+      "Bash(choco install:*)",
+      "Bash(cp:*)",
+      "WebFetch(domain:docs.openclaw.ai)",
+      "Bash(openclaw logs:*)",
+      "Bash(openclaw status:*)",
+      "Bash(openclaw gateway:*)",
+      "Bash(openclaw config:*)",
+      "mcp__chrome-devtools__list_pages",
+      "Bash(xxd:*)",
+      "Bash(npm start:*)",
+      "Bash(sed:*)",
+      "Bash(npx electron:*)",
+      "Bash(\"/c/Program Files/nodejs/npx.cmd\" electron:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)"
     ]
   }
 }

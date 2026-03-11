@@ -57,7 +57,7 @@ const { exec } = require('child_process');
 async function takeScreenshot(reason) {
     // 调用 desktop-control 技能截图
     const timestamp = Date.now();
-    const path = `C:\\Users\\zhouk\\Desktop\\screenshots\\${timestamp}.png`;
+    const path = `${os.tmpdir()}\\screenshots\\${timestamp}.png`;
     
     await exec(`node screenshot.js --output "${path}"`);
     

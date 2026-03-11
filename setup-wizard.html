@@ -892,6 +892,7 @@
 <script>
 // ===== State =====
 let currentStep = -1;
+let smartEnvManualPath = '';
   const totalSteps = 8;
   let maxVisitedStep = -1;
 let stepData = {
@@ -1077,6 +1078,8 @@ function jumpToStep(step) {
 }
 
 // ===== Navigation =====
+// goNext: alias for nextStep, used in env-check summary buttons
+function goNext() { nextStep(); }
 async function nextStep() {
   // Step validation
   if (!validateCurrentStep()) return;
@@ -1223,57 +1226,126 @@ async function renderStep(step) {
   }
 }
 
-// ─── Step 0 (-1): 环境预检 ───────────────────────
+// ─── Step 0 (-1): 环境预检（Smart Setup） ───────────────────────
 async function renderEnvCheck() {
   await addBubble('你好呀~ 我是小K！(^_^) 欢迎使用 KKClaw 桌面宠物~');
-  await addBubble('在正式配置之前，让我先帮你检测一下环境依赖，确保一切都准备好了！');
+  await addBubble('在正式配置之前，让我先做一次全面环境检测，确保一切就绪！');
 
   addCard(`
-    <h3>🔍 环境预检</h3>
-    <p style="font-size:11px;color:var(--text-medium);margin-bottom:10px;">正在检测运行环境，请稍候...</p>
+    <h3>🔍 Smart Setup 环境检测</h3>
+    <p style="font-size:11px;color:var(--text-medium);margin-bottom:10px;">正在全面检测运行环境，请稍候...</p>
 
+    <div style="font-size:11px;color:var(--text-medium);margin-bottom:6px;font-weight:600;">核心依赖</div>
     <div class="check-item" id="env-node">
       <span class="check-icon">⏳</span>
-      <span class="check-name">Node.js 版本</span>
+      <span class="check-name">Node.js</span>
       <span class="check-status">检测中...</span>
     </div>
-
-    <div class="check-item" id="env-openclaw">
+    <div class="check-item" id="env-npm">
       <span class="check-icon">⏳</span>
-      <span class="check-name">OpenClaw Gateway</span>
+      <span class="check-name">npm</span>
       <span class="check-status">检测中...</span>
     </div>
-
-    <div class="check-item" id="env-gateway">
+    <div class="check-item" id="env-git">
+      <span class="check-icon">⏳</span>
+      <span class="check-name">git</span>
+      <span class="check-status">检测中...</span>
+    </div>
+    <div class="check-item" id="env-openclaw-mode">
+      <span class="check-icon">⏳</span>
+      <span class="check-name">OpenClaw 安装模式</span>
+      <span class="check-status">检测中...</span>
+    </div>
+    <div class="check-item" id="env-openclaw-cli">
+      <span class="check-icon">⏳</span>
+      <span class="check-name">OpenClaw CLI 路径</span>
+      <span class="check-status">检测中...</span>
+    </div>
+    <div class="check-item" id="env-openclaw-manual">
+      <span class="check-icon">🛠️</span>
+      <span class="check-name">手动指定路径</span>
+      <span class="check-status">可手动输入 OpenClaw 主目录 / CLI 路径</span>
+    </div>
+    <div class="form-group" style="margin-top:8px;">
+      <label>手动指定 OpenClaw 主目录 / CLI 路径</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" class="form-input" id="openclaw-manual-path" placeholder="例如 C:\\Users\\name\\.openclaw 或 openclaw.cmd 所在路径">
+        <button class="btn btn-test" type="button" onclick="verifyOpenClawManualPath()">验证</button>
+      </div>
+      <div id="openclaw-manual-result" style="margin-top:6px;font-size:11px;color:var(--text-medium);"></div>
+    </div>
       <span class="check-icon">⏳</span>
       <span class="check-name">Gateway 运行状态</span>
       <span class="check-status">检测中...</span>
     </div>
+    <div class="check-item" id="env-project-deps">
+      <span class="check-icon">⏳</span>
+      <span class="check-name">项目依赖 (node_modules)</span>
+      <span class="check-status">检测中...</span>
+    </div>
 
+    <div style="font-size:11px;color:var(--text-medium);margin:10px 0 6px;font-weight:600;">增强依赖（可选）</div>
     <div class="check-item" id="env-python">
       <span class="check-icon">⏳</span>
-      <span class="check-name">Python 3.6+（可选，用于 EdgeTTS/CosyVoice）</span>
+      <span class="check-name">Python 3.6+</span>
+      <span class="check-status">检测中...</span>
+    </div>
+    <div class="check-item" id="env-edge-tts">
+      <span class="check-icon">⏳</span>
+      <span class="check-name">edge-tts</span>
+      <span class="check-status">检测中...</span>
+    </div>
+    <div class="check-item" id="env-sqlite3">
+      <span class="check-icon">⏳</span>
+      <span class="check-name">sqlite3</span>
       <span class="check-status">检测中...</span>
     </div>
 
     <div id="env-summary" class="hidden" style="margin-top:12px;padding:10px;border-radius:4px;border:2px solid;font-size:12px;"></div>
-
+    <div id="env-paths-section" class="hidden" style="margin-top:10px;"></div>
     <div id="env-actions" class="hidden" style="margin-top:12px;"></div>
   `);
 
   try {
-    const r = await wizardAPI.invoke('wizard-env-check');
+    // 并行调用：Smart 深度检测 + 旧版 Gateway 健康检测
+    const [smart, gwLegacy] = await Promise.all([
+      wizardAPI.invoke('wizard-smart-env-check', smartEnvManualPath || ''),
+      wizardAPI.invoke('wizard-env-check'),
+    ]);
 
-    // Node.js
-    setEnvItem('env-node', r.node.ok,
-      r.node.ok ? `Node.js ${r.node.version} ✓` : `❌ ${r.node.error}`,
-      r.node.ok ? null : { label: '前往下载 Node.js', action: () => wizardAPI.openExternal('https://nodejs.org/') }
+    if (!smart.success) {
+      await addBubble('检测出错: ' + smart.error);
+      return;
+    }
+
+    const deps = smart.dependencies;
+    const oc = smart.openclaw;
+    const paths = smart.paths;
+    const summary = smart.summary;
+
+    // ─── 核心依赖 ───
+    setEnvItem('env-node', deps.node.ok,
+      deps.node.ok ? 'Node.js ' + deps.node.version : '需要 Node.js 18+',
+      deps.node.ok ? null : { label: '前往下载 Node.js', action: () => wizardAPI.openExternal('https://nodejs.org/') }
     );
 
-    // OpenClaw
-    setEnvItem('env-openclaw', r.openclaw.ok,
-      r.openclaw.ok ? `OpenClaw 已安装 ${r.openclaw.version ? '(' + r.openclaw.version + ')' : ''}` : `未检测到 OpenClaw，请先安装`,
-      r.openclaw.ok ? null : {
+    setEnvItem('env-npm', deps.npm.ok,
+      deps.npm.ok ? 'npm ' + deps.npm.version : '未检测到 npm',
+      deps.npm.ok ? null : { label: '重新安装 Node.js', action: () => wizardAPI.openExternal('https://nodejs.org/') }
+    );
+
+    setEnvItem('env-git', deps.git.ok,
+      deps.git.ok ? 'git ' + deps.git.version : '未检测到 git',
+      deps.git.ok ? null : { label: '前往下载 git', action: () => wizardAPI.openExternal('https://git-scm.com/') }
+    );
+
+    if ((smart.manualPath || oc.manualInput) && document.getElementById('openclaw-manual-path')) {
+      document.getElementById('openclaw-manual-path').value = smart.manualPath || oc.manualInput || '';
+    }
+
+    setEnvItem('env-openclaw', deps.openclaw.ok,
+      deps.openclaw.ok ? 'OpenClaw ' + (deps.openclaw.version || '已安装') : '未检测到 OpenClaw',
+      deps.openclaw.ok ? null : {
         label: '一键安装 OpenClaw',
         cmdHint: 'npm install -g openclaw',
         action: async (btn) => {
@@ -1281,53 +1353,192 @@ async function renderEnvCheck() {
           await addBubble('正在安装 OpenClaw，请稍候（约30秒）...');
           const result = await wizardAPI.invoke('wizard-install-openclaw');
           if (result.success) {
-            await addBubble('✅ OpenClaw 安装成功！');
+            await addBubble('OpenClaw 安装成功！');
+            clearChat();
             renderEnvCheck();
           } else {
-            await addBubble(`❌ 安装失败，请手动运行：`);
+            await addBubble('安装失败，请手动运行命令');
             btn.textContent = '一键安装 OpenClaw'; btn.disabled = false;
           }
         }
       }
     );
 
-    // Gateway 运行状态
-    setEnvItem('env-gateway', r.gateway.ok,
-      r.gateway.ok ? `Gateway 运行中（端口 ${r.gateway.port}）✓` : `❌ ${r.gateway.error}`,
-      r.gateway.ok ? null : {
+    setEnvItem('env-openclaw-mode', deps.openclaw.ok,
+      deps.openclaw.ok ? ('模式: ' + (oc.installMode || deps.openclaw.detail?.installMode || 'unknown')) : '未识别安装模式'
+    );
+
+    setEnvItem('env-openclaw-cli', deps.openclaw.ok,
+      deps.openclaw.detail?.cliPath || '未检测到 CLI 路径'
+    );
+
+    // Gateway
+    setEnvItem('env-gateway', gwLegacy.gateway.ok,
+      gwLegacy.gateway.ok ? 'Gateway 运行中（端口 ' + gwLegacy.gateway.port + '）' : 'Gateway 未运行',
+      gwLegacy.gateway.ok ? null : {
         label: '一键启动 Gateway',
         action: async (btn) => {
           btn.textContent = '启动中...'; btn.disabled = true;
           await addBubble('正在启动 Gateway，最长等待20秒...');
           const result = await wizardAPI.invoke('wizard-start-gateway');
           if (result.success) {
-            await addBubble('✅ Gateway 启动成功！');
-            setEnvItem('env-gateway', true, 'Gateway 运行中 ✓', null);
-            updateEnvSummary(r, true);
+            await addBubble('Gateway 启动成功！');
+            setEnvItem('env-gateway', true, 'Gateway 运行中', null);
           } else {
-            await addBubble(`❌ 启动失败: ${result.error}`);
+            await addBubble('启动失败: ' + friendlyError(result.error));
             btn.textContent = '一键启动 Gateway'; btn.disabled = false;
           }
         }
       }
     );
 
-    // Python
-    setEnvItem('env-python',
-      r.python.ok ? true : 'warn',
-      r.python.ok
-        ? `${r.python.version} (${r.python.command}) ✓  EdgeTTS / CosyVoice 可用`
-        : `⚠️ ${r.python.error}`,
-      r.python.ok ? null : {
-        label: '前往下载 Python',
-        action: () => wizardAPI.openExternal('https://www.python.org/downloads/')
-      }
+    // 项目依赖
+    const projOk = deps.projectDeps.nodeModules.ok && deps.projectDeps.electron.ok;
+    setEnvItem('env-project-deps', projOk,
+      projOk ? 'node_modules 和 Electron 就绪' : '项目依赖缺失',
+      projOk ? null : { label: '查看安装命令', cmdHint: 'npm install' }
     );
 
-    updateEnvSummary(r);
+    // ─── 增强依赖 ───
+    setEnvItem('env-python',
+      deps.python.ok ? true : 'warn',
+      deps.python.ok ? deps.python.version + ' (' + deps.python.source + ')' : '未检测到 Python 3.6+',
+      deps.python.ok ? null : { label: '前往下载 Python', action: () => wizardAPI.openExternal('https://www.python.org/downloads/') }
+    );
+
+    setEnvItem('env-edge-tts',
+      deps.edgeTts.ok ? true : 'warn',
+      deps.edgeTts.ok ? 'edge-tts ' + deps.edgeTts.version : '未安装（EdgeTTS 不可用）',
+      deps.edgeTts.ok ? null : { label: '查看安装命令', cmdHint: 'pip install edge-tts' }
+    );
+
+    setEnvItem('env-sqlite3',
+      deps.sqlite3.ok ? true : 'warn',
+      deps.sqlite3.ok ? 'sqlite3 ' + deps.sqlite3.version : '未检测到（数据缓存不可用）',
+      null
+    );
+
+    // ─── 路径快照 ───
+    const pathsSection = document.getElementById('env-paths-section');
+    if (pathsSection) {
+      pathsSection.classList.remove('hidden');
+      pathsSection.innerHTML =
+        '<div style="font-size:11px;color:var(--text-medium);margin-bottom:6px;font-weight:600;">关键路径</div>' +
+        '<div style="font-size:11px;background:#fffdf5;border:1px solid var(--wood-light);border-radius:3px;padding:8px;line-height:1.8;word-break:break-all;">' +
+          '<div><strong>项目根目录：</strong>' + escapeHtml(paths.projectRoot) + '</div>' +
+          '<div><strong>用户目录：</strong>' + escapeHtml(paths.userHome) + '</div>' +
+          '<div><strong>OpenClaw CLI：</strong>' + escapeHtml(oc.cliPath || '未检测到') + '</div>' +
+          '<div><strong>安装模式：</strong>' + escapeHtml(oc.installMode || 'unknown') + '</div>' +
+          '<div><strong>安装根目录：</strong>' + escapeHtml(oc.installRoot || '未识别') + '</div>' +
+          '<div><strong>OpenClaw 配置：</strong>' + escapeHtml(paths.openclawConfigDir) +
+            (oc.configDir.exists ? ' <span style="color:var(--green);">存在</span>' : ' <span style="color:var(--red);">不存在</span>') +
+          '</div>' +
+          '<div><strong>OpenClaw 数据：</strong>' + escapeHtml(paths.openclawDataDir) +
+            (oc.dataDir.exists ? ' <span style="color:var(--green);">存在</span>' : ' <span style="color:#f57f17;">不存在</span>') +
+          '</div>' +
+          '<div><strong>候选数据目录：</strong>' + escapeHtml((paths.openclawDataCandidates || []).join(' | ')) + '</div>' +
+          '<div><strong>临时目录：</strong>' + escapeHtml(paths.tempDir) + '</div>' +
+          ((Array.isArray(oc.candidates) && oc.candidates.length > 1)
+            ? '<div><strong>候选安装位置：</strong><ul style="margin:4px 0 0 18px;">' + oc.candidates.map(function(c) { return '<li>' + escapeHtml((c.installMode || 'unknown') + ' | ' + (c.cliPath || c.installRoot || 'unknown')) + '</li>'; }).join('') + '</ul></div>'
+            : '') +
+        '</div>';
+    }
+
+    // ─── 摘要 ───
+    updateSmartEnvSummary(summary, gwLegacy.gateway.ok);
 
   } catch (err) {
-    await addBubble(`检测出错了: ${err.message} (>_<)`);
+    await addBubble('检测出错了: ' + err.message);
+  }
+}
+
+async function verifyOpenClawManualPath() {
+  const input = document.getElementById('openclaw-manual-path');
+  const resultEl = document.getElementById('openclaw-manual-result');
+  if (!input || !resultEl) return;
+
+  const value = input.value.trim();
+  if (!value) {
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = '请先输入 OpenClaw 主目录或 CLI 路径';
+    return;
+  }
+
+  resultEl.style.color = 'var(--text-medium)';
+  resultEl.textContent = '验证中...';
+
+  try {
+    const response = await wizardAPI.invoke('wizard-verify-openclaw-path', value);
+    if (!response.success) {
+      resultEl.style.color = 'var(--red)';
+      resultEl.textContent = '验证失败：' + (response.error || '未知错误');
+      return;
+    }
+
+    const oc = response.result;
+    smartEnvManualPath = value;
+    if (oc.installed || oc.manualValidated) {
+      resultEl.style.color = 'var(--green)';
+      resultEl.textContent = '验证通过：' + (oc.installMode || 'unknown') + ' | ' + (oc.cliPath || oc.installRoot || value);
+      const hiddenWorkspace = document.getElementById('workspace-dir');
+      if (hiddenWorkspace) hiddenWorkspace.value = oc.dataDir?.path || oc.installRoot || value;
+      const previewDir = document.getElementById('workspace-dir-preview');
+      const previewSource = document.getElementById('workspace-dir-source');
+      const previewMode = document.getElementById('workspace-install-mode');
+      const previewCli = document.getElementById('workspace-cli-preview');
+      if (previewDir) previewDir.textContent = oc.dataDir?.path || oc.installRoot || value;
+      if (previewSource) previewSource.textContent = 'saved-manual';
+      if (previewMode) previewMode.textContent = oc.installMode || 'unknown';
+      if (previewCli) previewCli.textContent = oc.cliPath || '未检测到';
+      await addBubble('我已经帮你验证过这个 OpenClaw 路径啦，可以识别到安装模式和主路径了~');
+      clearChat();
+      renderEnvCheck();
+      const newInput = document.getElementById('openclaw-manual-path');
+      if (newInput) newInput.value = value;
+    } else {
+      resultEl.style.color = '#f57f17';
+      resultEl.textContent = '已记录路径，但暂时没法确认它是有效的 OpenClaw 安装';
+    }
+  } catch (err) {
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = '验证出错：' + err.message;
+  }
+}
+
+  const summaryEl = document.getElementById('env-summary');
+  const actions = document.getElementById('env-actions');
+  if (!summaryEl) return;
+
+  const effectiveOverall = (!gatewayOk && summary.overall === 'ok') ? 'warning' : summary.overall;
+  summaryEl.classList.remove('hidden');
+
+  if (effectiveOverall === 'ok') {
+    summaryEl.style.background = '#e8f5e9';
+    summaryEl.style.borderColor = 'var(--grass-light)';
+    summaryEl.innerHTML = '<strong>环境检测全部通过！</strong> 可以继续配置了~';
+    actions.classList.remove('hidden');
+    actions.innerHTML = '<div class="btn-row"><button class="btn btn-primary" onclick="goNext()">下一步：配置 Gateway</button></div>';
+  } else if (effectiveOverall === 'warning') {
+    summaryEl.style.background = '#fff8e1';
+    summaryEl.style.borderColor = '#ffe082';
+    summaryEl.innerHTML = '<strong>核心环境就绪，部分可选依赖缺失</strong><br>' +
+      '<span style="color:var(--text-medium);font-size:11px;">' + summary.warnings.join('<br>') + '</span>' +
+      (!gatewayOk ? '<br><span style="color:#f57f17;">Gateway 未运行，建议先启动</span>' : '');
+    actions.classList.remove('hidden');
+    actions.innerHTML = '<div class="btn-row">' +
+      '<button class="btn btn-test" onclick="clearChat(); renderEnvCheck()">重新检测</button>' +
+      '<button class="btn btn-primary" onclick="goNext()">继续配置</button></div>';
+  } else {
+    summaryEl.style.background = '#fce4ec';
+    summaryEl.style.borderColor = '#ef9a9a';
+    const canSkip = summary.missing.every(function(m) { return m.indexOf('Node') === -1; });
+    summaryEl.innerHTML = '<strong>环境未就绪</strong> — 缺少: ' + summary.missing.join(', ') +
+      '<br><span style="color:var(--text-medium);">请按照上方提示完成安装后，点击"重新检测"</span>';
+    actions.classList.remove('hidden');
+    actions.innerHTML = '<div class="btn-row">' +
+      '<button class="btn btn-test" onclick="clearChat(); renderEnvCheck()">重新检测</button>' +
+      (canSkip ? '<button class="btn btn-secondary" onclick="goNext()">跳过，继续配置</button>' : '') +
+      '</div>';
   }
 }
 
@@ -1453,7 +1664,9 @@ function setEnvItem(id, status, text, action) {
     const btn = document.createElement('button');
     btn.className = 'fix-btn';
     btn.textContent = action.label;
-    btn.onclick = () => action.action(btn);
+    if (action.action) {
+      btn.onclick = () => action.action(btn);
+    }
     item.appendChild(btn);
   }
 }
@@ -2496,9 +2709,16 @@ async function renderStep4() {
 
   // Auto-detect dir
   let detectedDir = '';
+  let detectedMeta = { source: 'none', installMode: 'unknown', cliPath: '' };
   try {
     const r = await wizardAPI.invoke('wizard-detect-openclaw-dir');
     detectedDir = r.dir || '';
+    detectedMeta = {
+      source: r.source || 'none',
+      installMode: r.installMode || 'unknown',
+      cliPath: r.cliPath || ''
+    };
+    if (!smartEnvManualPath && detectedDir) smartEnvManualPath = detectedDir;
   } catch {}
 
   addCard(`
@@ -2553,6 +2773,15 @@ async function renderStep4() {
         💡 推荐使用 <strong>Claude Sonnet 4+</strong> 旗舰模型，语音播报遵循度最佳
       </div>
 
+      <div id="workspace-source-card" style="margin-bottom:10px;padding:8px;background:#f5f7ff;border:1px solid #c5cae9;border-radius:4px;font-size:11px;line-height:1.8;color:var(--text-medium);">
+        <div style="font-weight:700;color:var(--wood-dark);margin-bottom:4px;">📍 当前灵魂注入目标</div>
+        <div><strong>工作目录：</strong><span id="workspace-dir-preview">${escapeHtml(detectedDir || '未检测到')}</span></div>
+        <div><strong>来源：</strong><span id="workspace-dir-source">${escapeHtml(detectedMeta.source || 'none')}</span></div>
+        <div><strong>安装模式：</strong><span id="workspace-install-mode">${escapeHtml(detectedMeta.installMode || 'unknown')}</span></div>
+        <div><strong>CLI：</strong><span id="workspace-cli-preview">${escapeHtml(detectedMeta.cliPath || '未检测到')}</span></div>
+        <div style="margin-top:4px;color:#5c6bc0;">注入时会把 AGENTS.md / SOUL.md / USER.md / HEARTBEAT.md 等文件写到这个目录。</div>
+      </div>
+
       <input type="hidden" id="workspace-dir" value="${escapeHtml(detectedDir)}">
 
       <div class="btn-row">
@@ -2574,6 +2803,12 @@ async function renderStep4() {
     const cfg = await wizardAPI.invoke('wizard-get-config');
     const av = cfg.agentVoice || {};
     if (av.workspaceDir) document.getElementById('workspace-dir').value = av.workspaceDir;
+    if (document.getElementById('workspace-dir-preview')) {
+      document.getElementById('workspace-dir-preview').textContent = av.workspaceDir || detectedDir || '未检测到';
+      document.getElementById('workspace-dir-source').textContent = av.openclawManualPath ? 'saved-manual' : (detectedMeta.source || 'none');
+      document.getElementById('workspace-install-mode').textContent = av.openclawInstallMode || detectedMeta.installMode || 'unknown';
+      document.getElementById('workspace-cli-preview').textContent = av.openclawCliPath || detectedMeta.cliPath || '未检测到';
+    }
     if (av.petName) document.getElementById('pet-name').value = av.petName;
     if (av.userName) document.getElementById('user-name').value = av.userName;
     if (av.personalityPreset) {
@@ -2774,6 +3009,7 @@ async function infuseSoul() {
 
       stepData._agentVoiceConfigured = true;
       stepData._agentSkipWarned = false;
+      try { await saveAgentVoiceSetup(); } catch {}
 
       // 显示测试按钮
       const testBtn = document.getElementById('btn-test-voice');
@@ -2796,7 +3032,22 @@ async function infuseSoul() {
   }
 }
 
-function onPersonalityPresetChange(value) {
+async function saveAgentVoiceSetup() {
+  const petName = document.getElementById('pet-name')?.value?.trim() || '小助手';
+  const userName = document.getElementById('user-name')?.value?.trim() || '主人';
+  const personalityPreset = document.getElementById('personality-preset')?.value || 'sweet';
+  const customPersonality = document.getElementById('custom-personality')?.value?.trim() || '';
+  const workspaceDir = document.getElementById('workspace-dir')?.value?.trim() || '';
+
+  return wizardAPI.invoke('wizard-setup-agent-voice', {
+    workspaceDir: workspaceDir || null,
+    petName,
+    userName,
+    personalityPreset,
+    customPersonality,
+  });
+}
+
   const customArea = document.getElementById('custom-personality-area');
   if (value === 'custom') {
     customArea.classList.remove('hidden');

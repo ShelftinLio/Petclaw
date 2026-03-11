@@ -6,7 +6,7 @@ const os = require('os');
 class CCSwitchSync {
     constructor() {
         this.dbPath = path.join(os.homedir(), '.cc-switch', 'cc-switch.db');
-        this.sqlite3Path = 'C:\\Users\\zhouk\\AppData\\Local\\Android\\Sdk\\platform-tools\\sqlite3.exe';
+        this.sqlite3Path = process.env.SQLITE3_PATH || 'sqlite3';
     }
 
     /**

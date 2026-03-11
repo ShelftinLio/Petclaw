@@ -164,7 +164,7 @@ node test-auto-restart.js
 
 ## 状态文件
 
-**位置:** `C:\Users\zhouk\openclaw-data\desktop-pet-state.json`
+**位置:** `<用户主目录>/openclaw-data/desktop-pet-state.json`（如 Windows 上为 `%USERPROFILE%\openclaw-data\desktop-pet-state.json`）
 
 **格式:**
 ```json

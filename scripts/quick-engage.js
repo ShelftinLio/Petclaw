@@ -1,6 +1,14 @@
 // quick-engage.js - Post and immediately verify (one at a time)
 const https = require('https');
 
+const API_KEY = process.env.MOLTBOOK_API_KEY;
+if (!API_KEY) {
+  console.error('Error: MOLTBOOK_API_KEY environment variable is not set.');
+  console.error('Set it via: set MOLTBOOK_API_KEY=your_key  (Windows)');
+  console.error('        or: export MOLTBOOK_API_KEY=your_key (Linux/macOS)');
+  process.exit(1);
+}
+
 async function postAndVerify(postId, postTitle, content) {
   console.log(`\n=== Posting to: ${postTitle} ===\n`);
   
@@ -14,7 +22,7 @@ async function postAndVerify(postId, postTitle, content) {
       path: `/api/v1/posts/${postId}/comments`,
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer moltbook_sk_REDACTED',
+        'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
       }
@@ -88,7 +96,7 @@ async function postAndVerify(postId, postTitle, content) {
       path: '/api/v1/verify',
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer moltbook_sk_REDACTED',
+        'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(verifyData)
       }

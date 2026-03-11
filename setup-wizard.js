@@ -8,6 +8,9 @@ const { exec, execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
+const pathResolver = require('./utils/path-resolver');
+const openclawDetector = require('./utils/openclaw-detector');
+const dependencyChecker = require('./utils/dependency-checker');
 
 class SetupWizard {
   constructor(petConfig) {
@@ -27,6 +30,21 @@ class SetupWizard {
     // Step 0: 环境预检 — 全面检测
     ipcMain.handle('wizard-env-check', async () => {
       return this._envCheck();
+    });
+
+    // Smart Setup: 深度环境检测（依赖检测器 + OpenClaw 探测器 + 路径快照）
+    ipcMain.handle('wizard-smart-env-check', async (event, manualPath) => {
+      return this._smartEnvCheck(manualPath);
+    });
+
+    // Smart Setup: 获取路径快照
+    ipcMain.handle('wizard-path-snapshot', async () => {
+      return pathResolver.snapshot();
+    });
+
+    // Smart Setup: 手动验证 OpenClaw 路径
+    ipcMain.handle('wizard-verify-openclaw-path', async (event, inputPath) => {
+      return this._verifyOpenClawPath(inputPath);
     });
 
     // 打开外部链接（安全跨进程方式）
@@ -126,8 +144,8 @@ class SetupWizard {
     });
 
     // Step 5: Voice — 配置 Agent 语音播报
-    ipcMain.handle('wizard-setup-agent-voice', async (event, workspaceDir) => {
-      return this._setupAgentVoice(workspaceDir);
+    ipcMain.handle('wizard-setup-agent-voice', async (event, config) => {
+      return this._setupAgentVoice(config);
     });
 
     // Step 5: Voice — 测试语音播报链路
@@ -272,7 +290,15 @@ class SetupWizard {
     report('memory', 'memory/（记忆宫殿）', '🧠', 'done', memoryDir);
 
     // 保存配置
-    this.petConfig.set('agentVoice', { workspaceDir: targetDir, petName, userName, personalityPreset, customPersonality });
+    const existingAgentVoice = this.petConfig.get('agentVoice') || {};
+    this.petConfig.set('agentVoice', {
+      ...existingAgentVoice,
+      workspaceDir: targetDir,
+      petName,
+      userName,
+      personalityPreset,
+      customPersonality,
+    });
 
     return { bridgePath, agentsPath, soulPath, userPath, heartbeatPath };
   }
@@ -399,6 +425,79 @@ class SetupWizard {
     }
 
     return results;
+  }
+
+  /**
+   * Smart Setup 深度环境检测
+   * 汇聚 dependency-checker + openclaw-detector + path-resolver 结果
+   */
+  async _smartEnvCheck(manualPath = '') {
+    try {
+      const normalizedManualPath = String(manualPath || '').trim();
+      const [deps, openclaw, paths] = await Promise.all([
+        dependencyChecker.checkAll(),
+        openclawDetector.detect(normalizedManualPath ? { manualPath: normalizedManualPath } : {}),
+        Promise.resolve(pathResolver.snapshot()),
+      ]);
+
+      const summary = dependencyChecker.summarize({
+        ...deps,
+        openclaw: {
+          ...deps.openclaw,
+          ok: openclaw.installed,
+          version: openclaw.version,
+          detail: {
+            ...(deps.openclaw?.detail || {}),
+            cliPath: openclaw.cliPath,
+            installMode: openclaw.installMode,
+            installRoot: openclaw.installRoot,
+            source: openclaw.source,
+            multipleCandidates: openclaw.multipleCandidates,
+            candidates: openclaw.candidates,
+            configDir: openclaw.configDir,
+            configFile: openclaw.configFile,
+            dataDir: openclaw.dataDir,
+          },
+        },
+      });
+
+      return {
+        success: true,
+        dependencies: deps,
+        openclaw,
+        paths,
+        summary,
+        manualPath: normalizedManualPath || null,
+      };
+    } catch (e) {
+      return {
+        success: false,
+        error: e.message,
+      };
+    }
+  }
+
+  async _verifyOpenClawPath(inputPath) {
+    try {
+      if (!inputPath || !String(inputPath).trim()) {
+        return { success: false, error: '请输入 OpenClaw 主目录或 CLI 路径' };
+      }
+      const normalizedInput = String(inputPath).trim();
+      const result = await openclawDetector.verifyManualPath(normalizedInput);
+      if (result.installed || result.manualValidated) {
+        const agentVoice = this.petConfig.get('agentVoice') || {};
+        this.petConfig.set('agentVoice', {
+          ...agentVoice,
+          workspaceDir: result.dataDir?.path || result.installRoot || normalizedInput,
+          openclawManualPath: normalizedInput,
+          openclawInstallMode: result.installMode || 'unknown',
+          openclawCliPath: result.cliPath || '',
+        });
+      }
+      return { success: true, result };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   }
 
   async _installOpenClaw() {
@@ -1419,6 +1518,8 @@ ${personality}
       files: { status: 'pending', message: '' },
       clone: { status: 'pending', message: '' }
     };
+    const configuredAgentVoice = this.petConfig.get('agentVoice') || {};
+    const preferredWorkspaceDir = configuredAgentVoice.workspaceDir || this._detectOpenClawDir().dir || this.openclawDir;
 
     // 1. Gateway 测试
     try {
@@ -1485,24 +1586,7 @@ ${personality}
 
     // 6. Agent 配置文件检查
     try {
-      // Find the actual OpenClaw workspace (may differ from config dir)
-      let targetDir = this.openclawDir;
-      try {
-        const configPath = path.join(this.openclawDir, 'openclaw.json');
-        if (fs.existsSync(configPath)) {
-          const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-          // OpenClaw workspace = repo field in config, or cwd
-          if (config.repo) targetDir = config.repo;
-        }
-      } catch {}
-
-      // Also check common alternative: ~/openclaw-data
-      if (!fs.existsSync(path.join(targetDir, 'AGENTS.md'))) {
-        const altDir = path.join(this.homeDir, 'openclaw-data');
-        if (fs.existsSync(path.join(altDir, 'AGENTS.md'))) {
-          targetDir = altDir;
-        }
-      }
+      const targetDir = preferredWorkspaceDir;
 
       const filesToCheck = [
         { name: 'AGENTS.md', path: path.join(targetDir, 'AGENTS.md') },
@@ -1600,11 +1684,31 @@ ${personality}
   // ─── OpenClaw 目录检测 ──────────────────────
 
   _detectOpenClawDir() {
-    const defaultDir = this.openclawDir;
-    if (fs.existsSync(defaultDir)) {
-      return { dir: defaultDir, detected: true };
-    }
-    return { dir: '', detected: false };
+    try {
+      const agentVoice = this.petConfig.get('agentVoice') || {};
+      const manualWorkspaceDir = agentVoice.workspaceDir;
+      if (manualWorkspaceDir && fs.existsSync(manualWorkspaceDir)) {
+        return {
+          dir: manualWorkspaceDir,
+          detected: true,
+          source: 'saved-manual',
+          installMode: agentVoice.openclawInstallMode || 'manual',
+          cliPath: agentVoice.openclawCliPath || '',
+        };
+      }
+
+      const defaultDir = this.openclawDir;
+      if (fs.existsSync(defaultDir)) {
+        return { dir: defaultDir, detected: true, source: 'default-config', installMode: 'local-prefix', cliPath: '' };
+      }
+
+      const fallbackDataDir = pathResolver.getOpenClawDataDir();
+      if (fallbackDataDir && fs.existsSync(fallbackDataDir)) {
+        return { dir: fallbackDataDir, detected: true, source: 'path-resolver', installMode: 'workspace-data', cliPath: '' };
+      }
+    } catch (_) {}
+
+    return { dir: '', detected: false, source: 'none', installMode: 'unknown', cliPath: '' };
   }
 
   // ─── 单项重试测试 ──────────────────────
