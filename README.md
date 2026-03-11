@@ -16,7 +16,7 @@
 
 *OpenClaw Core + Desktop Embodiment = A living interface with emotion, voice, and presence*
 
-[![Version](https://img.shields.io/badge/version-3.5.0-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.5.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/kk43994/kkclaw/ci.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=CI)](https://github.com/kk43994/kkclaw/actions/workflows/ci.yml)
 [![Stars](https://img.shields.io/github/stars/kk43994/kkclaw?style=for-the-badge&logo=github&color=FFD700)](https://github.com/kk43994/kkclaw/stargazers)
 [![Downloads](https://img.shields.io/github/downloads/kk43994/kkclaw/total?style=for-the-badge&logo=github&color=8B5CF6)](https://github.com/kk43994/kkclaw/releases)
@@ -46,6 +46,21 @@
 - 🔁 **KKClaw Switch** — 3秒热切换AI模型，无需重启
 - 🎯 **7×24 稳定** — 自动重启、日志轮转、错误恢复
 - 🍎 **跨平台支持** — Windows 10/11 + macOS (Intel & Apple Silicon)
+
+### 🆕 v3.5.2 — Setup Wizard 修复 + 一键安装缺失依赖
+
+> ⚡ **体验优化！** Wizard 白屏修复 + 缺失依赖一键安装 + 跨平台支持
+
+- ⚡ **一键安装缺失依赖** — 环境检测页新增按钮，自动安装 edge-tts / sqlite3 / node_modules，实时进度反馈
+- 🔧 **跨平台安装** — Windows (winget/choco)、macOS (brew)、Linux (apt/yum)
+- 🐛 **Wizard 白屏修复** — 修复 3 处语法错误导致的向导空白页
+- 🐛 **Wizard 错误可视化** — 渲染出错时直接显示报错信息，方便用户排查
+- 📝 **sqlite3 依赖说明** — 标注用途 `(CC-Switch 同步)`，未安装时提示安装命令
+
+### 🆕 v3.5.1 — 双声音修复 + 桌面快捷方式修复
+
+- 🔇 **双声音修复** — 所有 `new Notification()` 添加 `silent: true`，阻止 Windows 系统朗读
+- 🖥️ **快捷方式修复** — 指向 `start.cmd`，启动时显示 CMD 控制台 + Gateway 日志
 
 ### 🆕 v3.5.0 — 体验大升级：彩色终端 + 智能守护 + 桌面快捷方式
 
@@ -162,15 +177,15 @@
 
 ## 📦 下载安装
 
-### 最新版本：v3.5.0
+### 最新版本：v3.5.2
 
 <div align="center">
 
 | 平台 | 架构 | 下载链接 | 大小 |
 |------|------|----------|------|
-| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.5.0-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.5.0-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.5.0-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.5.2-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.5.2-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.5.2-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-arm64.dmg) | ~160MB |
 
 [📦 查看所有版本](https://github.com/kk43994/kkclaw/releases) | [🎥 在线演示](https://kk43994.github.io/kkclaw/)
 
@@ -739,6 +754,24 @@ node kkclaw-hotswitch.js --restart
 
 ## 📝 更新日志
 
+### [3.5.2] - 2026-03-12
+
+#### ⚡ 一键安装缺失依赖
+- ⚡ **环境检测页新增按钮** — 自动安装 edge-tts / sqlite3 / node_modules，实时进度反馈
+- 🔧 **跨平台安装** — Windows (winget/choco)、macOS (brew)、Linux (apt/yum)
+
+#### 🐛 修复
+- 修复 Setup Wizard 白屏 — 3 处函数声明缺失导致 SyntaxError
+- Wizard 错误可视化 — 渲染出错时显示具体报错
+- sqlite3 依赖说明优化 — 标注 `(CC-Switch 同步)` 用途
+
+### [3.5.1] - 2026-03-12
+
+#### 🐛 修复
+- 修复双声音问题 — 所有 `new Notification()` 添加 `silent: true`
+- 修复桌面快捷方式不显示 CMD — 指向 `start.cmd`，WindowStyle 1
+- 移除 `speak()` 临时调试日志
+
 ### [3.5.0] - 2026-03-12
 
 #### 🎨 全局彩色终端日志
@@ -957,7 +990,7 @@ node kkclaw-hotswitch.js --restart
 
 ![Hero Banner](docs/images/hero-banner.png)
 
-[![Version](https://img.shields.io/badge/version-3.5.0-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.5.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/kkclaw)
 
@@ -979,7 +1012,16 @@ A **different kind** of desktop AI assistant:
 - 🎯 **7×24 Stable** — Auto-restart, log rotation, error recovery
 - 🍎 **Cross-Platform** — Windows 10/11 + macOS (Intel & Apple Silicon)
 
-### 🆕 What's New in v3.5.0
+### 🆕 What's New in v3.5.2
+
+> ⚡ **UX polish!** Wizard blank page fix + One-click missing dependency installer + Cross-platform support
+
+- ⚡ **One-click Install Missing Deps** — Auto-install edge-tts / sqlite3 / node_modules with real-time progress
+- 🔧 **Cross-platform Install** — Windows (winget/choco), macOS (brew), Linux (apt/yum)
+- 🐛 **Wizard Blank Page Fix** — Fixed 3 syntax errors causing empty wizard content
+- 🐛 **Wizard Error Visualization** — Shows error details instead of blank page for easier debugging
+- 🔇 **Dual Audio Fix** (v3.5.1) — All `new Notification()` use `silent: true` to prevent Windows narration
+- 🖥️ **Shortcut Fix** (v3.5.1) — Desktop shortcut now targets `start.cmd` to show CMD console
 
 > 🎨 **Major UX update!** Global colorized terminal logs + Smart Gateway auto-start + Log dedup & noise reduction + Auto desktop shortcut on first launch
 
@@ -1037,9 +1079,9 @@ npm start
 
 | Platform | Arch | Download | Size |
 |----------|------|----------|------|
-| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-arm64.dmg) | ~160MB |
 
 [📦 All Releases](https://github.com/kk43994/kkclaw/releases)
 
