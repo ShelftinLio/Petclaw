@@ -67,12 +67,15 @@ class ServiceManager extends EventEmitter {
         this.emit('log', entry);
 
         // 控制台带颜色前缀输出
-        const { c, applyColors } = require('./utils/color-log');
-        const colors = { info: c.green, warn: c.yellow, error: c.red, success: c.bGreen };
-        const color = colors[level] || c.white;
-        const tag = service.startsWith('gateway') ? '[Gateway]' : '[Service]';
-        const highlighted = applyColors(message);
-        console.log(`${color}${tag}${c.reset} ${highlighted}`);
+        // gateway-stdout / gateway-stderr 的日志已由各自 handler 直接输出，不重复打印
+        if (!service.startsWith('gateway-std')) {
+            const { c, applyColors } = require('./utils/color-log');
+            const colors = { info: c.green, warn: c.yellow, error: c.red, success: c.bGreen };
+            const color = colors[level] || c.white;
+            const tag = service.startsWith('gateway') ? '[Gateway]' : '[Service]';
+            const highlighted = applyColors(message);
+            console.log(`${color}${tag}${c.reset} ${highlighted}`);
+        }
     }
 
     // 获取最近日志
