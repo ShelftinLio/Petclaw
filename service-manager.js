@@ -65,7 +65,12 @@ class ServiceManager extends EventEmitter {
             this.logs.shift();
         }
         this.emit('log', entry);
-        console.log(`[${level.toUpperCase()}] [${service}] ${message}`);
+
+        // 控制台带颜色前缀输出
+        const colors = { info: '\x1b[32m', warn: '\x1b[33m', error: '\x1b[31m', success: '\x1b[32m' };
+        const color = colors[level] || '\x1b[37m';
+        const tag = service.startsWith('gateway') ? '[Gateway]' : '[Service]';
+        console.log(`${color}${tag}\x1b[0m ${message}`);
     }
 
     // 获取最近日志
@@ -271,11 +276,55 @@ class ServiceManager extends EventEmitter {
         // 记录启动状态
         this._startupState = { pid: child.pid, startedAt: Date.now(), exited: false };
 
+        // 去重集合：Gateway 可能同时向 stdout/stderr 写相同内容
+        const _recentLines = new Set();
+        const _dedupLine = (line) => {
+            if (_recentLines.has(line)) return false;
+            _recentLines.add(line);
+            // 只保留最近 50 条用于去重
+            if (_recentLines.size > 50) {
+                const first = _recentLines.values().next().value;
+                _recentLines.delete(first);
+            }
+            return true;
+        };
+
         child.stdout.on('data', (chunk) => {
-            stdoutBuf = (stdoutBuf + chunk.toString()).slice(-2048);
+            const text = chunk.toString();
+            stdoutBuf = (stdoutBuf + text).slice(-2048);
+            // 实时转发 Gateway stdout 到 KKClaw 控制台
+            // 保留 Gateway 原始 ANSI 颜色（模型名、状态等已有颜色区分），只加前缀标签
+            text.split('\n').filter(l => l.trim()).forEach(line => {
+                if (_dedupLine(line)) {
+                    // 去掉 ANSI 后判断严重级别，仅用于前缀颜色
+                    const plain = line.replace(/\x1b\[[0-9;]*m/g, '');
+                    let tag;
+                    if (/error|Error|❌|FAIL|fatal/i.test(plain)) {
+                        tag = '\x1b[31m[Gateway]\x1b[0m';
+                    } else if (/warn|mismatch|⚠/i.test(plain)) {
+                        tag = '\x1b[33m[Gateway]\x1b[0m';
+                    } else if (/listening on|✅|started|ready|loaded/i.test(plain)) {
+                        tag = '\x1b[32m[Gateway]\x1b[0m';
+                    } else {
+                        tag = '\x1b[36m[Gateway]\x1b[0m';
+                    }
+                    // 原文带颜色直接输出，不覆盖
+                    console.log(`${tag} ${line}`);
+                    this.log('info', plain, 'gateway-stdout');
+                }
+            });
         });
         child.stderr.on('data', (chunk) => {
-            stderrBuf = (stderrBuf + chunk.toString()).slice(-2048);
+            const text = chunk.toString();
+            stderrBuf = (stderrBuf + text).slice(-2048);
+            // 实时转发 Gateway stderr — 保留原始颜色
+            text.split('\n').filter(l => l.trim()).forEach(line => {
+                if (_dedupLine(line)) {
+                    const plain = line.replace(/\x1b\[[0-9;]*m/g, '');
+                    console.log(`\x1b[33m[Gateway:WARN]\x1b[0m ${line}`);
+                    this.log('warn', plain, 'gateway-stderr');
+                }
+            });
         });
         // 用 close 而不是 exit — close 在所有 stdio 流结束后才触发，确保 buffer 已填充
         child.on('close', (code) => {

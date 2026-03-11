@@ -44,10 +44,8 @@ class GlobalErrorHandler extends EventEmitter {
             this.handleWarning(warning);
         });
 
-        // 多次监听器警告
-        process.on('multipleResolves', (type, promise, reason) => {
-            this.handleMultipleResolves(type, promise, reason);
-        });
+        // multipleResolves 已在 Node.js 18+ 中废弃 (DEP0160)，不再监听
+        // 之前此处会输出大量 "Promise 多次 reject: AbortError" 噪音日志
 
         // 优雅退出
         process.on('beforeExit', (code) => {

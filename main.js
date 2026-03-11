@@ -45,6 +45,7 @@ const configManager = require('./utils/config-manager'); // 🔒 配置管理
 const SecureStorage = require('./utils/secure-storage'); // 🔒 安全存储
 const pathResolver = require('./utils/openclaw-path-resolver'); // 🔧 路径解析
 const SessionLockManager = require('./utils/session-lock-manager');
+const { printHero, printReady } = require('./startup-banner'); // 🦞 启动动画
 
 // Windows透明窗口修复 — 禁用硬件加速彻底解决浅色背景矩形框
 // macOS 上禁用硬件加速反而会破坏透明度，仅在 Windows 上启用
@@ -435,6 +436,13 @@ async function createWindow() {
         voiceSystem.speak('OpenClaw服务断开连接', { priority: 'high' });
       }
     } else if (change.currentStatus === 'running' && change.previousStatus !== 'running') {
+      // 🦞 Gateway 就绪 — 打印 Ready Banner
+      if (change.service === 'gateway') {
+        const configMgr = require('./utils/config-manager');
+        const port = (() => { try { const p = Number.parseInt(configMgr.getConfig()?.gateway?.port, 10); return p > 0 ? p : 18789; } catch { return 18789; } })();
+        printReady(port);
+      }
+
       if (voiceSystem) {
         voiceSystem.speak('OpenClaw服务已连接', { priority: 'normal' });
       }
@@ -1627,10 +1635,14 @@ function fixTokenEncryptedField() {
 }
 
 app.whenReady().then(async () => {
+  const pkg = require('./package.json');
+  await printHero(pkg.version);
+
   // 首先修复配置
   fixTokenEncryptedField();
 
   await createWindow();
+  console.log('\x1b[32m  ✅ Main window created\x1b[0m');
 
   // 🧙 首次运行自动弹出配置向导
   if (!petConfig.get('setupComplete')) {
