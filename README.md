@@ -17,10 +17,15 @@
 *OpenClaw Core + Desktop Embodiment = A living interface with emotion, voice, and presence*
 
 [![Version](https://img.shields.io/badge/version-3.1.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
-[![Updated](https://img.shields.io/badge/updated-2026--02--22-34D399?style=for-the-badge)](https://github.com/kk43994/kkclaw)
-[![Build](https://img.shields.io/github/actions/workflow/status/kk43994/kkclaw/build-release.yml?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/kk43994/kkclaw/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/kk43994/kkclaw/ci.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=CI)](https://github.com/kk43994/kkclaw/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/kk43994/kkclaw?style=for-the-badge&logo=github&color=FFD700)](https://github.com/kk43994/kkclaw/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/kk43994/kkclaw/total?style=for-the-badge&logo=github&color=8B5CF6)](https://github.com/kk43994/kkclaw/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/kkclaw)
+[![Electron](https://img.shields.io/badge/Electron-28.x-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Node](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Release](https://img.shields.io/github/v/release/kk43994/kkclaw?style=for-the-badge&color=34D399&logo=rocket&logoColor=white)](https://github.com/kk43994/kkclaw/releases/latest)
+[![Issues](https://img.shields.io/github/issues/kk43994/kkclaw?style=for-the-badge&logo=github&color=F97316)](https://github.com/kk43994/kkclaw/issues)
 
 [🎥 **在线演示**](https://kk43994.github.io/kkclaw/) | [📦 **下载最新版**](https://github.com/kk43994/kkclaw/releases) | [📖 **配置教程**](docs/CONFIGURATION-GUIDE.md) | [💬 **加入社群**](#-社群)
 
