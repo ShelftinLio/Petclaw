@@ -1628,64 +1628,153 @@ ipcMain.handle('take-screenshot', async (event, reason = 'manual') => {
   }
 });
 
-// 🖥️ 首次启动自动创建桌面快捷方式
+// 🖥️ 首次启动自动创建桌面快捷方式（Windows + macOS）
 function createDesktopShortcut() {
   const { colorLog } = require('./utils/color-log');
   const { execFile } = require('child_process');
 
   try {
     const desktopPath = app.getPath('desktop');
-    const shortcutPath = path.join(desktopPath, 'Claw 桌面宠物.lnk');
-
-    // 已存在则跳过
-    if (fs.existsSync(shortcutPath)) {
-      colorLog('🖥️ 桌面快捷方式已存在，跳过创建');
-      petConfig.set('shortcutCreated', true);
-      return;
-    }
-
     const projectPath = path.resolve(__dirname);
-    const iconPath = path.join(projectPath, 'icon.ico');
-    const electronExe = path.join(projectPath, 'node_modules', 'electron', 'dist', 'electron.exe');
 
-    function escPS(value) {
-      return value.replace(/'/g, "''");
+    if (process.platform === 'win32') {
+      _createWindowsShortcut(desktopPath, projectPath, colorLog, execFile);
+    } else if (process.platform === 'darwin') {
+      _createMacShortcut(desktopPath, projectPath, colorLog, execFile);
     }
-
-    const psScript = [
-      '$WshShell = New-Object -ComObject WScript.Shell',
-      `$Shortcut = $WshShell.CreateShortcut('${escPS(shortcutPath)}')`,
-      `if (Test-Path '${escPS(electronExe)}') {`,
-      `  $Shortcut.TargetPath = '${escPS(electronExe)}'`,
-      `  $Shortcut.Arguments = '${escPS(projectPath)}'`,
-      `} else {`,
-      "  $Shortcut.TargetPath = 'cmd.exe'",
-      `  $Shortcut.Arguments = '/c cd /d "${escPS(projectPath)}" && npm start'`,
-      `}`,
-      `$Shortcut.WorkingDirectory = '${escPS(projectPath)}'`,
-      "$Shortcut.Description = 'Claw 桌面宠物 - OpenClaw AI 助手'",
-      `$Shortcut.IconLocation = '${escPS(iconPath)}'`,
-      '$Shortcut.WindowStyle = 7',
-      '$Shortcut.Save()'
-    ].join('; ');
-
-    colorLog('🖥️ 正在创建桌面快捷方式...');
-
-    execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psScript], (err) => {
-      if (err) {
-        console.error('❌ 创建桌面快捷方式失败:', err.message);
-        return;
-      }
-      colorLog('🖥️ ✅ 桌面快捷方式创建成功!');
-      petConfig.set('shortcutCreated', true);
-
-      // 语音播报
-      if (voiceSystem) {
-        voiceSystem.speak('桌面快捷方式已创建');
-      }
-    });
   } catch (err) {
     console.error('❌ 创建桌面快捷方式异常:', err.message);
+  }
+}
+
+// Windows: PowerShell COM 创建 .lnk
+function _createWindowsShortcut(desktopPath, projectPath, colorLog, execFile) {
+  const shortcutPath = path.join(desktopPath, 'Claw 桌面宠物.lnk');
+
+  if (fs.existsSync(shortcutPath)) {
+    colorLog('🖥️ 桌面快捷方式已存在，跳过创建');
+    petConfig.set('shortcutCreated', true);
+    return;
+  }
+
+  const iconPath = path.join(projectPath, 'icon.ico');
+  const electronExe = path.join(projectPath, 'node_modules', 'electron', 'dist', 'electron.exe');
+
+  function escPS(value) {
+    return value.replace(/'/g, "''");
+  }
+
+  const psScript = [
+    '$WshShell = New-Object -ComObject WScript.Shell',
+    `$Shortcut = $WshShell.CreateShortcut('${escPS(shortcutPath)}')`,
+    `if (Test-Path '${escPS(electronExe)}') {`,
+    `  $Shortcut.TargetPath = '${escPS(electronExe)}'`,
+    `  $Shortcut.Arguments = '${escPS(projectPath)}'`,
+    `} else {`,
+    "  $Shortcut.TargetPath = 'cmd.exe'",
+    `  $Shortcut.Arguments = '/c cd /d "${escPS(projectPath)}" && npm start'`,
+    `}`,
+    `$Shortcut.WorkingDirectory = '${escPS(projectPath)}'`,
+    "$Shortcut.Description = 'Claw 桌面宠物 - OpenClaw AI 助手'",
+    `$Shortcut.IconLocation = '${escPS(iconPath)}'`,
+    '$Shortcut.WindowStyle = 7',
+    '$Shortcut.Save()'
+  ].join('; ');
+
+  colorLog('🖥️ 正在创建桌面快捷方式...');
+
+  execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psScript], (err) => {
+    if (err) {
+      console.error('❌ 创建桌面快捷方式失败:', err.message);
+      return;
+    }
+    colorLog('🖥️ ✅ 桌面快捷方式创建成功!');
+    petConfig.set('shortcutCreated', true);
+    if (voiceSystem) voiceSystem.speak('桌面快捷方式已创建');
+  });
+}
+
+// macOS: 创建 .app 启动器（AppleScript ��成 Application 快捷方式）
+function _createMacShortcut(desktopPath, projectPath, colorLog, execFile) {
+  const appName = 'Claw 桌面宠物.app';
+  const appPath = path.join(desktopPath, appName);
+
+  if (fs.existsSync(appPath)) {
+    colorLog('🖥️ 桌面快捷方式已存在，跳过创建');
+    petConfig.set('shortcutCreated', true);
+    return;
+  }
+
+  colorLog('🖥️ 正在创建 macOS 桌面快捷方式...');
+
+  // 构造 .app 目录结构
+  const contentsDir = path.join(appPath, 'Contents');
+  const macOSDir = path.join(contentsDir, 'MacOS');
+  const resourcesDir = path.join(contentsDir, 'Resources');
+
+  try {
+    fs.mkdirSync(macOSDir, { recursive: true });
+    fs.mkdirSync(resourcesDir, { recursive: true });
+
+    // 1. 启动脚本
+    const electronBin = path.join(projectPath, 'node_modules', '.bin', 'electron');
+    const launchScript = `#!/bin/bash
+cd "${projectPath}"
+if [ -x "${electronBin}" ]; then
+  "${electronBin}" "${projectPath}" &
+else
+  /usr/local/bin/npm start &
+fi
+`;
+    const launchPath = path.join(macOSDir, 'launch');
+    fs.writeFileSync(launchPath, launchScript, { mode: 0o755 });
+
+    // 2. Info.plist
+    const plist = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>Claw 桌面宠物</string>
+  <key>CFBundleDisplayName</key>
+  <string>Claw 桌面宠物</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.kk43994.kkclaw</string>
+  <key>CFBundleVersion</key>
+  <string>3.5.0</string>
+  <key>CFBundleExecutable</key>
+  <string>launch</string>
+  <key>CFBundleIconFile</key>
+  <string>icon</string>
+  <key>LSUIElement</key>
+  <false/>
+</dict>
+</plist>
+`;
+    fs.writeFileSync(path.join(contentsDir, 'Info.plist'), plist);
+
+    // 3. 复制图标（如果 .icns 存在）
+    const icnsPath = path.join(projectPath, 'icon.icns');
+    if (fs.existsSync(icnsPath)) {
+      fs.copyFileSync(icnsPath, path.join(resourcesDir, 'icon.icns'));
+    }
+
+    colorLog('🖥️ ✅ macOS 桌面快捷方式创建成功!');
+    petConfig.set('shortcutCreated', true);
+    if (voiceSystem) voiceSystem.speak('桌面快捷方式已创建');
+  } catch (err) {
+    console.error('❌ 创建 macOS 快捷方式失败:', err.message);
+    // 兜底方案：创建符号链接
+    try {
+      const symlinkTarget = path.join(projectPath, 'node_modules', 'electron', 'dist', 'Electron.app');
+      if (fs.existsSync(symlinkTarget)) {
+        fs.symlinkSync(symlinkTarget, path.join(desktopPath, 'Claw 桌面宠物'), 'dir');
+        colorLog('🖥️ ✅ macOS 桌面符号链接创建成功（降级方案）');
+        petConfig.set('shortcutCreated', true);
+      }
+    } catch (linkErr) {
+      console.error('❌ 降级符号链接也失败:', linkErr.message);
+    }
   }
 }
 
@@ -1727,8 +1816,8 @@ app.whenReady().then(async () => {
   await createWindow();
   console.log('\x1b[32m  ✅ Main window created\x1b[0m');
 
-  // 🖥️ 首次启动自动创建桌面快捷方式
-  if (!petConfig.get('shortcutCreated') && process.platform === 'win32') {
+  // 🖥️ 首次启动自动创建桌面快捷方式（Windows + macOS）
+  if (!petConfig.get('shortcutCreated') && (process.platform === 'win32' || process.platform === 'darwin')) {
     createDesktopShortcut();
   }
 
