@@ -1267,7 +1267,7 @@ async function renderEnvCheck() {
     // Node.js
     setEnvItem('env-node', r.node.ok,
       r.node.ok ? `Node.js ${r.node.version} ✓` : `❌ ${r.node.error}`,
-      r.node.ok ? null : { label: '前往下载 Node.js', action: () => wizardAPI.invoke('open-external', 'https://nodejs.org/') }
+      r.node.ok ? null : { label: '前往下载 Node.js', action: () => wizardAPI.openExternal('https://nodejs.org/') }
     );
 
     // OpenClaw
@@ -1320,7 +1320,7 @@ async function renderEnvCheck() {
         : `⚠️ ${r.python.error}`,
       r.python.ok ? null : {
         label: '前往下载 Python',
-        action: () => wizardAPI.invoke('open-external', 'https://www.python.org/downloads/')
+        action: () => wizardAPI.openExternal('https://www.python.org/downloads/')
       }
     );
 
@@ -1708,7 +1708,7 @@ async function renderStepModel() {
 
     <div style="margin-top: 8px; padding: 8px 12px; border-radius: 2px; border: 2px solid var(--wood-light); background: linear-gradient(135deg, #f0e6ff, #e8f0ff); font-size: 11px; color: var(--text-medium); line-height: 1.6;">
       如果没有合适的可用套餐，也可以联系 KK 提供 Gemini / Claude / Codex 满血双ISP稳定不降智的 Coding Plan 拼车服务~<br>
-      <a href="#" onclick="wizardAPI.invoke('open-external', 'https://discord.com/users/reribth_75722'); return false;" style="color: #7c6bf0; font-weight: 600; text-decoration: underline; cursor: pointer;">Discord: reribth_75722</a>
+      <a href="#" onclick="wizardAPI.openExternal('https://discord.com/users/reribth_75722'); return false;" style="color: #7c6bf0; font-weight: 600; text-decoration: underline; cursor: pointer;">Discord: reribth_75722</a>
     </div>
 
     <div class="btn-row">
@@ -2318,7 +2318,7 @@ async function handleTTSFix(checkId, result) {
     } else if (checkId === 'check-python') {
       // Python 未安装，打开下载页面
       await addBubble('正在打开 Python 官网下载页面...');
-      wizardAPI.invoke('open-external', result.fix);
+      wizardAPI.openExternal(result.fix);
     }
   } catch (err) {
     await addBubble(`修复失败: ${err.message}`);

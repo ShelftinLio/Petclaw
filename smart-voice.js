@@ -672,12 +672,12 @@ class SmartVoiceSystem {
      */
     async speakWithEdgeTTS(cleanText, voiceConfig, outputFile) {
         const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-        // 将文本写入临时文件，通过 --text-file 传入，避免 shell 注入
+        // 将文本写入临时文件，通过 --file 传入，避免 shell 注入
         const textFile = path.join(this.tempDir, `tts_text_${Date.now()}.txt`);
         const fsSync = require('fs');
         fsSync.writeFileSync(textFile, cleanText, 'utf8');
 
-        const args = ['-m', 'edge_tts', '--voice', voiceConfig.voice, '--text-file', textFile, '--write-media', outputFile];
+        const args = ['-m', 'edge_tts', '--voice', voiceConfig.voice, '--file', textFile, '--write-media', outputFile];
 
         if (voiceConfig.rate !== '+0%') {
             args.push('--rate', voiceConfig.rate);

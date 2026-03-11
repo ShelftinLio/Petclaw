@@ -694,12 +694,12 @@ class SetupWizard {
         await this._playAudio(audioFile);
         return { success: true };
       } else {
-        // Edge TTS — 将文本写入临时文件，通过 --text-file 传入，使用 execFileAsync 避免 shell 注入
+        // Edge TTS — 将文本写入临时文件，通过 --file 传入，使用 execFileAsync 避免 shell 注入
         const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
         const textFile = path.join(tempDir, `wizard_tts_text_${Date.now()}.txt`);
         await fsPromises.writeFile(textFile, testText, 'utf8');
         try {
-          await execFileAsync(pythonCmd, ['-m', 'edge_tts', '--voice', 'zh-CN-XiaoxiaoNeural', '--text-file', textFile, '--write-media', outputFile], { timeout: 30000, windowsHide: true });
+          await execFileAsync(pythonCmd, ['-m', 'edge_tts', '--voice', 'zh-CN-XiaoxiaoNeural', '--file', textFile, '--write-media', outputFile], { timeout: 30000, windowsHide: true });
         } finally {
           fsPromises.unlink(textFile).catch(() => {});
         }

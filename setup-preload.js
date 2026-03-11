@@ -25,6 +25,7 @@ const VALID_INVOKE_CHANNELS = [
   'wizard-env-check',
   'wizard-install-openclaw',
   'wizard-start-gateway',
+  'wizard-save-voice-id',
   'check-tts',
   'install-edge-tts',
   'install-dashscope',
