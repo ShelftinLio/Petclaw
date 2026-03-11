@@ -37,15 +37,35 @@
 
 给你的 OpenClaw AI 一个**看得见、听得到**的桌面化身：
 
-- 🦞 **67px 琉璃球体** — 3层流体动画 + 双重高光 + 14种情绪动态光效，像活的一样
+#### 🎨 视觉 & 情感
+- 🦞 **67px 琉璃球体** — 3层流体动画 + 双重高光 + 1.5px 玻璃边框，像活的一样
+- 🌈 **14种情绪色系** — happy / sad / angry / calm / excited / love / focused 等，每种有专属外发光效果
 - 👀 **38种待机表情** — 眨眼、歪头、星星眼、打盹、装死…不操作时也有生命感
-- 🎙️ **声音克隆 TTS** — 上传30秒录音即可克隆专属音色，MiniMax 2.5 Turbo 驱动，支持14种情绪语调
-- 🧙 **RPG 配置向导** — 木质边框 + 羊皮纸背景，7步引导零基础上手，缺失依赖一键安装
-- 🛡️ **Gateway 智能守护** — 自动拉起、异常检测、健康评分、语音播报状态，不用手动盯
-- 🔁 **模型热切换** — CC-Switch 同步 Provider，切换 Claude / GPT / Gemini 无需重启
 - 🎨 **空气感双窗口** — 球体 + 歌词字幕，像桌面歌词一样不挡操作，却始终陪伴
+
+#### 🎙️ 语音 & 人设
+- 🎤 **一键声音克隆** — 上传30秒录音即可克隆专属音色，MiniMax 2.5 Turbo 驱动
+- 🎭 **14种情绪语调** — TTS 自动识别文本情绪，开心用欢快声、悲伤用低沉声
+- 🧠 **人设定制系统** — 5种预设风格（甜妹/专业/幽默/酷帅/自定义），一键生成 AGENTS.md + SOUL.md
+- 🔉 **智能降级链** — MiniMax → Edge TTS 自动降级，永远不会没声音
+
+#### 🛡️ Gateway 增强
+- ⚡ **智能自启动** — Guardian 检测不到 Gateway 后自动拉起，不再永远等待
+- 📊 **异常检测 + 健康评分** — 多维度量化 Gateway 状态，自动识别异常模式
+- 🎙️ **状态语音播报** — 启动中/成功/失败 分别语音通知，不用盯控制台
+- 🔧 **二次确认防误判** — 与 ServiceManager 交叉校验，避免误触重启
+
+#### 🧙 Setup Wizard 配置向导
+- 🎮 **RPG 游戏风格** — 木质边框 + 羊皮纸背景 + 龙虾向导角色 + 打字机效果
+- 📋 **7步引导流程** — Gateway → 模型 → 渠道 → TTS → 播报 → 显示 → 全链路测试
+- ⚡ **一键安装缺失依赖** — 自动安装 edge-tts / sqlite3 / node_modules，实时进度反馈
+- 🩺 **Doctor 自检系统** — 10项全自动诊断，每项带修复建议
+
+#### 🔧 工程 & 稳定性
+- 🎨 **彩色终端日志** — 12+ 模块全覆盖，Gateway 日志关键词自动高亮（模型/URL/渠道/错误）
+- 🔁 **模型热切换** — CC-Switch 同步 Provider，切换 Claude / GPT / Gemini 无需重启
 - 🔐 **安全存储** — API Key 加密落盘 (safeStorage)、IPC 白名单沙箱、日志自动脱敏
-- 🎯 **生产级稳定** — 7×24 自动重启 + 彩色终端日志 + 日志轮转 + 性能监控
+- 🎯 **7×24 生产级稳定** — 自动重启 + 日志轮转 + 性能监控 + 内存清理
 - 🍎 **跨平台** — Windows 10/11 + macOS (Intel & Apple Silicon)，首次启动自动创建桌面快捷方式
 
 ### 🆕 v3.5.2 — Setup Wizard 修复 + 一键安装缺失依赖
@@ -1003,16 +1023,36 @@ node kkclaw-hotswitch.js --restart
 
 Give your OpenClaw AI a **visible, audible** desktop embodiment:
 
-- 🦞 **67px Glass Orb** — 3-layer fluid animation + dual highlights + 14 emotion glow effects, feels alive
-- 👀 **38 Idle Animations** — Blink, tilt, sparkle eyes, doze off, play dead… lifelike even when idle
-- 🎙️ **Voice Cloning TTS** — Upload 30s audio to clone your voice, MiniMax 2.5 Turbo powered, 14 emotion tones
-- 🧙 **RPG Setup Wizard** — Wood-framed parchment UI, 7-step guided setup, one-click missing dependency install
-- 🛡️ **Smart Gateway Guardian** — Auto-start, anomaly detection, health scoring, voice status announcements
-- 🔁 **Hot Model Swap** — CC-Switch synced providers, switch Claude / GPT / Gemini without restart
-- 🎨 **Airy Dual Windows** — Orb + lyric subtitle, like desktop lyrics — always present, never in the way
-- 🔐 **Secure Storage** — Encrypted API keys (safeStorage), IPC whitelist sandbox, auto log sanitization
-- 🎯 **Production-Grade** — 7×24 auto-restart + colorized terminal logs + log rotation + perf monitoring
-- 🍎 **Cross-Platform** — Windows 10/11 + macOS (Intel & Apple Silicon), auto desktop shortcut on first launch
+#### 🎨 Visual & Emotion
+- 🦞 **67px Glass Orb** — 3-layer fluid animation + dual highlights + glass border, feels alive
+- 🌈 **14 Emotion Colors** — happy / sad / angry / calm / excited / love / focused, each with unique glow
+- 👀 **38 Idle Animations** — Blink, tilt, sparkle, doze, play dead… lifelike even when idle
+- 🎨 **Airy Dual Windows** — Orb + lyric subtitle, like desktop lyrics — present but never in the way
+
+#### 🎙️ Voice & Persona
+- 🎤 **One-Click Voice Cloning** — Upload 30s audio to clone your voice, MiniMax 2.5 Turbo powered
+- 🎭 **14 Emotion Tones** — Auto-detects text emotion, adjusts speech tone accordingly
+- 🧠 **Persona System** — 5 presets (sweet/pro/humor/cool/custom), auto-generates AGENTS.md + SOUL.md
+- 🔉 **Smart Fallback** — MiniMax → Edge TTS auto-fallback, never silent
+
+#### 🛡️ Gateway Guardian
+- ⚡ **Smart Auto-Start** — Auto-launches Gateway after detection failure, no manual intervention
+- 📊 **Anomaly Detection + Health Scoring** — Multi-dimensional Gateway health metrics
+- 🎙️ **Voice Status Reports** — Startup/success/failure spoken aloud
+- 🔧 **Cross-Validation** — Double-checks with ServiceManager to prevent false restarts
+
+#### 🧙 Setup Wizard
+- 🎮 **RPG Style** — Wood frames + parchment background + lobster guide + typewriter text
+- 📋 **7-Step Onboarding** — Gateway → Model → Channels → TTS → Voice → Display → Full Test
+- ⚡ **One-Click Dependency Install** — Auto-install edge-tts / sqlite3 / node_modules with progress
+- 🩺 **Doctor Self-Check** — 10 auto-diagnostics with fix suggestions
+
+#### 🔧 Engineering & Stability
+- 🎨 **Colorized Terminal Logs** — 12+ modules, auto-highlighting models/URLs/channels/errors
+- 🔁 **Hot Model Swap** — CC-Switch synced providers, Claude / GPT / Gemini without restart
+- 🔐 **Secure Storage** — Encrypted API keys (safeStorage), IPC sandbox, auto log sanitization
+- 🎯 **7×24 Production-Grade** — Auto-restart + log rotation + perf monitoring + memory cleanup
+- 🍎 **Cross-Platform** — Windows 10/11 + macOS (Intel & Apple Silicon), auto desktop shortcut
 
 ### 🆕 What's New in v3.5.2
 
