@@ -87,7 +87,7 @@ class SmartVoiceSystem {
     }
 
     /**
-     * 🔊 跨平台音频播放（使用 execFile/spawn 避免命令注入）
+     * 🔊 跨平台音频播放
      */
     async _playAudioFile(filePath) {
         if (process.platform === 'darwin') {
@@ -99,43 +99,29 @@ class SmartVoiceSystem {
                 await execFileAsync('paplay', [filePath], { timeout: 120000 });
             }
         } else {
-            // Windows: 用 winmm.dll MCI 接口直接播放，不触发系统文件关联
-            const psScript = `
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-using System.Text;
-public class WinAudio {
-    [DllImport("winmm.dll", CharSet=CharSet.Unicode)]
-    public static extern int mciSendStringW(string cmd, StringBuilder buf, int bufLen, IntPtr hwnd);
-}
-"@
-$f = $args[0] -replace '"','""'
-[WinAudio]::mciSendStringW("open ""$f"" type mpegvideo alias kkaudio", $null, 0, [IntPtr]::Zero)
-[WinAudio]::mciSendStringW("play kkaudio wait", $null, 0, [IntPtr]::Zero)
-[WinAudio]::mciSendStringW("close kkaudio", $null, 0, [IntPtr]::Zero)
-            `;
-            await new Promise((resolve, reject) => {
-                const child = spawn('powershell', [
-                    '-NoProfile', '-NonInteractive', '-Command', psScript, filePath
-                ], { windowsHide: true, stdio: 'ignore' });
-                this._currentProcess = child;
-                const timer = setTimeout(() => {
-                    child.kill();
-                    this._currentProcess = null;
-                    resolve(); // 超时静默完成
-                }, 60000); // 60秒播放超时
-                child.on('close', () => {
-                    clearTimeout(timer);
-                    this._currentProcess = null;
-                    resolve();
-                });
-                child.on('error', (err) => {
-                    clearTimeout(timer);
-                    this._currentProcess = null;
-                    reject(err);
-                });
-            });
+            // Windows: 用 Electron 的 Chromium 内置 Audio API 播放
+            // 完全进程内播放，绝不触发系统文件关联
+            try {
+                const { BrowserWindow } = require('electron');
+                const windows = BrowserWindow.getAllWindows();
+                if (windows.length === 0) {
+                    console.warn('[Voice] 无可用窗口，跳过音频播放');
+                    return;
+                }
+                const fileUrl = 'file:///' + filePath.replace(/\\/g, '/');
+                const safeUrl = JSON.stringify(fileUrl);
+                await windows[0].webContents.executeJavaScript(`
+                    new Promise((resolve) => {
+                        const audio = new Audio(${safeUrl});
+                        audio.onended = () => { audio.src = ''; resolve('done'); };
+                        audio.onerror = (e) => { audio.src = ''; resolve('error'); };
+                        audio.play().catch(() => resolve('blocked'));
+                        setTimeout(() => { try { audio.pause(); audio.src = ''; } catch(e) {} resolve('timeout'); }, 60000);
+                    })
+                `);
+            } catch (err) {
+                console.error('[Voice] Electron 音频播放失败:', err.message);
+            }
         }
     }
 
