@@ -8,7 +8,7 @@
 
 ## 🇨🇳 中文
 
-**OpenClaw 桌面可视化伴侣 — 流体玻璃球宠物、14情绪系统、声音克隆（MiniMax/CosyVoice）、一键配置向导、实时 WebSocket 同步**
+**OpenClaw 桌面可视化伴侣 — 流体玻璃球宠物、14情绪系统、声音克隆（MiniMax TTS）、一键配置向导、Gateway 智能守护**
 
 <div align="center">
 
@@ -35,17 +35,18 @@
 
 ## 🌟 项目亮点
 
-一个**不一样**的桌面AI助手：
+给你的 OpenClaw AI 一个**看得见、听得到**的桌面化身：
 
-- 🎨 **空气感UI** — 像桌面歌词，不妨碍操作，却始终陪伴
-- 🦞 **67px 龙虾球** — 流体动画 + 琉璃质感 + 14种情绪色系
-- 👀 **38个待机表情** — 眨眼、歪头、星星眼、打盹...自然随机
-- 🎙️ **克隆音色TTS** — MiniMax 2.8 HD / 2.5 Turbo，7种情感
-- 🧙 **Setup Wizard** — RPG风格配置向导，零基础5分钟搞定
-- 🔐 **API Key 加密** — Electron safeStorage，密钥不明文存盘
-- 🔁 **KKClaw Switch** — 3秒热切换AI模型，无需重启
-- 🎯 **7×24 稳定** — 自动重启、日志轮转、错误恢复
-- 🍎 **跨平台支持** — Windows 10/11 + macOS (Intel & Apple Silicon)
+- 🦞 **67px 琉璃球体** — 3层流体动画 + 双重高光 + 14种情绪动态光效，像活的一样
+- 👀 **38种待机表情** — 眨眼、歪头、星星眼、打盹、装死…不操作时也有生命感
+- 🎙️ **声音克隆 TTS** — 上传30秒录音即可克隆专属音色，MiniMax 2.5 Turbo 驱动，支持14种情绪语调
+- 🧙 **RPG 配置向导** — 木质边框 + 羊皮纸背景，7步引导零基础上手，缺失依赖一键安装
+- 🛡️ **Gateway 智能守护** — 自动拉起、异常检测、健康评分、语音播报状态，不用手动盯
+- 🔁 **模型热切换** — CC-Switch 同步 Provider，切换 Claude / GPT / Gemini 无需重启
+- 🎨 **空气感双窗口** — 球体 + 歌词字幕，像桌面歌词一样不挡操作，却始终陪伴
+- 🔐 **安全存储** — API Key 加密落盘 (safeStorage)、IPC 白名单沙箱、日志自动脱敏
+- 🎯 **生产级稳定** — 7×24 自动重启 + 彩色终端日志 + 日志轮转 + 性能监控
+- 🍎 **跨平台** — Windows 10/11 + macOS (Intel & Apple Silicon)，首次启动自动创建桌面快捷方式
 
 ### 🆕 v3.5.2 — Setup Wizard 修复 + 一键安装缺失依赖
 
@@ -984,7 +985,7 @@ node kkclaw-hotswitch.js --restart
 
 ## 🇬🇧 English
 
-**Desktop visualization companion for OpenClaw — Fluid glass orb pet, 14-emotion system, voice cloning (MiniMax/CosyVoice), Setup Wizard, and real-time WebSocket sync**
+**Desktop visualization companion for OpenClaw — Fluid glass orb pet, 14-emotion system, voice cloning (MiniMax TTS), Setup Wizard, and Smart Gateway Guardian**
 
 <div align="center">
 
@@ -1000,17 +1001,18 @@ node kkclaw-hotswitch.js --restart
 
 ### ✨ Highlights
 
-A **different kind** of desktop AI assistant:
+Give your OpenClaw AI a **visible, audible** desktop embodiment:
 
-- 🎨 **Airy UI** — Like desktop lyrics, always present but never in the way
-- 🦞 **67px Lobster Orb** — Fluid animation + glass texture + 14 emotion colors
-- 👀 **38 Idle Animations** — Blink, tilt, sparkle eyes, doze off... naturally random
-- 🎙️ **Voice Cloning TTS** — MiniMax 2.8 HD / 2.5 Turbo, 7 emotions
-- 🧙 **Setup Wizard** — RPG-style onboarding, zero-to-running in 5 minutes
-- 🔐 **Encrypted API Keys** — Electron safeStorage, no plaintext on disk
-- 🔁 **KKClaw Switch** — Hot-swap AI models in 3 seconds, no restart needed
-- 🎯 **7×24 Stable** — Auto-restart, log rotation, error recovery
-- 🍎 **Cross-Platform** — Windows 10/11 + macOS (Intel & Apple Silicon)
+- 🦞 **67px Glass Orb** — 3-layer fluid animation + dual highlights + 14 emotion glow effects, feels alive
+- 👀 **38 Idle Animations** — Blink, tilt, sparkle eyes, doze off, play dead… lifelike even when idle
+- 🎙️ **Voice Cloning TTS** — Upload 30s audio to clone your voice, MiniMax 2.5 Turbo powered, 14 emotion tones
+- 🧙 **RPG Setup Wizard** — Wood-framed parchment UI, 7-step guided setup, one-click missing dependency install
+- 🛡️ **Smart Gateway Guardian** — Auto-start, anomaly detection, health scoring, voice status announcements
+- 🔁 **Hot Model Swap** — CC-Switch synced providers, switch Claude / GPT / Gemini without restart
+- 🎨 **Airy Dual Windows** — Orb + lyric subtitle, like desktop lyrics — always present, never in the way
+- 🔐 **Secure Storage** — Encrypted API keys (safeStorage), IPC whitelist sandbox, auto log sanitization
+- 🎯 **Production-Grade** — 7×24 auto-restart + colorized terminal logs + log rotation + perf monitoring
+- 🍎 **Cross-Platform** — Windows 10/11 + macOS (Intel & Apple Silicon), auto desktop shortcut on first launch
 
 ### 🆕 What's New in v3.5.2
 
