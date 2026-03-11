@@ -35,6 +35,7 @@ class GatewayGuardian extends EventEmitter {
         this.restartHistory = [];
         this.isRestarting = false; // 防止重复触发
         this._lastError = null;   // 最近一次错误原因
+        this._hasBeenHealthy = false; // Gateway 是否曾经连接成功过
 
         // 新增：性能监控模块
         this.metricsCollector = new GatewayMetricsCollector();
@@ -117,9 +118,9 @@ class GatewayGuardian extends EventEmitter {
         this.metricsCollector.recordRequest(healthy, responseTime, healthy ? null : 'ping_failed');
         this.metricsCollector.recordAvailability(healthy);
 
-        // 检测异常
+        // 检测异常（仅在 Gateway 曾经健康后才报告，避免启动阶段噪音）
         const anomalies = this.anomalyDetector.detectAnomalies();
-        if (anomalies.length > 0) {
+        if (anomalies.length > 0 && this._hasBeenHealthy) {
             console.log('[Guardian] 检测到异常:', anomalies.map(a => a.message).join(', '));
             this.emit('anomalies', anomalies);
         }
@@ -182,6 +183,11 @@ class GatewayGuardian extends EventEmitter {
 
     // 健康时：重置计数，降频到 30s
     _onHealthy() {
+        if (!this._hasBeenHealthy) {
+            this._hasBeenHealthy = true;
+            // 首次连上时重置异常检测基线，不让启动期数据污染
+            this.anomalyDetector.updateBaseline();
+        }
         if (this.consecutiveFailures > 0) {
             console.log('[Guardian] Gateway 已恢复');
             this.emit('recovered');

@@ -292,11 +292,9 @@ class ServiceManager extends EventEmitter {
         child.stdout.on('data', (chunk) => {
             const text = chunk.toString();
             stdoutBuf = (stdoutBuf + text).slice(-2048);
-            // 实时转发 Gateway stdout 到 KKClaw 控制台
-            // 保留 Gateway 原始 ANSI 颜色（模型名、状态等已有颜色区分），只加前缀标签
+            // 实时转发 Gateway stdout 到 KKClaw 控制台，关键信息高亮
             text.split('\n').filter(l => l.trim()).forEach(line => {
                 if (_dedupLine(line)) {
-                    // 去掉 ANSI 后判断严重级别，仅用于前缀颜色
                     const plain = line.replace(/\x1b\[[0-9;]*m/g, '');
                     let tag;
                     if (/error|Error|❌|FAIL|fatal/i.test(plain)) {
@@ -308,8 +306,9 @@ class ServiceManager extends EventEmitter {
                     } else {
                         tag = '\x1b[36m[Gateway]\x1b[0m';
                     }
-                    // 原文带颜色直接输出，不覆盖
-                    console.log(`${tag} ${line}`);
+                    // 对正文内容进行关键词高亮
+                    const highlighted = this._highlightKeywords(line);
+                    console.log(`${tag} ${highlighted}`);
                     this.log('info', plain, 'gateway-stdout');
                 }
             });
@@ -317,11 +316,11 @@ class ServiceManager extends EventEmitter {
         child.stderr.on('data', (chunk) => {
             const text = chunk.toString();
             stderrBuf = (stderrBuf + text).slice(-2048);
-            // 实时转发 Gateway stderr — 保留原始颜色
             text.split('\n').filter(l => l.trim()).forEach(line => {
                 if (_dedupLine(line)) {
                     const plain = line.replace(/\x1b\[[0-9;]*m/g, '');
-                    console.log(`\x1b[33m[Gateway:WARN]\x1b[0m ${line}`);
+                    const highlighted = this._highlightKeywords(line);
+                    console.log(`\x1b[33m[Gateway:WARN]\x1b[0m ${highlighted}`);
                     this.log('warn', plain, 'gateway-stderr');
                 }
             });
@@ -416,6 +415,56 @@ class ServiceManager extends EventEmitter {
         } finally {
             this._restartLock = false;
         }
+    }
+
+    // 高亮 Gateway 日志中的关键信息
+    _highlightKeywords(line) {
+        // 先去掉已有的 ANSI 颜色，统一重新上色
+        let text = line.replace(/\x1b\[[0-9;]*m/g, '');
+
+        // 模型名称 — 亮青色加粗（覆盖常见 LLM/TTS 模型名）
+        text = text.replace(
+            /\b(gpt-[a-z0-9._-]+|claude-[a-z0-9._-]+|deepseek-[a-z0-9._-]+|qwen[a-z0-9._-]*|gemini-[a-z0-9._-]+|speech-[a-z0-9._-]+|cosyvoice[a-z0-9._-]*|whisper[a-z0-9._-]*|dall-e[a-z0-9._-]*|moonshot[a-z0-9._-]*|glm[a-z0-9._-]*|ernie[a-z0-9._-]*|minimax[a-z0-9._-]*)\b/gi,
+            '\x1b[96m\x1b[1m$1\x1b[0m'
+        );
+
+        // URL — 亮绿色加粗
+        text = text.replace(
+            /(https?:\/\/[^\s,'"]+)/g,
+            '\x1b[92m\x1b[1m$1\x1b[0m'
+        );
+
+        // 端口号（:数字） — 亮黄色
+        text = text.replace(
+            /(:)(\d{4,5})\b/g,
+            ':' + '\x1b[93m\x1b[1m$2\x1b[0m'
+        );
+
+        // 成功关键词 — 亮绿色
+        text = text.replace(
+            /\b(started|running|listening|connected|ready|loaded|success|enabled|OK)\b/gi,
+            '\x1b[92m\x1b[1m$1\x1b[0m'
+        );
+
+        // 失败/错误关键词 — 亮红色
+        text = text.replace(
+            /\b(error|failed|failure|crashed|refused|timeout|ECONNREFUSED|EADDRINUSE|EACCES|ENOSPC)\b/gi,
+            '\x1b[91m\x1b[1m$1\x1b[0m'
+        );
+
+        // 警告关键词 — 亮黄色
+        text = text.replace(
+            /\b(warning|deprecated|mismatch|retry|retrying|slow)\b/gi,
+            '\x1b[93m$1\x1b[0m'
+        );
+
+        // 渠道/服务名 — 亮洋���色
+        text = text.replace(
+            /\b(feishu|telegram|discord|wecom|slack|webhook|websocket|gateway)\b/gi,
+            '\x1b[95m$1\x1b[0m'
+        );
+
+        return text;
     }
 
     // 获取所有服务状态

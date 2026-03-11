@@ -16,57 +16,49 @@ const c = {
   cyan:    '\x1b[36m',
   white:   '\x1b[37m',
   gray:    '\x1b[90m',
-  // 高亮色
   bRed:    '\x1b[91m',
   bGreen:  '\x1b[92m',
   bYellow: '\x1b[93m',
   bMagenta:'\x1b[95m',
   bCyan:   '\x1b[96m',
-  // 背景
-  bgRed:   '\x1b[41m',
 };
 
-// 渐变色序列（红→粉→橙，龙虾色系）
-const gradient = ['\x1b[91m', '\x1b[31m', '\x1b[33m', '\x1b[91m', '\x1b[95m', '\x1b[31m'];
-
-function applyGradient(text) {
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    if (text[i] === ' ') {
-      result += ' ';
-    } else {
-      result += gradient[i % gradient.length] + text[i];
-    }
-  }
-  return result + c.reset;
-}
-
-// 主 ASCII Art — 龙虾球
-const LOGO = [
-  '                ██████████                ',
-  '            ████░░░░░░░░░░████            ',
-  '          ██░░░░░░████░░░░░░░░██          ',
-  '        ██░░░░████████████░░░░░░██        ',
-  '       █░░░░██████████████████░░░░█       ',
-  '      █░░░██████████████████████░░░█      ',
-  '     █░░░████████████████████████░░░█     ',
-  '     █░░███████���██  ██  ██████████░░█     ',
-  '     █░░██████████████████████████░░█     ',
-  '      █░░░██████████████████████░░░█      ',
-  '       █░░░░██████████████████░░░░█       ',
-  '        ██░░░░████████████░░░░░░██        ',
-  '          ██░░░░░░████░░░░░░░░██          ',
-  '            ████░░░░░░░░░░████            ',
-  '                ██████████                ',
+// 行级渐变（每行一个颜色，从红→洋红→黄，龙虾色系）
+const rowColors = [
+  '\x1b[31m',   // 红
+  '\x1b[91m',   // 亮红
+  '\x1b[31m',   // 红
+  '\x1b[91m',   // 亮红
+  '\x1b[95m',   // 亮洋红
+  '\x1b[91m',   // 亮红
 ];
 
+// 简洁龙虾 ASCII Art — 线条风格，CMD 友好
+const LOBSTER = [
+  '          \\/\\/          \\/\\/',
+  '          \\  \\        /  /',
+  '           \\  \\      /  /',
+  '      .-----\\  \\----/  /-----.',
+  '     /  .----\\  \\--/  /----.  \\',
+  '    /  /      \\        /    \\  \\',
+  '   |  |   ()   \\    /   ()  |  |',
+  '   |  |         \\  /        |  |',
+  '    \\  \\        /  \\       /  /',
+  '     \\  `------/ /\\ \\-----\'  /',
+  '      \\  .----/ /  \\ \\----.  /',
+  '       \\/     / /    \\ \\    \\/',
+  '             / /      \\ \\',
+  '            / /        \\ \\',
+  '           `-\'          `-\'',
+];
+
+// KKCLAW 大字标题 — 简洁方块风格
 const TITLE = [
-  ' ██╗  ██╗██╗  ██╗ ██████╗██╗      █████╗ ██╗    ██╗',
-  ' ██║ ██╔╝██║ ██╔╝██╔════╝██║     ██╔══██╗██║    ██║',
-  ' █████╔╝ █████╔╝ ██║     ██║     ███████║██║ █╗ ██║',
-  ' ██╔═██╗ ██╔═██╗ ██║     ██║     ██╔══██║██║███╗██║',
-  ' ██║  ██╗██║  ██╗╚██████╗███████╗██║  ██║╚███╔███╔╝',
-  ' ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ ',
+  ' _  ___  _____ _        _ __        __',
+  '| |/ / |/ / __| |   __ | |\\ \\      / /',
+  '| \' /| \' / (__| |_ / _`| | \\ \\ /\\ / / ',
+  '| . \\| . \\___| __| (_| | |  \\ V  V /  ',
+  '|_|\\_\\_|\\_\\   |_|  \\__,_|_|   \\_/\\_/   ',
 ];
 
 function getSystemInfo(version) {
@@ -86,7 +78,7 @@ function getSystemInfo(version) {
 
 function printSeparator() {
   const width = Math.min(process.stdout.columns || 60, 60);
-  console.log(c.gray + '─'.repeat(width) + c.reset);
+  console.log(c.gray + '-'.repeat(width) + c.reset);
 }
 
 async function sleep(ms) {
@@ -99,29 +91,30 @@ async function sleep(ms) {
  * @param {boolean} animate - 是否使用动画效果
  */
 async function printHero(version, animate = true) {
-  const delay = animate ? 15 : 0;
+  const delay = animate ? 20 : 0;
   const info = getSystemInfo(version);
 
   console.log('');
 
-  // 打印渐变 LOGO
-  for (const line of LOGO) {
-    console.log(applyGradient('  ' + line));
+  // 打印龙虾 — 整行统一红色
+  for (let i = 0; i < LOBSTER.length; i++) {
+    const color = rowColors[i % rowColors.length];
+    console.log(color + '  ' + LOBSTER[i] + c.reset);
     if (delay) await sleep(delay);
   }
 
   console.log('');
 
-  // 打印大字标题
+  // 打印大字标题 — 统一亮红色 + 粗体
   for (const line of TITLE) {
-    console.log(c.bRed + line + c.reset);
+    console.log(c.bRed + c.bold + line + c.reset);
     if (delay) await sleep(delay);
   }
 
   // 副标题
   console.log('');
   console.log(c.gray + '  ' + c.reset + c.white + c.bold +
-    ' Desktop Pet  ×  OpenClaw Gateway  ×  Live Console' + c.reset);
+    'Desktop Pet  x  OpenClaw Gateway  x  Live Console' + c.reset);
   console.log('');
 
   printSeparator();
@@ -140,7 +133,7 @@ async function printHero(version, animate = true) {
   printSeparator();
 
   // 状态行
-  console.log(c.yellow + '  ⏳ ' + c.reset + 'Initializing modules...');
+  console.log(c.yellow + '  >> ' + c.reset + 'Initializing modules...');
   console.log('');
 }
 
@@ -151,9 +144,9 @@ function printReady(port = 18789) {
   const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
   printSeparator();
   console.log('');
-  console.log(c.bGreen + c.bold + '  🦞 KKClaw is ready!' + c.reset);
+  console.log(c.bGreen + c.bold + '  [OK] KKClaw is ready!' + c.reset);
   console.log('');
-  console.log(c.gray + '  Gateway   ' + c.reset + c.green + `http://127.0.0.1:${port}` + c.reset);
+  console.log(c.gray + '  Gateway   ' + c.reset + c.green + c.bold + `http://127.0.0.1:${port}` + c.reset);
   console.log(c.gray + '  Started   ' + c.reset + c.white + time + c.reset);
   console.log(c.gray + '  Logs      ' + c.reset + c.dim + 'Gateway output will appear below' + c.reset);
   console.log('');
