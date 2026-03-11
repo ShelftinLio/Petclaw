@@ -654,7 +654,7 @@ class SmartVoiceSystem {
             
             if (errorMessage.includes('quota') || errorMessage.includes('balance') || errorMessage.includes('insufficient')) {
                 reason = '额度用完';
-                suggestion = `${fromEngine === 'minimax' ? 'MiniMax' : 'DashScope'} API 额度已用完，请前往官网充值续费`;
+                suggestion = 'MiniMax API 额度已用完，请前往官网充值续费';
             } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT') || errorMessage.includes('ECONNREFUSED')) {
                 reason = '网络超时';
                 suggestion = '网络连接失败，请检查网络状态';

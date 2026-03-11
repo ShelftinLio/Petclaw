@@ -2091,22 +2091,17 @@ ipcMain.handle('diag-doctor', async () => {
     if (voiceSystem) {
       const engine = voiceSystem.ttsEngine;
       const hasMinimax = voiceSystem.minimax !== null;
-      const hasDashscope = voiceSystem.dashscope !== null;
       const stats = voiceSystem.getStats();
 
       let status = 'pass', message = '', fix = null;
       if (engine === 'edge') {
         status = 'warn';
         message = '使用 Edge TTS 兜底';
-        fix = '检查 MiniMax / DashScope API Key 是否正确配置';
-      } else if (engine === 'dashscope') {
-        status = 'warn';
-        message = 'MiniMax 不可用，使用 DashScope';
-        fix = '检查 MiniMax API Key';
+        fix = '检查 MiniMax API Key 是否正确配置';
       } else {
         message = 'MiniMax 引擎正常';
       }
-      message += ` | MiniMax: ${hasMinimax ? '✓' : '✗'} | DashScope: ${hasDashscope ? '✓' : '✗'}`;
+      message += ` | MiniMax: ${hasMinimax ? '✓' : '✗'} | 回退: Edge TTS`;
       if (!stats.enabled) { status = 'warn'; message += ' | 语音已关闭'; }
 
       checks.push({ name: '语音引擎', status, message, fix });
@@ -2120,10 +2115,8 @@ ipcMain.handle('diag-doctor', async () => {
     if (petConfig) {
       const issues = [];
       const minimax = petConfig.get('minimax');
-      const dashscope = petConfig.get('dashscope');
       if (minimax?.apiKey && String(minimax.apiKey).startsWith('enc:')) issues.push('MiniMax Key 未解密');
-      if (dashscope?.apiKey && String(dashscope.apiKey).startsWith('enc:')) issues.push('DashScope Key 未解密');
-      if (!minimax?.apiKey && !dashscope?.apiKey) issues.push('无任何 API Key');
+      if (!minimax?.apiKey) issues.push('MiniMax API Key 未配置');
       checks.push({
         name: 'API Key',
         status: issues.length === 0 ? 'pass' : issues.some(i => i.includes('未解密')) ? 'fail' : 'warn',
