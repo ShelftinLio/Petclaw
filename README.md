@@ -16,7 +16,7 @@
 
 *OpenClaw Core + Desktop Embodiment = A living interface with emotion, voice, and presence*
 
-[![Version](https://img.shields.io/badge/version-3.1.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.5.0-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/kk43994/kkclaw/ci.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=CI)](https://github.com/kk43994/kkclaw/actions/workflows/ci.yml)
 [![Stars](https://img.shields.io/github/stars/kk43994/kkclaw?style=for-the-badge&logo=github&color=FFD700)](https://github.com/kk43994/kkclaw/stargazers)
 [![Downloads](https://img.shields.io/github/downloads/kk43994/kkclaw/total?style=for-the-badge&logo=github&color=8B5CF6)](https://github.com/kk43994/kkclaw/releases)
@@ -47,6 +47,37 @@
 - 🎯 **7×24 稳定** — 自动重启、日志轮转、错误恢复
 - 🍎 **跨平台支持** — Windows 10/11 + macOS (Intel & Apple Silicon)
 
+### 🆕 v3.5.0 — 体验大升级：彩色终端 + 智能守护 + 桌面快捷方式
+
+> 🎨 **重大体验更新！** 全局彩色终端日志 + Gateway 智能自启动 + 日志去重降噪 + 首次启动自动创建桌面快捷方式
+
+#### 🎨 全局彩色终端日志系统
+- 🆕 **color-log.js 中心化模块** — 统一 ANSI 颜色常量 + 自动关键词高亮
+- ✨ **12+ 模块全覆盖** — main.js / service-manager / gateway-guardian / smart-voice / message-sync / pet-config / screenshot / log-rotation / performance-monitor / desktop-notifier 全部迁移
+- 🎯 **Gateway 日志高亮增强** — 模型名(cyan)、URL(green)、路径(dim)、渠道(magenta)、@botname(magenta)、key=value(yellow)、端口号(yellow)、协议(cyan)、错误(red)、成功(green)、警告(yellow)
+
+#### 🛡️ Gateway 智能自启动
+- 🆕 **首次启动主动拉起** — Guardian 不再永远等待，连续 3 次检测不到 Gateway 后自动执行 `startGateway()`
+- 🆕 **启动状态语音播报** — 启动中播报"等待Gateway启动中"，成功/失败分别语音通知
+- 🔧 **二次确认防误判** — 与 ServiceManager 探活交叉校验，避免误触重启
+- 🔧 **启动期静默** — 首次启动阶段不发告警事件，避免噪音
+
+#### 🔇 日志去重降噪
+- 🔧 **修复 Gateway 日志重复** — 找到根因：`log()` 方法在 stdout handler 之后二次 `console.log()`，gateway-std* 服务跳过控制台输出
+- 🔧 **stderr 智能过滤** — 仅显示含 error/fatal/panic/exception 的真错误行
+- 🔧 **空白归一化去重** — `\s+` → `' '` 归一化后 Set 去重，彻底消除同内容重复
+
+#### 🖥️ 首次启动自动创建桌面快捷方式
+- 🆕 **自动创建 .lnk** — 首次启动自动在桌面创建"Claw 桌面宠物"快捷方式
+- 🔧 **PowerShell COM 对象** — 使用 WScript.Shell 创建快捷方式，设置图标和最小化启动
+- 🔧 **智能跳过** — 已存在快捷方式或非 Windows 平台自动跳过
+- 🎙️ **语音播报** — 创建成功后播报"桌面快捷方式已创建"
+
+#### 🔧 其他修复
+- 🐛 **修复语音双响** — 移除 messageSync 中重复的 `voiceSystem.speak()` 调用
+- 🐛 **修复通知日志重复** — desktop-notifier 只打印通知类型，不重复打印 payload
+- 🐛 **DashScope TTS 引擎移除** — 语音降级链简化为 MiniMax → Edge TTS
+
 ### 🆕 v3.1.2 — 安全加固 & 模型管理升级
 
 > 🔒 **安全重点更新！** 命令注入修复 + 动态 Token 管理 + 模型热切换状态机 + Gateway 智能监控
@@ -61,7 +92,7 @@
 - 💡 **模型兼容性提示** — 推荐 Claude Sonnet 4+ 旗舰模型获得最佳播报体验
 - ✅ **7 项全链路测试** — Gateway / 模型 / TTS / 播报 / 歌词 / Agent文件 / 音色
 
-#### ���� 情绪系统升级
+#### 🌈 情绪系统升级
 - 🌈 **7 → 14 种情绪** — 新增 sad、angry、fearful、calm、excited、love、focused
 - ✨ **动态外发光** — 每种情绪有专属 glow 光效
 - 🎭 **情绪文本检测** — `desktop-bridge.js` 自动分析内容情绪，10种匹配规则
@@ -131,15 +162,15 @@
 
 ## 📦 下载安装
 
-### 最新版本：v3.1.2
+### 最新版本：v3.5.0
 
 <div align="center">
 
 | 平台 | 架构 | 下载链接 | 大小 |
 |------|------|----------|------|
-| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.1.2-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.1.2-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.1.2-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.5.0-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.5.0-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.5.0-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-arm64.dmg) | ~160MB |
 
 [📦 查看所有版本](https://github.com/kk43994/kkclaw/releases) | [🎥 在线演示](https://kk43994.github.io/kkclaw/)
 
@@ -708,6 +739,33 @@ node kkclaw-hotswitch.js --restart
 
 ## 📝 更新日志
 
+### [3.5.0] - 2026-03-12
+
+#### 🎨 全局彩色终端日志
+- 🆕 **color-log.js** — 中心化 ANSI 颜色模块，统一颜色常量 + 自动高亮函数
+- ✨ **全面迁移** — 12+ 模块启动日志迁移到 `colorLog()` / `kvLog()` / `tagLog()`
+- ✨ **Gateway 日志高亮增强** — 模型名、URL、路径、渠道、@botname、key=value、端口号、协议、错误/成功/警告 全彩高亮
+
+#### 🛡️ Gateway 智能自启动
+- 🆕 **首次启动主动拉起** — 连续 3 次检测不到 Gateway 后自动 `startGateway()`，不再永远等待
+- 🆕 **启动状态语音播报** — 启动中/成功/失败 分别语音通知
+- 🔧 **二次确认防误判** — 与 ServiceManager 交叉校验
+
+#### 🔇 日志去重降噪
+- 🔧 **修复 Gateway 日志重复** — 根因：`log()` 二次打印；gateway-std* 跳过控制台输出
+- 🔧 **stderr 智能过滤** — 仅显示 error/fatal/panic/exception
+- 🔧 **空白归一化去重** — `\s+` → `' '` 归一化后 Set 去重
+
+#### 🖥️ 首次启动自动创建桌面快捷方式
+- 🆕 **自动创建 .lnk** — 首次启动自动在桌面创建"Claw 桌面宠物"快捷方式
+- 🔧 **PowerShell COM** — WScript.Shell 创建快捷方式
+- 🎙️ **语音播报** — 创建成功后播报
+
+#### 🐛 修复
+- 修复语音双响（移除 messageSync 重复 speak）
+- 修复通知日志重复（desktop-notifier 只打印类型）
+- DashScope TTS 引擎移除，降级链简化为 MiniMax → Edge TTS
+
 ### [3.1.2] - 2026-03-11
 
 #### 🔒 安全加固
@@ -733,7 +791,7 @@ node kkclaw-hotswitch.js --restart
 
 #### 🏗️ 架构优化
 - ✨ **路径解析器** — `openclaw-path-resolver.js`，消除硬编码路径
-- ✨ **安全配置加载** — `safe-config-loader.js`，带校验的配置读��
+- ✨ **安全配置加载** — `safe-config-loader.js`，带校验的配置读取
 - ✨ **安全存储** — `secure-storage.js`，token 安全管理
 - ✨ **会话锁管理器** — `session-lock-manager.js`，并发安全的会话操作
 - ✨ **配置管理器** — `config-manager.js` + `config-writer.js`，统一配置读写
@@ -772,7 +830,7 @@ node kkclaw-hotswitch.js --restart
 
 #### 🩺 诊断与运维
 - ✨ **Doctor 自检系统** — `diag-doctor` IPC，10 项全自动诊断（Gateway / 系统托盘 / TTS 配置 / API Key / 模型配置 / 端口占用 / 健康评分 / 缓存大小 / 歌词窗口 / 日志目录），每项带修复建议
-- ✨ **会话刷��** — `doRefreshSession()` 一键清理损坏会话并重连
+- ✨ **会话刷新** — `doRefreshSession()` 一键清理损坏会话并重连
 - ✨ **诊断工具箱 UI 升级** — Doctor 面板新增 summary 统计条 + 修复建议 + pass/warn/fail 分级显示
 
 #### 🎛️ 模型管理升级
@@ -899,7 +957,7 @@ node kkclaw-hotswitch.js --restart
 
 ![Hero Banner](docs/images/hero-banner.png)
 
-[![Version](https://img.shields.io/badge/version-3.1.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.5.0-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/kkclaw)
 
@@ -921,44 +979,34 @@ A **different kind** of desktop AI assistant:
 - 🎯 **7×24 Stable** — Auto-restart, log rotation, error recovery
 - 🍎 **Cross-Platform** — Windows 10/11 + macOS (Intel & Apple Silicon)
 
-### 🆕 What's New in v3.1.2
+### 🆕 What's New in v3.5.0
 
-> 🔒 **Security-focused update!** Command injection fixes + dynamic token management + model hot-swap state machine + smart gateway monitoring
+> 🎨 **Major UX update!** Global colorized terminal logs + Smart Gateway auto-start + Log dedup & noise reduction + Auto desktop shortcut on first launch
 
-#### 🔒 Security Hardening
-- 🔧 **Command injection fix** — `_playAudioFile()` / `_playAudio()` / `speakWithEdgeTTS()` replaced `exec()` shell interpolation with `execFile()` / `spawn()` + argument arrays
-- 🔧 **Edge TTS injection fix** — Text passed via temp file (`--text-file`) instead of inline `--text`
-- 🔧 **stop() actually stops playback** — Tracks current process ref, kills it on `stop()`
-- ✨ **Dynamic token loading** — `openclaw-client.js` reads token on each request via `SecureStorage` + `configManager`
-- ✨ **IPC validator** — New `ipc-validator.js` for channel whitelist validation
-- ✨ **Log sanitizer** — New `log-sanitizer.js` to prevent sensitive data leaking to logs
+#### 🎨 Global Colorized Terminal Logs
+- 🆕 **color-log.js** — Centralized ANSI color module with auto-keyword highlighting
+- ✨ **12+ modules migrated** — All startup logs use `colorLog()` / `kvLog()` / `tagLog()`
+- 🎯 **Enhanced Gateway log highlighting** — Models(cyan), URLs(green), paths(dim), channels(magenta), @botname(magenta), key=value(yellow), ports(yellow), protocols(cyan), errors(red), success(green), warnings(yellow)
 
-#### 🎛️ Model Management Upgrades
-- ✨ **Model switch state machine** — State-driven switching flow
-- ✨ **Switch strategy pattern** — Extensible switching strategies
-- ✨ **Switch history** — Track model switch history
-- ✨ **Quota query** — API balance queries
+#### 🛡️ Smart Gateway Auto-Start
+- 🆕 **Proactive first launch** — Guardian auto-starts Gateway after 3 consecutive failures instead of waiting forever
+- 🆕 **Voice status announcements** — "Waiting for Gateway" / success / failure spoken aloud
+- 🔧 **Cross-validation** — Double-checks with ServiceManager to prevent false restarts
 
-#### 🛡️ Smart Gateway Monitoring
-- ✨ **Anomaly detector** — Auto-identify abnormal patterns
-- ✨ **Health scorer** — Multi-dimensional health quantification
-- ✨ **Metrics collector** — Real-time gateway metrics
-- ✨ **Smart detector** — Intelligent fault diagnosis
+#### 🔇 Log Dedup & Noise Reduction
+- 🔧 **Fixed Gateway log duplication** — Root cause: `log()` method double-printing; gateway-std* services skip console output
+- 🔧 **Smart stderr filtering** — Only show lines with error/fatal/panic/exception
+- 🔧 **Whitespace-normalized dedup** — `\s+` → `' '` normalization before Set dedup
 
-#### 🏗️ Architecture
-- ✨ **Path resolver** — Eliminates hardcoded paths
-- ✨ **Session lock manager** — Concurrent-safe session operations
-- ✨ **Config manager** — Unified config read/write
-- ✨ **Model Settings separation** — CSS/JS extracted from HTML
-- 🆕 **Preset Templates** — Built-in mainstream provider presets for quick setup
+#### 🖥️ Auto Desktop Shortcut
+- 🆕 **Auto-create .lnk on first launch** — Creates "Claw 桌面宠物" shortcut on desktop
+- 🔧 **PowerShell COM** — WScript.Shell shortcut creation with icon and minimized start
+- 🎙️ **Voice announcement** — "Desktop shortcut created" on success
 
-#### 🎙️ Voice Enhancements
-- 🆕 **MiniMax Speech 2.8 HD** — New high-definition voice engine option
-- 🔄 **Unified Config Source** — SmartVoiceSystem reads petConfig directly
-- 🔧 **Lyrics TTS Marker Filtering** — `<#0.3#>` pause markers hidden from subtitles
-
-#### 📖 Documentation
-- 🆕 **Complete Configuration Guide** — [CONFIGURATION-GUIDE.md](docs/CONFIGURATION-GUIDE.md) (863 lines), step-by-step from zero to fully configured
+#### 🐛 Fixes
+- Fixed dual audio playback (removed duplicate `voiceSystem.speak()` from messageSync)
+- Fixed duplicate notification logs (desktop-notifier only logs type)
+- Removed DashScope TTS engine, simplified fallback: MiniMax → Edge TTS
 
 ### 🚀 Quick Start
 
@@ -989,9 +1037,9 @@ npm start
 
 | Platform | Arch | Download | Size |
 |----------|------|----------|------|
-| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.0/KKClaw-Desktop-Pet-3.5.0-arm64.dmg) | ~160MB |
 
 [📦 All Releases](https://github.com/kk43994/kkclaw/releases)
 

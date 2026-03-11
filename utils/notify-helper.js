@@ -1,7 +1,9 @@
 // 快速通知函数 - 直接在 Node.js 中使用
-async function notifyDesktop(type, payload) {
+async function notifyDesktop(type, payload, port) {
+    // 支持传入端口，或从环境变量/配置读取，默认 18788
+    const notifyPort = port || process.env.KKCLAW_NOTIFY_PORT || 18788;
     try {
-        const response = await fetch('http://127.0.0.1:18788/notify', {
+        const response = await fetch(`http://127.0.0.1:${notifyPort}/notify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

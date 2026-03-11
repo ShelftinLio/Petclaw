@@ -667,9 +667,10 @@ class SmartVoiceSystem {
                 text: message
             });
             
+            const notifyPort = (this.petConfig && this.petConfig.get('notifyPort')) || 18788;
             const options = {
-                hostname: 'localhost',
-                port: 18788,
+                hostname: '127.0.0.1',
+                port: notifyPort,
                 path: '/notify',
                 method: 'POST',
                 headers: {

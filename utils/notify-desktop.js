@@ -1,12 +1,13 @@
 // 桌面通知辅助工具 - 修复版
 const http = require('http');
 
-function notifyDesktop(type, payload) {
+function notifyDesktop(type, payload, port) {
+    const notifyPort = port || process.env.KKCLAW_NOTIFY_PORT || 18788;
     const data = JSON.stringify({ type, payload });
-    
+
     const options = {
         hostname: '127.0.0.1',
-        port: 18788,
+        port: notifyPort,
         path: '/notify',
         method: 'POST',
         headers: {

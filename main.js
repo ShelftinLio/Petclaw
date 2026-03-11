@@ -1628,6 +1628,67 @@ ipcMain.handle('take-screenshot', async (event, reason = 'manual') => {
   }
 });
 
+// 🖥️ 首次启动自动创建桌面快捷方式
+function createDesktopShortcut() {
+  const { colorLog } = require('./utils/color-log');
+  const { execFile } = require('child_process');
+
+  try {
+    const desktopPath = app.getPath('desktop');
+    const shortcutPath = path.join(desktopPath, 'Claw 桌面宠物.lnk');
+
+    // 已存在则跳过
+    if (fs.existsSync(shortcutPath)) {
+      colorLog('🖥️ 桌面快捷方式已存在，跳过创建');
+      petConfig.set('shortcutCreated', true);
+      return;
+    }
+
+    const projectPath = path.resolve(__dirname);
+    const iconPath = path.join(projectPath, 'icon.ico');
+    const electronExe = path.join(projectPath, 'node_modules', 'electron', 'dist', 'electron.exe');
+
+    function escPS(value) {
+      return value.replace(/'/g, "''");
+    }
+
+    const psScript = [
+      '$WshShell = New-Object -ComObject WScript.Shell',
+      `$Shortcut = $WshShell.CreateShortcut('${escPS(shortcutPath)}')`,
+      `if (Test-Path '${escPS(electronExe)}') {`,
+      `  $Shortcut.TargetPath = '${escPS(electronExe)}'`,
+      `  $Shortcut.Arguments = '${escPS(projectPath)}'`,
+      `} else {`,
+      "  $Shortcut.TargetPath = 'cmd.exe'",
+      `  $Shortcut.Arguments = '/c cd /d "${escPS(projectPath)}" && npm start'`,
+      `}`,
+      `$Shortcut.WorkingDirectory = '${escPS(projectPath)}'`,
+      "$Shortcut.Description = 'Claw 桌面宠物 - OpenClaw AI 助手'",
+      `$Shortcut.IconLocation = '${escPS(iconPath)}'`,
+      '$Shortcut.WindowStyle = 7',
+      '$Shortcut.Save()'
+    ].join('; ');
+
+    colorLog('🖥️ 正在创建桌面快捷方式...');
+
+    execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psScript], (err) => {
+      if (err) {
+        console.error('❌ 创建桌面快捷方式失败:', err.message);
+        return;
+      }
+      colorLog('🖥️ ✅ 桌面快捷方式创建成功!');
+      petConfig.set('shortcutCreated', true);
+
+      // 语音播报
+      if (voiceSystem) {
+        voiceSystem.speak('桌面快捷方式已创建');
+      }
+    });
+  } catch (err) {
+    console.error('❌ 创建桌面快捷方式异常:', err.message);
+  }
+}
+
 // 🔧 启动时修复配置：将 token_encrypted 恢复为 token（OpenClaw 不认识 token_encrypted）
 function fixTokenEncryptedField() {
   try {
@@ -1665,6 +1726,11 @@ app.whenReady().then(async () => {
 
   await createWindow();
   console.log('\x1b[32m  ✅ Main window created\x1b[0m');
+
+  // 🖥️ 首次启动自动创建桌面快捷方式
+  if (!petConfig.get('shortcutCreated') && process.platform === 'win32') {
+    createDesktopShortcut();
+  }
 
   // 🧙 首次运行自动弹出配置向导
   if (!petConfig.get('setupComplete')) {

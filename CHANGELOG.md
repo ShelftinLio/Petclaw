@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-03-12
+
+### Added
+- **color-log.js 彩色终端日志模块** — 中心化 ANSI 颜色常量 + `colorLog()` / `kvLog()` / `tagLog()` / `applyColors()` 自动高亮函数
+- **12+ 模块全面迁移** — main.js / service-manager / gateway-guardian / smart-voice / message-sync / pet-config / screenshot / log-rotation / performance-monitor / desktop-notifier 全部使用 color-log
+- **Gateway 日志高亮增强** — 模型名(cyan)、URL(green)、路径(dim)、渠道(magenta)、@botname(magenta)、key=value(yellow)、端口号(yellow)、协议(cyan)、错误(red)、成功/default(green)、警告(yellow)
+- **Gateway 智能自启动** — Guardian 连续 3 次检测不到 Gateway 后主动执行 `startGateway()`，不再永远等待
+- **Gateway 启动语音播报** — 启动中/成功/失败 分别语音通知
+- **首次启动自动创建桌面快捷方式** — PowerShell COM 创建 .lnk，语音播报确认
+- **二次确认防误判** — 与 ServiceManager 探活交叉校验，避免误触重启
+
+### Fixed
+- **Gateway 日志重复** — 根因：`log()` 方法在 stdout handler 后二次 `console.log()`；gateway-std* 服务跳过控制台输出
+- **语音双响** — 移除 messageSync 中重复的 `voiceSystem.speak()` 调用
+- **通知日志重复** — desktop-notifier 只打印通知类型，不重复打印 payload
+- **stderr 噪音** — 仅显示含 error/fatal/panic/exception 的真错误行
+- **空白归一化去重** — `\s+` → `' '` 归一化后 Set 去重
+
+### Removed
+- **DashScope TTS 引擎** — 语音降级链简化为 MiniMax → Edge TTS
+
 ## [3.1.2] - 2026-03-11
 
 ### Fixed
@@ -19,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - **命令注入修复** — 音频播放 (`_playAudioFile`, `_playAudio`) 由 `exec()` 字符串拼接改为 `execFile()`/`spawn()` + 参数数组
 - **Edge TTS 命令注入修复** — 文本通过临时文件 (`--text-file`) 传递，替代内联 `--text`
-- **Token 安全** — ��态配置读取替代模块级缓存；新增 `SecureStorage`、`LogSanitizer`、`IpcValidator` 模块
+- **Token 安全** — 动态配置读取替代模块级缓存；新增 `SecureStorage`、`LogSanitizer`、`IpcValidator` 模块
 
 ### Added
 - **模型热切换** — 状态机 + 策略模式 + 切换历史记录
@@ -33,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-02-22
 
 ### Added
-- **Setup Wizard 配置向导** — RPG 游戏风格，7 ���引导流程（Gateway → 模型 → 渠道 → TTS → 播报 → 显示 → 测试）
+- **Setup Wizard 配置向导** — RPG 游戏风格，7 步引导流程（Gateway → 模型 → 渠道 → TTS → 播报 → 显示 → 测试）
 - **一键音色克隆** — 上传 30 秒录音，自动调 MiniMax/CosyVoice API 创建专属音色
 - **人设定制系统** — 5 种预设风格（甜妹/专业/幽默/酷帅/自定义），一键生成 `AGENTS.md` + `SOUL.md` + `USER.md` + `HEARTBEAT.md`
 - **14 种情绪系统** — 在原 7 种基础上新增 sad、angry、fearful、calm、excited、love、focused，每种有专属 glow 光效
