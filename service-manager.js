@@ -277,10 +277,12 @@ class ServiceManager extends EventEmitter {
         this._startupState = { pid: child.pid, startedAt: Date.now(), exited: false };
 
         // 去重集合：Gateway 可能同时向 stdout/stderr 写相同内容
+        // 用纯文本（去掉 ANSI 颜色码）做比较，防止同内容不同颜色码绕过去重
         const _recentLines = new Set();
         const _dedupLine = (line) => {
-            if (_recentLines.has(line)) return false;
-            _recentLines.add(line);
+            const plain = line.replace(/\x1b\[[0-9;]*m/g, '');
+            if (_recentLines.has(plain)) return false;
+            _recentLines.add(plain);
             // 只保留最近 50 条用于去重
             if (_recentLines.size > 50) {
                 const first = _recentLines.values().next().value;
