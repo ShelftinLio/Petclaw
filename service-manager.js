@@ -280,7 +280,11 @@ class ServiceManager extends EventEmitter {
         // 用纯文本（去掉 ANSI 颜色码）做比较，防止同内容不同颜色码绕过去重
         const _recentLines = new Set();
         const _dedupLine = (line) => {
-            const plain = line.replace(/\x1b\[[0-9;]*m/g, '');
+            // 去掉 ANSI 颜色码 + 不可见字符 + 首尾空白，确保彻底去重
+            const plain = line.replace(/\x1b\[[0-9;]*m/g, '')
+                              .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+                              .trim();
+            if (!plain) return false; // 空行跳过
             if (_recentLines.has(plain)) return false;
             _recentLines.add(plain);
             // 只保留最近 50 条用于去重

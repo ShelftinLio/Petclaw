@@ -206,6 +206,12 @@ class GatewayGuardian extends EventEmitter {
     async _onUnhealthy() {
         this.consecutiveFailures++;
 
+        // Gateway 从未连接成功过 → 还在首次启动中，静默等待，不触发告警和重启
+        if (!this._hasBeenHealthy) {
+            this._scheduleNext(this.baseInterval);
+            return;
+        }
+
         if (this.consecutiveFailures < 3) {
             // 前两次失败：快速重试确认
             this._scheduleNext(this.baseInterval);

@@ -233,7 +233,7 @@ class SmartVoiceSystem {
         }
         
         // 3. 内容分类和优先级
-        if (text.match(/🔥|紧急|错误|崩溃|失败/)) {
+        if (text.match(/🔥|紧急|错误|崩溃|失败|异常|断开|断连|不健康/)) {
             analysis.priority = 'high';
             analysis.emotion = 'urgent';
             analysis.category = 'error';
