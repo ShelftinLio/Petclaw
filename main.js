@@ -1460,6 +1460,14 @@ function reopenSetupWizard() {
   setupWizardWindow.setMenuBarVisibility(false);
   setupWizardWindow.loadFile('setup-wizard.html');
   setupWizardWindow.on('closed', () => { setupWizardWindow = null; });
+
+  // 🐛 Debug: 监听渲染进程错误
+  setupWizardWindow.webContents.on('console-message', (e, level, msg, line, source) => {
+    if (level >= 2) console.log(`[Wizard:ERROR] ${msg} (line:${line})`);
+  });
+  setupWizardWindow.webContents.on('did-fail-load', (e, code, desc) => {
+    console.log(`[Wizard] did-fail-load: ${code} ${desc}`);
+  });
 }
 
 // 屏幕边界约束 — 防止球体跑到屏幕外

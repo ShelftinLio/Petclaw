@@ -218,7 +218,7 @@ class DependencyChecker {
     // 可选依赖
     if (!results.python.ok) warnings.push('Python not found — EdgeTTS / CosyVoice unavailable');
     if (!results.edgeTts.ok) warnings.push('edge-tts not installed — EdgeTTS fallback unavailable');
-    if (!results.sqlite3.ok) warnings.push('sqlite3 not found — local caching unavailable');
+    if (!results.sqlite3.ok) warnings.push('sqlite3 not found — CC-Switch provider sync unavailable');
 
     const coreReady = missing.length === 0;
     const overall = coreReady ? (warnings.length > 0 ? 'warning' : 'ok') : 'error';
