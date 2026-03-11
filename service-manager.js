@@ -279,33 +279,36 @@ class ServiceManager extends EventEmitter {
         this._startupState = { pid: child.pid, startedAt: Date.now(), exited: false };
 
         // 去重集合：Gateway 可能同时向 stdout/stderr 写相同内容
-        // 用纯文本（去掉所有 ANSI 转义序列）做比较，防止同内容不同颜色码绕过去重
         const _recentLines = new Set();
-        // 匹配所有 ANSI CSI 序列（SGR、清屏、光标移动等）+ OSC 序列
-        const _ansiRe = /\x1b\[[\d;]*[A-Za-z]|\x1b\][\s\S]*?(?:\x07|\x1b\\)|\x1b[()][A-Z0-9]|\x1b[=><78NOMDEHFcABCDZ ]/g;
         const _dedupLine = (line) => {
-            // 去掉所有 ANSI 转义 + 不可见 Unicode + 首尾空白，确保彻底去重
-            const plain = line.replace(_ansiRe, '')
-                              .replace(/[\u200B\u200C\u200D\uFEFF\u00A0]/g, '')
-                              .trim();
-            if (!plain) return false; // 空行跳过
+            // 彻底清理：所有 ANSI + 控制字符 + 不可见 Unicode + \r
+            const plain = line
+                .replace(/\x1b\[[\d;]*[A-Za-z]/g, '')
+                .replace(/\x1b\][\s\S]*?(?:\x07|\x1b\\)/g, '')
+                .replace(/\x1b[()][A-Z0-9]/g, '')
+                .replace(/\x1b[=><78NOMDEHFcZ]/g, '')
+                .replace(/[\u200B\u200C\u200D\uFEFF\u00A0]/g, '')
+                .replace(/\r/g, '')
+                .trim();
+            if (!plain) return false;
             if (_recentLines.has(plain)) return false;
             _recentLines.add(plain);
-            // 只保留最近 100 条用于去重（扩大窗口）
-            if (_recentLines.size > 100) {
+            if (_recentLines.size > 200) {
                 const first = _recentLines.values().next().value;
                 _recentLines.delete(first);
             }
             return true;
         };
 
+        // 统一的 ANSI 剥离函数
+        const _stripAnsi = (s) => s.replace(/\x1b\[[\d;]*[A-Za-z]/g, '').replace(/\r/g, '');
+
         child.stdout.on('data', (chunk) => {
             const text = chunk.toString();
             stdoutBuf = (stdoutBuf + text).slice(-2048);
-            // 实时转发 Gateway stdout 到 KKClaw 控制台，关键信息高亮
             text.split('\n').filter(l => l.trim()).forEach(line => {
                 if (_dedupLine(line)) {
-                    const plain = line.replace(_ansiRe, '');
+                    const plain = _stripAnsi(line);
                     let tag;
                     if (/error|Error|❌|FAIL|fatal/i.test(plain)) {
                         tag = '\x1b[31m[Gateway]\x1b[0m';
@@ -316,7 +319,6 @@ class ServiceManager extends EventEmitter {
                     } else {
                         tag = '\x1b[36m[Gateway]\x1b[0m';
                     }
-                    // 对正文内容进行关键词高亮
                     const highlighted = this._highlightKeywords(line);
                     console.log(`${tag} ${highlighted}`);
                     this.log('info', plain, 'gateway-stdout');
@@ -328,7 +330,7 @@ class ServiceManager extends EventEmitter {
             stderrBuf = (stderrBuf + text).slice(-2048);
             text.split('\n').filter(l => l.trim()).forEach(line => {
                 if (_dedupLine(line)) {
-                    const plain = line.replace(_ansiRe, '');
+                    const plain = _stripAnsi(line);
                     const highlighted = this._highlightKeywords(line);
                     console.log(`\x1b[33m[Gateway:WARN]\x1b[0m ${highlighted}`);
                     this.log('warn', plain, 'gateway-stderr');
@@ -430,11 +432,13 @@ class ServiceManager extends EventEmitter {
     // 高亮 Gateway 日志中的关键信息
     _highlightKeywords(line) {
         // 先去掉已有的 ANSI 颜色，统一重新上色
-        let text = line.replace(/\x1b\[[0-9;]*m/g, '');
+        let text = line.replace(/\x1b\[[\d;]*[A-Za-z]/g, '').replace(/\r/g, '');
 
-        // 模型名称 — 亮青色加粗（覆盖常见 LLM/TTS 模型名）
+        // ======== 1. 标识类（最高优先级）========
+
+        // 模型名称 — 亮青色加粗
         text = text.replace(
-            /\b(gpt-[a-z0-9._-]+|claude-[a-z0-9._-]+|deepseek-[a-z0-9._-]+|qwen[a-z0-9._-]*|gemini-[a-z0-9._-]+|speech-[a-z0-9._-]+|cosyvoice[a-z0-9._-]*|whisper[a-z0-9._-]*|dall-e[a-z0-9._-]*|moonshot[a-z0-9._-]*|glm[a-z0-9._-]*|ernie[a-z0-9._-]*|minimax[a-z0-9._-]*)\b/gi,
+            /\b(gpt-[a-z0-9._-]+|claude-[a-z0-9._-]+|deepseek-[a-z0-9._-]+|qwen[a-z0-9._-]*|gemini-[a-z0-9._-]+|speech-[a-z0-9._-]+|cosyvoice[a-z0-9._-]*|whisper[a-z0-9._-]*|dall-e[a-z0-9._-]*|moonshot[a-z0-9._-]*|glm[a-z0-9._-]*|ernie[a-z0-9._-]*|minimax[a-z0-9._-]*|o1-[a-z0-9._-]+|o3-[a-z0-9._-]+|o4-[a-z0-9._-]+)\b/gi,
             '\x1b[96m\x1b[1m$1\x1b[0m'
         );
 
@@ -444,34 +448,74 @@ class ServiceManager extends EventEmitter {
             '\x1b[92m\x1b[1m$1\x1b[0m'
         );
 
-        // 端口号（:数字） — 亮黄色
+        // 文件路径 (Windows) — 暗白
         text = text.replace(
-            /(:)(\d{4,5})\b/g,
-            ':' + '\x1b[93m\x1b[1m$2\x1b[0m'
+            /([A-Z]:\\[^\s,'"]+)/g,
+            '\x1b[2m\x1b[37m$1\x1b[0m'
         );
 
-        // 成功关键词 — 亮绿色
+        // ======== 2. 渠道/服务名 — 亮洋红色加粗 ========
         text = text.replace(
-            /\b(started|running|listening|connected|ready|loaded|success|enabled|OK)\b/gi,
+            /\b(feishu|telegram|discord|wecom|slack|webhook|lark)\b/gi,
+            '\x1b[95m\x1b[1m$1\x1b[0m'
+        );
+
+        // ======== 3. 状态关键词 ========
+
+        // 成功 — 亮绿色加粗 (包含 default, true)
+        text = text.replace(
+            /\b(started|running|listening|connected|ready|loaded|success|enabled|OK|done|completed|registered|configured|default|starting|active|open|accepted|resolved)\b/gi,
             '\x1b[92m\x1b[1m$1\x1b[0m'
         );
 
-        // 失败/错误关键词 — 亮红色
+        // 失败/错误 — 亮红色加粗
         text = text.replace(
-            /\b(error|failed|failure|crashed|refused|timeout|ECONNREFUSED|EADDRINUSE|EACCES|ENOSPC)\b/gi,
+            /\b(error|failed|failure|crashed|refused|timeout|ECONNREFUSED|EADDRINUSE|EACCES|ENOSPC|rejected|denied|invalid|fatal|FAIL|disabled|missing|closed|aborted|killed)\b/gi,
             '\x1b[91m\x1b[1m$1\x1b[0m'
         );
 
-        // 警告关键词 — 亮黄色
+        // 警告 — 亮黄色
         text = text.replace(
-            /\b(warning|deprecated|mismatch|retry|retrying|slow)\b/gi,
+            /\b(warning|deprecated|mismatch|retry|retrying|slow|limits?|exceeded|throttle|unavailable)\b/gi,
             '\x1b[93m$1\x1b[0m'
         );
 
-        // 渠道/服务名 — 亮洋���色
+        // ======== 4. 协议与技术名词 — 亮青色加粗 ========
         text = text.replace(
-            /\b(feishu|telegram|discord|wecom|slack|webhook|websocket|gateway)\b/gi,
-            '\x1b[95m$1\x1b[0m'
+            /\b(WebSocket|HTTP|HTTPS|TCP|UDP|gRPC|REST|SSE|JSON|XML|OAuth|JWT|SSL|TLS|DNS|ws)\b/g,
+            '\x1b[96m\x1b[1m$1\x1b[0m'
+        );
+
+        // ======== 5. 配置值高亮 ========
+
+        // @用户名/bot名 — 亮洋红色加粗
+        text = text.replace(
+            /(@[\w][\w.-]+)/g,
+            '\x1b[95m\x1b[1m$1\x1b[0m'
+        );
+
+        // key=value 配置对 — value 亮黄色加粗
+        text = text.replace(
+            /\b(\w+)=(true|false|[\d.]+|[\w.-]+)\b/g,
+            (_, key, val) => `${key}=\x1b[93m\x1b[1m${val}\x1b[0m`
+        );
+
+        // 端口号（:数字） — 亮黄色
+        text = text.replace(
+            /(:)(\d{4,5})\b/g,
+            ':\x1b[93m\x1b[1m$2\x1b[0m'
+        );
+
+        // 数字 + 单位/名词 — 数字亮黄色
+        text = text.replace(
+            /\b(\d+)\s+(commands?|providers?|models?|bots?|channels?|plugins?|messages?|requests?|connections?|ms|bytes?)\b/g,
+            '\x1b[93m\x1b[1m$1\x1b[0m $2'
+        );
+
+        // provider / client / dispatcher 等角色词 — 亮白
+        text = text.replace(
+            /\b(provider|client|dispatcher|handler|middleware|plugin|adapter|bridge|worker|listener|subscriber)\b/gi,
+            '\x1b[97m$1\x1b[0m'
         );
 
         return text;
