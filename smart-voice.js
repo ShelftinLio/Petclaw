@@ -1,10 +1,9 @@
-// 🎙️ 智能语音播报系统 - 增强版（支持 MiniMax Speech / DashScope CosyVoice）
+// 🎙️ 智能语音播报系统 - 增强版（支持 MiniMax Speech / Edge TTS）
 const { execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const execFileAsync = promisify(execFile);
 const path = require('path');
 const fs = require('fs').promises;
-const DashScopeTTS = require('./voice/dashscope-tts');
 const MiniMaxTTS = require('./voice/minimax-tts');
 
 class SmartVoiceSystem {
@@ -22,21 +21,15 @@ class SmartVoiceSystem {
         // 🎭 情境模式
         this.contextMode = 'normal';  // normal, excited, calm, urgent
         
-        // 🎙️ TTS 引擎选择: 'minimax' | 'dashscope' | 'edge'
+        // 🎙️ TTS 引擎选择: 'minimax' | 'edge'
         this.ttsEngine = 'minimax';  // 默认使用 MiniMax Speech 2.5
-        
+
         // 🔑 MiniMax 配置
         this.minimax = null;
         this.minimaxVoiceId = 'xiaotuantuan_minimax';  // 🎤 小团团克隆音色 (KK的默认)
         this.minimaxModel = 'speech-2.5-turbo-preview';
         this.minimaxEmotion = 'happy';  // 默认开心
         this.initMiniMax();
-        
-        // 🔑 DashScope 配置 (备用)
-        this.dashscope = null;
-        this.dashscopeVoice = 'cosyvoice-v3-plus-tuantuan-28c7ca7e915943a081ab7ece12916d28';  // 🎤 小团团克隆音色
-        this.dashscopeModel = 'cosyvoice-v3-plus';  // v3-plus 模型（声音复刻最佳）
-        this.initDashScope();
         
         // 📊 统计数据
         this.stats = {
@@ -75,18 +68,20 @@ class SmartVoiceSystem {
                     emotion: config.minimax?.emotion || this.minimaxEmotion,
                     tempDir: this.tempDir
                 });
-                console.log('[Voice] 🎙️ MiniMax Speech 引擎已初始化 (小团团克隆音色 + 情感控制)');
+                console.log('[Voice] 🎙️ MiniMax Speech 引擎已初始化');
+                console.log(`[Voice]    模型: ${config.minimax?.model || this.minimaxModel}`);
+                console.log(`[Voice]    音色: ${config.minimax?.voiceId || this.minimaxVoiceId}`);
+                console.log(`[Voice]    情绪: ${config.minimax?.emotion || this.minimaxEmotion} | 语速: ${config.minimax?.speed || 1.1}x | 音量: ${config.minimax?.vol || 3.0}`);
             } else {
-                console.log('[Voice] ⚠️ MiniMax API Key 未设置');
+                console.log('[Voice] ⚠️ MiniMax API Key 未设置，回退到 Edge TTS');
                 if (this.ttsEngine === 'minimax') {
-                    this.ttsEngine = 'dashscope';
-                    console.log('[Voice] 回退到 DashScope');
+                    this.ttsEngine = 'edge';
                 }
             }
         } catch (err) {
             console.error('[Voice] ❌ MiniMax 初始化失败:', err.message);
             if (this.ttsEngine === 'minimax') {
-                this.ttsEngine = 'dashscope';
+                this.ttsEngine = 'edge';
             }
         }
     }
@@ -104,15 +99,23 @@ class SmartVoiceSystem {
                 await execFileAsync('paplay', [filePath], { timeout: 120000 });
             }
         } else {
-            // Windows: 用 spawn 启动 PowerShell，参数数组传递避免注入
+            // Windows: 用 PowerShell MediaPlayer，增加超时保护和错误处理
             const psScript = `
                 Add-Type -AssemblyName presentationCore
                 $player = New-Object System.Windows.Media.MediaPlayer
                 $player.Open([uri]$args[0])
                 $player.Play()
-                while($player.NaturalDuration.HasTimeSpan -eq $false) { Start-Sleep -Milliseconds 100 }
-                $duration = $player.NaturalDuration.TimeSpan.TotalSeconds
-                Start-Sleep -Seconds $duration
+                $wait = 0
+                while($player.NaturalDuration.HasTimeSpan -eq $false -and $wait -lt 50) {
+                    Start-Sleep -Milliseconds 100
+                    $wait++
+                }
+                if($player.NaturalDuration.HasTimeSpan) {
+                    $duration = $player.NaturalDuration.TimeSpan.TotalSeconds
+                    Start-Sleep -Seconds ([Math]::Min($duration + 0.5, 60))
+                } else {
+                    Start-Sleep -Seconds 3
+                }
                 $player.Close()
             `;
             await new Promise((resolve, reject) => {
@@ -120,15 +123,21 @@ class SmartVoiceSystem {
                     '-NoProfile', '-NonInteractive', '-Command', psScript, filePath
                 ], { windowsHide: true, stdio: 'ignore' });
                 this._currentProcess = child;
-                child.on('close', (code) => {
+                const timer = setTimeout(() => {
+                    child.kill();
                     this._currentProcess = null;
-                    code === 0 ? resolve() : reject(new Error(`播放退出码: ${code}`));
+                    resolve(); // 超时不报错，静默完成
+                }, 30000); // 30秒播放超时（比之前120秒合理得多）
+                child.on('close', (code) => {
+                    clearTimeout(timer);
+                    this._currentProcess = null;
+                    resolve(); // 不管退出码都resolve，避免播放问题阻断后续逻辑
                 });
                 child.on('error', (err) => {
+                    clearTimeout(timer);
                     this._currentProcess = null;
                     reject(err);
                 });
-                setTimeout(() => { child.kill(); reject(new Error('播放超时')); }, 120000);
             });
         }
     }
@@ -140,7 +149,6 @@ class SmartVoiceSystem {
         if (this.petConfig) {
             return {
                 minimax: this.petConfig.get('minimax') || {},
-                dashscope: this.petConfig.get('dashscope') || {},
                 ttsEngine: this.petConfig.get('ttsEngine'),
                 voiceEnabled: this.petConfig.get('voiceEnabled'),
             };
@@ -157,54 +165,6 @@ class SmartVoiceSystem {
             console.warn('[SmartVoice] 读取配置失败:', err?.message || err);
         }
         return {};
-    }
-
-    /**
-     * 🔑 初始化 DashScope TTS
-     */
-    initDashScope() {
-        try {
-            // 从环境变量或配置文件读取 API Key
-            const apiKey = process.env.DASHSCOPE_API_KEY || this.loadApiKeyFromConfig();
-            if (apiKey) {
-                this.dashscope = new DashScopeTTS({
-                    apiKey: apiKey,
-                    voice: this.dashscopeVoice,
-                    model: this.dashscopeModel || 'cosyvoice-v3-plus',
-                    tempDir: this.tempDir
-                });
-                console.log('[Voice] 🎙️ DashScope CosyVoice 引擎已初始化 (小团团音色)');
-            } else {
-                console.log('[Voice] ⚠️ DashScope API Key 未设置，回退到 Edge TTS');
-                this.ttsEngine = 'edge';
-            }
-        } catch (err) {
-            console.error('[Voice] ❌ DashScope 初始化失败:', err.message);
-            this.ttsEngine = 'edge';
-        }
-    }
-
-    /**
-     * 📄 从配置加载 DashScope API Key
-     */
-    loadApiKeyFromConfig() {
-        if (this.petConfig) {
-            const dashscope = this.petConfig.get('dashscope') || {};
-            return dashscope.apiKey || '';
-        }
-        // Fallback: 直接读文件（无法解密）
-        try {
-            const configPath = path.join(__dirname, 'pet-config.json');
-            const fsSync = require('fs');
-            const SafeConfigLoader = require('./utils/safe-config-loader');
-            if (fsSync.existsSync(configPath)) {
-                const config = SafeConfigLoader.load(configPath, {});
-                return config.dashscope?.apiKey || config.dashscopeApiKey || '';
-            }
-        } catch (err) {
-            console.warn('[SmartVoice] 获取 DashScope API Key 失败:', err?.message || err);
-        }
-        return '';
     }
 
     /**
@@ -498,7 +458,7 @@ class SmartVoiceSystem {
                 try {
                     // 优先用 analysis 传入的 emotion，否则自动检测
                     const emotion = (['happy','sad','angry','fearful','disgusted','surprised','calm'].includes(analysis.emotion))
-                        ? analysis.emotion 
+                        ? analysis.emotion
                         : MiniMaxTTS.detectEmotion(cleanText);
                     console.log(`[Voice] 🎭 TTS情绪: ${emotion} (来源: ${analysis.emotion === emotion ? '外部指定' : '自动检测'})`);
                     const audioFile = await this.minimax.synthesize(cleanText, {
@@ -506,46 +466,14 @@ class SmartVoiceSystem {
                         emotion: emotion,
                         outputFile: outputFile
                     });
-                    
-                    await this._playAudioFile(audioFile);
-                    
-                } catch (minimaxErr) {
-                    console.error('[Voice] ❌ MiniMax 失败，回退到 DashScope:', minimaxErr.message);
-                    // 🚨 发送降级通知
-                    this.notifyDegradation('minimax', 'dashscope', minimaxErr.message);
-                    // 回退到 DashScope
-                    if (this.dashscope) {
-                        try {
-                            const audioFile = await this.dashscope.synthesize(cleanText, {
-                                voice: this.dashscopeVoice,
-                                outputFile: outputFile
-                            });
-                            await this._playAudioFile(audioFile);
-                        } catch (dashErr) {
-                            console.error('[Voice] ❌ DashScope 也失败，回退到 Edge TTS:', dashErr.message);
-                            // 🚨 发送二级降级通知
-                            this.notifyDegradation('dashscope', 'edge', dashErr.message);
-                            await this.speakWithEdgeTTS(cleanText, voiceConfig, outputFile);
-                        }
-                    } else {
-                        await this.speakWithEdgeTTS(cleanText, voiceConfig, outputFile);
-                    }
-                }
-            } else if (this.ttsEngine === 'dashscope' && this.dashscope) {
-                // DashScope CosyVoice
-                try {
-                    const audioFile = await this.dashscope.synthesize(cleanText, {
-                        voice: this.dashscopeVoice,
-                        outputFile: outputFile
-                    });
-                    
+
                     await this._playAudioFile(audioFile);
 
-                } catch (dashErr) {
-                    console.error('[Voice] ❌ DashScope 失败，回退到 Edge TTS:', dashErr.message);
+                } catch (minimaxErr) {
+                    console.error('[Voice] ❌ MiniMax 失败，回退到 Edge TTS:', minimaxErr.message);
                     // 🚨 发送降级通知
-                    this.notifyDegradation('dashscope', 'edge', dashErr.message);
-                    // 回退到 Edge TTS
+                    this.notifyDegradation('minimax', 'edge', minimaxErr.message);
+                    // 直接回退到 Edge TTS
                     await this.speakWithEdgeTTS(cleanText, voiceConfig, outputFile);
                 }
             } else {
@@ -699,24 +627,17 @@ class SmartVoiceSystem {
      * 🎙️ 切换 TTS 引擎
      */
     setEngine(engine) {
-        if (engine === 'dashscope' && !this.dashscope) {
-            console.log('[Voice] ⚠️ DashScope 未初始化，无法切换');
+        if (!['minimax', 'edge'].includes(engine)) {
+            console.log(`[Voice] ⚠️ 不支持的引擎: ${engine}，可选: minimax, edge`);
+            return false;
+        }
+        if (engine === 'minimax' && !this.minimax) {
+            console.log('[Voice] ⚠️ MiniMax 未初始化，无法切换');
             return false;
         }
         this.ttsEngine = engine;
         console.log(`[Voice] 🎙️ TTS 引擎切换为: ${engine}`);
         return true;
-    }
-
-    /**
-     * 🎭 设置 DashScope 音色
-     */
-    setDashScopeVoice(voice) {
-        this.dashscopeVoice = voice;
-        if (this.dashscope) {
-            this.dashscope.voice = voice;
-        }
-        console.log(`[Voice] 🎭 DashScope 音色切换为: ${voice}`);
     }
 
     /**
