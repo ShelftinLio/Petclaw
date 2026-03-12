@@ -889,6 +889,7 @@
         .t-magenta { color: #d2a8ff; }
         .t-dim { color: #484f58; }
         .t-white { color: #e6edf3; }
+        .t-primary { color: #FF6B4A; }
         @keyframes fadeInLine { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
         /* ===== Gateway Status Flow ===== */
@@ -1172,6 +1173,40 @@
         </div>
     </div>
 
+    <!-- Startup Terminal Showcase -->
+    <section id="startup-demo" style="padding: 5rem 2rem;">
+        <div style="max-width:1100px; margin:0 auto;">
+            <div class="section-header reveal">
+                <div class="section-label" style="background: rgba(255,107,74,0.15); color: var(--primary);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    <span class="en-inline">STARTUP EXPERIENCE</span><span class="zh-inline">启动体验</span>
+                </div>
+                <h2 class="section-title en">Boot Up in Style</h2>
+                <h2 class="section-title zh">酷炫的启动画面</h2>
+                <p class="section-subtitle en">Fire-sweep animation, ASCII lobster, system diagnostics — all in your terminal</p>
+                <p class="section-subtitle zh">火焰扫描动画、ASCII 龙虾、系统诊断——全在你的终端里</p>
+            </div>
+            <div class="reveal" style="max-width: 680px; margin: 0 auto;">
+                <div class="terminal-window" style="box-shadow: 0 25px 80px rgba(255,107,74,0.12), 0 20px 60px rgba(0,0,0,0.4);">
+                    <div class="terminal-bar">
+                        <div class="terminal-dot red"></div>
+                        <div class="terminal-dot yellow"></div>
+                        <div class="terminal-dot green"></div>
+                        <span class="terminal-title">C:\WINDOWS\system32\cmd.exe — KKClaw Desktop Pet</span>
+                    </div>
+                    <div class="terminal-body" id="startup-terminal" style="min-height: 420px; max-height: 500px; font-size: 0.72rem; line-height: 1.4; padding: 1.5rem; background: #0c0c0c;">
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="playStartupDemo()" id="startup-play-btn" style="font-size: 0.9rem;">
+                        <span class="en-inline">▶ Replay Startup Animation</span>
+                        <span class="zh-inline">▶ 重播启动动画</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- What's New in v3.5.2 -->
     <section id="whats-new" style="padding: 5rem 2rem; background: linear-gradient(180deg, rgba(255,107,74,0.04) 0%, transparent 100%);">
         <div style="max-width:1100px; margin:0 auto;">
@@ -1395,11 +1430,53 @@
                 </div>
                 <h2 class="section-title en">Try the KKClaw 新手引导</h2>
                 <h2 class="section-title zh">体验 KKClaw 新手引导</h2>
-                <p class="section-subtitle en">Click through all 7 steps — Gateway, Model, Channels, TTS, Voice, Display, and Full Test.</p>
-                <p class="section-subtitle zh">点击体验全部 7 个步骤 — Gateway、模型、渠道、TTS、语音、显示、全链路测试。</p>
+                <p class="section-subtitle en">Click through all 8 steps — Smart Env Check, Gateway, Model, Channels, TTS, Voice, Display, and Full Test.</p>
+                <p class="section-subtitle zh">点击体验全部 8 个步骤 — 智能环境检测、Gateway、模型、渠道、TTS、语音、显示、全链路测试。</p>
             </div>
-            <div class="reveal" style="margin-top: 2.5rem; display: flex; justify-content: center;">
-                <div style="width: 480px; height: 640px; border-radius: 12px; overflow: hidden; border: 2px solid var(--card-border); box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: relative;">
+            <div class="reveal" style="margin-top: 2.5rem; display: flex; gap: 2.5rem; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
+                <!-- Wizard Feature Highlights -->
+                <div style="flex: 0 0 280px; display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.2rem; border-left: 3px solid var(--accent-green);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                            <span style="font-size: 1.2rem;">⚡</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="en">One-Click Install</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="zh">一键安装依赖</span>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="en">Auto-detects missing deps (edge-tts, sqlite3, node_modules) and installs with real-time progress.</p>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="zh">自动检测缺失依赖并一键安装，每个依赖实时显示安装进度。</p>
+                        <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: rgba(52,211,153,0.12); color: var(--accent-green); font-weight: 600;">NEW in v3.5.2</span>
+                    </div>
+                    <div style="background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.2rem; border-left: 3px solid var(--primary);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                            <span style="font-size: 1.2rem;">🐛</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="en">No More White Screens</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="zh">出错不白屏</span>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="en">Error visualization shows actual error message instead of blank page. Renderer errors forwarded to main process.</p>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="zh">出错时显示具体报错信息，渲染进程错误自动转发到主进程日志。</p>
+                        <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.68rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: rgba(255,107,74,0.12); color: var(--primary); font-weight: 600;">FIXED in v3.5.2</span>
+                    </div>
+                    <div style="background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.2rem; border-left: 3px solid var(--accent-blue);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                            <span style="font-size: 1.2rem;">🔍</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="en">Smart Env Detection</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="zh">智能环境检测</span>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="en">10-item auto-diagnostics: Gateway, TTS, model, port, health, cache, lyrics, logs, and more.</p>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="zh">10项全自动诊断：Gateway、TTS、模型、端口、健康度、缓存、歌词、日志等。</p>
+                    </div>
+                    <div style="background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.2rem; border-left: 3px solid var(--accent-purple);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                            <span style="font-size: 1.2rem;">🎭</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="en">RPG-Style Wizard</span>
+                            <span style="font-weight: 600; font-size: 0.92rem;" class="zh">RPG 风格向导</span>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="en">7-step guided setup with game aesthetic: Gateway → Model → Channels → TTS → Voice → Display → Test.</p>
+                        <p style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;" class="zh">7步引导流程，游戏化视觉：Gateway → 模型 → 渠道 → TTS → 语音 → 显示 → 测试。</p>
+                    </div>
+                </div>
+                <!-- Wizard iframe -->
+                <div style="width: 480px; height: 640px; border-radius: 12px; overflow: hidden; border: 2px solid var(--card-border); box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: relative; flex-shrink: 0;">
                     <iframe src="demo.html" style="width: 100%; height: 100%; border: none;"></iframe>
                 </div>
             </div>
@@ -1558,6 +1635,39 @@
                             <li class="zh">✓ <strong style="color: var(--primary);">约3秒</strong> ⚡</li>
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            <!-- Interactive Provider Panel -->
+            <div class="reveal" style="margin-top: 3rem;">
+                <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; color: var(--text);">
+                    <span class="en">Interactive Provider Panel</span>
+                    <span class="zh">交互式 Provider 面板</span>
+                </h4>
+                <p style="text-align: center; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 2rem;">
+                    <span class="en">Click any provider card to switch — just like in the real app</span>
+                    <span class="zh">点击任意 Provider 卡片即可切换——与应用内体验一致</span>
+                </p>
+                <!-- Currently Using Bar -->
+                <div id="switch-status-bar" style="background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.3); border-radius: 10px; padding: 0.8rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <span style="font-size: 0.78rem; color: var(--text-dim);"><span class="en-inline">Currently Using</span><span class="zh-inline">当前使用</span></span>
+                        <span id="switch-current-model" style="font-weight: 700; color: #D97757; font-size: 1rem;">Claude Opus 4.6</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span id="switch-current-latency" style="font-size: 0.82rem; color: #D97757; font-weight: 600;">280ms</span>
+                        <span style="font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: rgba(52,211,153,0.15); color: var(--accent-green);">● Connected</span>
+                    </div>
+                </div>
+                <!-- Provider Cards Grid -->
+                <div id="provider-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem;"></div>
+                <!-- Switch History Timeline -->
+                <div style="margin-top: 2rem; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem;">
+                    <h5 style="font-size: 0.88rem; color: var(--text-dim); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span class="en-inline">Switch History</span><span class="zh-inline">切换历史</span>
+                    </h5>
+                    <div id="switch-history" style="font-family: 'SF Mono', monospace; font-size: 0.78rem; color: var(--text-dim); line-height: 2;"></div>
                 </div>
             </div>
 
@@ -2307,6 +2417,271 @@ node kkclaw-hotswitch.js --restart</code></pre>
         }, { threshold: 0.5 });
         const latencySection = document.getElementById('latency-demo');
         if (latencySection) latencyObserver.observe(latencySection);
+
+        // ===== Startup Terminal ASCII Art Demo =====
+        let startupPlaying = false;
+        function playStartupDemo() {
+            if (startupPlaying) return;
+            startupPlaying = true;
+            const btn = document.getElementById('startup-play-btn');
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+            const terminal = document.getElementById('startup-terminal');
+            terminal.innerHTML = '';
+
+            // ASCII Lobster Ball (eyes closed → open)
+            const lobsterClosed = [
+                '            ████░░░░░░░░░░████            ',
+                '          ██░░░░░░████░░░░░░░░██          ',
+                '        ██░░░░████████████░░░░░░██        ',
+                '       █░░░░██████████████████░░░░█       ',
+                '      █░░░████████████████████████░░░█    ',
+                '     █░░░████████████████████████████░░░█ ',
+                '     █░░████████████████████████████████░░█',
+                '     █░░█████��██████████████████████████░░█',
+                '      █░░░████████████████████████████░░░█',
+                '       █░░░░██████████████████████░░░░█   ',
+                '        ██░░░░████████████████░░░░░░██    ',
+                '          ██░░░░░░████░░░░░░░░░░██        ',
+                '            ████░░░░░░░░░░████            ',
+            ];
+            const lobsterOpen = [
+                '            ████░░░░░░░░░░████            ',
+                '          ██░░░░░░████░░░░░░░░██          ',
+                '        ██░░░░████████████░░░░░░██        ',
+                '       █░░░░██████████████████░░░░█       ',
+                '      █░░░████████████████████████░░░█    ',
+                '     █░░░████████████████████████████░░░█ ',
+                '     █░░████████ ○ ████████ ○ ████████░░█',
+                '     █░░████████████████████████████████░░█',
+                '      █░░░████████████████████████████░░░█',
+                '       █░░░░██████████████████████░░░░█   ',
+                '        ██░░░░████████████████░░░░░░██    ',
+                '          ██░░░░░░████░░░░░░░░░░██        ',
+                '            ████░░░░░░░░░░████            ',
+            ];
+            const titleArt = [
+                ' ██╗  ██╗██╗  ██╗ ██████╗██╗      █████╗ ██╗    ██╗',
+                ' ██║ ██╔╝██║ ██╔╝██╔════╝██║     ██╔══██╗██║    ██║',
+                ' █████╔╝ █████╔╝ ██║     ██║     ███████║██║ █╗ ██║',
+                ' ██╔═██╗ ██╔═██╗ ██║     ██║     ██╔══██║██║███╗██║',
+                ' ██║  ██╗██║  ██╗╚██████╗███████╗██║  ██║╚███╔███╔╝',
+                ' ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ ',
+            ];
+
+            const lines = [];
+            let d = 0;
+
+            // Phase 1: Fire sweep — reveal lobster line by line
+            lobsterClosed.forEach((line, i) => {
+                lines.push({ delay: d, html: `<span class="t-red">${escHtml(line)}</span>`, phase: 'sweep' });
+                d += 80;
+            });
+            d += 300;
+
+            // Phase 2: Flash — blink to open eyes
+            lines.push({ delay: d, action: 'clear-logo' });
+            d += 150;
+            lobsterOpen.forEach((line, i) => {
+                lines.push({ delay: d, html: `<span class="t-primary">${escHtml(line)}</span>`, phase: 'open' });
+                d += 30;
+            });
+            d += 200;
+
+            // Phase 3: Title
+            lines.push({ delay: d, html: '' }); // blank line
+            d += 100;
+            titleArt.forEach((line, i) => {
+                lines.push({ delay: d, html: `<span class="t-yellow">${escHtml(line)}</span>` });
+                d += 60;
+            });
+            d += 300;
+
+            // Phase 4: System info
+            const sysLines = [
+                '',
+                `<span class="t-dim">══════════════════════════════════════════════════════</span>`,
+                `<span class="t-cyan"> ✦ Desktop Visualization Companion for OpenClaw</span>`,
+                `<span class="t-dim">══════════════════════════════════════════════════════</span>`,
+                '',
+                `<span class="t-dim">  Platform :</span> <span class="t-white">Windows x86_64</span>`,
+                `<span class="t-dim">  Node     :</span> <span class="t-white">v20.11.1</span>   <span class="t-dim">Electron :</span> <span class="t-white">28.3.3</span>`,
+                `<span class="t-dim">  Version  :</span> <span class="t-green">v3.5.2</span>`,
+                `<span class="t-dim">  CPU      :</span> <span class="t-white">13th Gen Intel Core i5 (12 cores)</span>`,
+                `<span class="t-dim">  Memory   :</span> <span class="t-white">15.7 GB</span>`,
+                '',
+                `<span class="t-dim">  Modules  :</span> <span class="t-green">✓ Gateway</span>  <span class="t-green">✓ TTS</span>  <span class="t-green">✓ Voice</span>  <span class="t-green">✓ Pet</span>  <span class="t-green">✓ Sync</span>`,
+                `<span class="t-dim">  Guardian :</span> <span class="t-green">● Active</span>  <span class="t-dim">|</span>  <span class="t-dim">Health :</span> <span class="t-green">98/100</span>`,
+                '',
+                `<span class="t-dim">══════════════════════════════════════════════════════</span>`,
+                `<span class="t-green"> 🦞 Ready!  All systems nominal.</span>`,
+            ];
+            sysLines.forEach(line => {
+                lines.push({ delay: d, html: line });
+                d += 60;
+            });
+
+            // Execute timeline
+            const totalDuration = d + 500;
+            lines.forEach(l => {
+                setTimeout(() => {
+                    if (l.action === 'clear-logo') {
+                        // Remove the closed-eyes logo lines (first 13 divs)
+                        const children = Array.from(terminal.children);
+                        children.slice(0, 13).forEach(el => el.remove());
+                        return;
+                    }
+                    const div = document.createElement('div');
+                    div.className = 'terminal-line';
+                    div.style.whiteSpace = 'pre';
+                    div.innerHTML = l.html;
+                    terminal.appendChild(div);
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, l.delay);
+            });
+
+            setTimeout(() => {
+                startupPlaying = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = '';
+            }, totalDuration);
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        // Auto-play startup demo when section becomes visible
+        const startupSection = document.getElementById('startup-demo');
+        if (startupSection) {
+            const startupObs = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (e.isIntersecting && !e.target._started) {
+                        e.target._started = true;
+                        setTimeout(playStartupDemo, 400);
+                    }
+                });
+            }, { threshold: 0.3 });
+            startupObs.observe(startupSection);
+        }
+
+        // ===== KKClaw Switch Interactive Provider Panel =====
+        const PROVIDERS = [
+            { id: 'anthropic', name: 'Anthropic', icon: '✦', color: '#D97757', model: 'Claude Opus 4.6', latency: 280, api: 'anthropic-messages', status: 'healthy' },
+            { id: 'openai', name: 'OpenAI', icon: '◎', color: '#10A37F', model: 'GPT-5.4', latency: 310, api: 'openai-completions', status: 'healthy' },
+            { id: 'google', name: 'Google AI', icon: '✦', color: '#4285F4', model: 'Gemini 3.1 Pro', latency: 250, api: 'openai-completions', status: 'healthy' },
+            { id: 'deepseek', name: 'DeepSeek', icon: '🔮', color: '#4D6BFE', model: 'DeepSeek-R1', latency: 190, api: 'openai-completions', status: 'healthy' },
+            { id: 'minimax', name: 'MiniMax', icon: '🎵', color: '#FF6B9D', model: 'MiniMax-01', latency: 340, api: 'openai-completions', status: 'degraded' },
+            { id: 'zhipu', name: '智谱 AI', icon: '🧠', color: '#7C3AED', model: 'GLM-4-Plus', latency: 160, api: 'openai-completions', status: 'healthy' },
+        ];
+
+        let currentProvider = PROVIDERS[0];
+        const switchHistoryLog = [];
+
+        function renderProviderCards() {
+            const container = document.getElementById('provider-cards');
+            if (!container) return;
+            container.innerHTML = PROVIDERS.map(p => `
+                <div id="pcard-${p.id}" onclick="switchToProvider('${p.id}')"
+                     style="background: var(--card); border: 1px solid ${p.id === currentProvider.id ? p.color : 'var(--card-border)'};
+                            border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: all 0.3s ease;
+                            position: relative; overflow: hidden;
+                            ${p.id === currentProvider.id ? 'box-shadow: 0 0 20px ' + p.color + '33;' : ''}"
+                     onmouseenter="this.style.borderColor='${p.color}'; this.style.transform='translateY(-2px)'"
+                     onmouseleave="this.style.borderColor='${p.id === currentProvider.id ? p.color : 'var(--card-border)'}'; this.style.transform=''">
+                    ${p.id === currentProvider.id ? '<div style="position:absolute;top:0;right:0;background:' + p.color + ';color:#fff;font-size:0.65rem;padding:0.15rem 0.6rem;border-radius:0 0 0 8px;font-weight:700;">ACTIVE</div>' : ''}
+                    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
+                        <span style="width:32px;height:32px;border-radius:8px;background:${p.color}22;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">${p.icon}</span>
+                        <div>
+                            <div style="font-weight:700;font-size:0.95rem;">${p.name}</div>
+                            <div style="font-size:0.75rem;color:var(--text-dim);">${p.model}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem;">
+                        <span style="font-size:0.75rem;color:var(--text-dim);">${p.api}</span>
+                        <div style="display:flex;align-items:center;gap:0.4rem;">
+                            <span style="font-size:0.78rem;font-weight:600;color:${p.latency < 200 ? 'var(--accent-green)' : p.latency < 300 ? 'var(--accent-yellow)' : 'var(--primary)'};">${p.latency}ms</span>
+                            <span style="width:6px;height:6px;border-radius:50%;background:${p.status === 'healthy' ? 'var(--accent-green)' : 'var(--accent-yellow)'};"></span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchToProvider(id) {
+            const newProvider = PROVIDERS.find(p => p.id === id);
+            if (!newProvider || newProvider.id === currentProvider.id) return;
+
+            const oldProvider = currentProvider;
+            currentProvider = newProvider;
+
+            // Update status bar
+            const modelEl = document.getElementById('switch-current-model');
+            const latencyEl = document.getElementById('switch-current-latency');
+            if (modelEl) {
+                modelEl.textContent = newProvider.model;
+                modelEl.style.color = newProvider.color;
+            }
+            if (latencyEl) {
+                latencyEl.textContent = newProvider.latency + 'ms';
+                latencyEl.style.color = newProvider.color;
+            }
+
+            // Flash animation on status bar
+            const bar = document.getElementById('switch-status-bar');
+            if (bar) {
+                bar.style.borderColor = newProvider.color + '66';
+                bar.style.background = newProvider.color + '11';
+                setTimeout(() => {
+                    bar.style.borderColor = 'rgba(52,211,153,0.3)';
+                    bar.style.background = 'rgba(52,211,153,0.08)';
+                }, 1500);
+            }
+
+            // Add to history
+            const now = new Date();
+            const timeStr = now.toTimeString().slice(0, 8);
+            switchHistoryLog.unshift({
+                time: timeStr,
+                from: oldProvider,
+                to: newProvider
+            });
+            if (switchHistoryLog.length > 6) switchHistoryLog.pop();
+            renderSwitchHistory();
+
+            // Re-render cards
+            renderProviderCards();
+        }
+
+        function renderSwitchHistory() {
+            const container = document.getElementById('switch-history');
+            if (!container) return;
+            if (switchHistoryLog.length === 0) {
+                container.innerHTML = '<span style="color:var(--text-muted);font-style:italic;">No switches yet — click a provider card above</span>';
+                return;
+            }
+            container.innerHTML = switchHistoryLog.map(h => `
+                <div style="display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0;border-bottom:1px solid var(--card-border);">
+                    <span style="color:var(--text-muted);min-width:65px;">${h.time}</span>
+                    <span style="color:${h.from.color};font-weight:600;">${h.from.icon} ${h.from.name}</span>
+                    <span style="color:var(--text-muted);">→</span>
+                    <span style="color:${h.to.color};font-weight:600;">${h.to.icon} ${h.to.name}</span>
+                    <span style="margin-left:auto;font-size:0.72rem;padding:0.1rem 0.4rem;border-radius:8px;background:${h.to.color}18;color:${h.to.color};">${h.to.model}</span>
+                </div>
+            `).join('');
+        }
+
+        // Initialize provider panel
+        renderProviderCards();
+        renderSwitchHistory();
+
+        // Auto-randomize latency to make it feel alive
+        setInterval(() => {
+            PROVIDERS.forEach(p => {
+                p.latency = Math.max(80, p.latency + Math.floor(Math.random() * 40 - 20));
+            });
+            renderProviderCards();
+        }, 4000);
     </script>
 
     <style>
