@@ -1652,10 +1652,10 @@
                 <div id="switch-status-bar" style="background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.3); border-radius: 10px; padding: 0.8rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
                     <div style="display: flex; align-items: center; gap: 0.8rem;">
                         <span style="font-size: 0.78rem; color: var(--text-dim);"><span class="en-inline">Currently Using</span><span class="zh-inline">当前使用</span></span>
-                        <span id="switch-current-model" style="font-weight: 700; color: #D97757; font-size: 1rem;">Claude Opus 4.6</span>
+                        <span id="switch-current-model" style="font-weight: 700; color: #10A37F; font-size: 1rem;">GPT-5.4</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span id="switch-current-latency" style="font-size: 0.82rem; color: #D97757; font-weight: 600;">280ms</span>
+                        <span id="switch-current-latency" style="font-size: 0.82rem; color: #10A37F; font-weight: 600;">310ms</span>
                         <span style="font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: rgba(52,211,153,0.15); color: var(--accent-green);">● Connected</span>
                     </div>
                 </div>
@@ -2429,7 +2429,7 @@ node kkclaw-hotswitch.js --restart</code></pre>
             const terminal = document.getElementById('startup-terminal');
             terminal.innerHTML = '';
 
-            // ASCII Lobster Ball (eyes closed → open)
+            // ASCII Lobster Ball
             const lobsterClosed = [
                 '            ████░░░░░░░░░░████            ',
                 '          ██░░░░░░████░░░░░░░░██          ',
@@ -2438,7 +2438,7 @@ node kkclaw-hotswitch.js --restart</code></pre>
                 '      █░░░████████████████████████░░░█    ',
                 '     █░░░████████████████████████████░░░█ ',
                 '     █░░████████████████████████████████░░█',
-                '     █░░█████��██████████████████████████░░█',
+                '     █░░████████████████████████████████░░█',
                 '      █░░░████████████████████████████░░░█',
                 '       █░░░░██████████████████████░░░░█   ',
                 '        ██░░░░████████████████░░░░░░██    ',
@@ -2469,77 +2469,101 @@ node kkclaw-hotswitch.js --restart</code></pre>
                 ' ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ ',
             ];
 
-            const lines = [];
-            let d = 0;
+            const allLines = [...lobsterClosed, '', ...titleArt];
+            const totalLines = allLines.length; // 13 + 1 + 6 = 20
 
-            // Phase 1: Fire sweep — reveal lobster line by line
-            lobsterClosed.forEach((line, i) => {
-                lines.push({ delay: d, html: `<span class="t-red">${escHtml(line)}</span>`, phase: 'sweep' });
-                d += 80;
+            // Phase 1: Show everything in dim gray
+            allLines.forEach(line => {
+                const div = document.createElement('div');
+                div.className = 'terminal-line';
+                div.style.whiteSpace = 'pre';
+                div.innerHTML = `<span style="color:#484f58">${escHtml(line)}</span>`;
+                terminal.appendChild(div);
             });
-            d += 300;
 
-            // Phase 2: Flash — blink to open eyes
-            lines.push({ delay: d, action: 'clear-logo' });
-            d += 150;
-            lobsterOpen.forEach((line, i) => {
-                lines.push({ delay: d, html: `<span class="t-primary">${escHtml(line)}</span>`, phase: 'open' });
-                d += 30;
-            });
-            d += 200;
+            let d = 400; // initial pause
 
-            // Phase 3: Title
-            lines.push({ delay: d, html: '' }); // blank line
-            d += 100;
-            titleArt.forEach((line, i) => {
-                lines.push({ delay: d, html: `<span class="t-yellow">${escHtml(line)}</span>` });
-                d += 60;
-            });
-            d += 300;
+            // Phase 2: Fire sweep — white band moves top to bottom, behind it turns red
+            for (let front = -1; front <= totalLines + 1; front++) {
+                (function(f) {
+                    setTimeout(() => {
+                        const divs = terminal.children;
+                        for (let g = 0; g < divs.length; g++) {
+                            const text = allLines[g] || '';
+                            let color;
+                            if (g <= f - 2) {
+                                // Already swept — bright red
+                                color = g >= 14 ? '#e3b341; font-weight:bold' : '#ff7b72';
+                            } else if (g === f - 1 || g === f) {
+                                // Fire front — bright white, bold
+                                color = '#ffffff; font-weight:bold; text-shadow:0 0 8px rgba(255,255,255,0.6)';
+                            } else {
+                                // Not yet reached — dim gray
+                                color = '#484f58';
+                            }
+                            divs[g].innerHTML = `<span style="color:${color}">${escHtml(text)}</span>`;
+                        }
+                    }, d);
+                    // Speed curve: fast in middle, slow at edges
+                    const t = Math.max(0, Math.min(1, f / totalLines));
+                    d += Math.round(50 - 30 * Math.sin(t * Math.PI));
+                })(front);
+            }
+            d += 60;
 
-            // Phase 4: System info
+            // Phase 3: Flash — everything bright white
+            setTimeout(() => {
+                const divs = terminal.children;
+                for (let g = 0; g < divs.length; g++) {
+                    divs[g].innerHTML = `<span style="color:#ffffff;font-weight:bold;text-shadow:0 0 12px rgba(255,255,255,0.8)">${escHtml(allLines[g] || '')}</span>`;
+                }
+            }, d);
+            d += 120;
+
+            // Phase 4: Eyes OPEN! Settle to final colors (red lobster, yellow title)
+            setTimeout(() => {
+                const openLines = [...lobsterOpen, '', ...titleArt];
+                const divs = terminal.children;
+                for (let g = 0; g < divs.length; g++) {
+                    const text = openLines[g] || '';
+                    const color = g >= 14 ? '#e3b341; font-weight:bold' : '#FF6B4A';
+                    divs[g].innerHTML = `<span style="color:${color}">${escHtml(text)}</span>`;
+                }
+            }, d);
+            d += 400;
+
+            // Phase 5: System info lines (append below)
             const sysLines = [
                 '',
-                `<span class="t-dim">══════════════════════════════════════════════════════</span>`,
-                `<span class="t-cyan"> ✦ Desktop Visualization Companion for OpenClaw</span>`,
-                `<span class="t-dim">══════════════════════════════════════════════════════</span>`,
+                `<span style="color:#484f58">══════════════════════════════════════════════════════</span>`,
+                `<span style="color:#79c0ff"> ✦ Desktop Visualization Companion for OpenClaw</span>`,
+                `<span style="color:#484f58">══════════════════════════════════════════════════════</span>`,
                 '',
-                `<span class="t-dim">  Platform :</span> <span class="t-white">Windows x86_64</span>`,
-                `<span class="t-dim">  Node     :</span> <span class="t-white">v20.11.1</span>   <span class="t-dim">Electron :</span> <span class="t-white">28.3.3</span>`,
-                `<span class="t-dim">  Version  :</span> <span class="t-green">v3.5.2</span>`,
-                `<span class="t-dim">  CPU      :</span> <span class="t-white">13th Gen Intel Core i5 (12 cores)</span>`,
-                `<span class="t-dim">  Memory   :</span> <span class="t-white">15.7 GB</span>`,
+                `<span style="color:#484f58">  Platform :</span> <span style="color:#e6edf3">Windows x86_64</span>`,
+                `<span style="color:#484f58">  Node     :</span> <span style="color:#e6edf3">v20.11.1</span>   <span style="color:#484f58">Electron :</span> <span style="color:#e6edf3">28.3.3</span>`,
+                `<span style="color:#484f58">  Version  :</span> <span style="color:#7ee787">v3.5.2</span>`,
+                `<span style="color:#484f58">  CPU      :</span> <span style="color:#e6edf3">13th Gen Intel Core i5 (12 cores)</span>`,
+                `<span style="color:#484f58">  Memory   :</span> <span style="color:#e6edf3">15.7 GB</span>`,
                 '',
-                `<span class="t-dim">  Modules  :</span> <span class="t-green">✓ Gateway</span>  <span class="t-green">✓ TTS</span>  <span class="t-green">✓ Voice</span>  <span class="t-green">✓ Pet</span>  <span class="t-green">✓ Sync</span>`,
-                `<span class="t-dim">  Guardian :</span> <span class="t-green">● Active</span>  <span class="t-dim">|</span>  <span class="t-dim">Health :</span> <span class="t-green">98/100</span>`,
+                `<span style="color:#484f58">  Modules  :</span> <span style="color:#7ee787">✓ Gateway</span>  <span style="color:#7ee787">✓ TTS</span>  <span style="color:#7ee787">✓ Voice</span>  <span style="color:#7ee787">✓ Pet</span>  <span style="color:#7ee787">✓ Sync</span>`,
+                `<span style="color:#484f58">  Guardian :</span> <span style="color:#7ee787">● Active</span>  <span style="color:#484f58">|</span>  <span style="color:#484f58">Health :</span> <span style="color:#7ee787">98/100</span>`,
                 '',
-                `<span class="t-dim">══════════════════════════════════════════════════════</span>`,
-                `<span class="t-green"> 🦞 Ready!  All systems nominal.</span>`,
+                `<span style="color:#484f58">══════════════════════════════════════════════════════</span>`,
+                `<span style="color:#7ee787"> 🦞 Ready!  All systems nominal.</span>`,
             ];
-            sysLines.forEach(line => {
-                lines.push({ delay: d, html: line });
-                d += 60;
-            });
-
-            // Execute timeline
-            const totalDuration = d + 500;
-            lines.forEach(l => {
+            sysLines.forEach(html => {
                 setTimeout(() => {
-                    if (l.action === 'clear-logo') {
-                        // Remove the closed-eyes logo lines (first 13 divs)
-                        const children = Array.from(terminal.children);
-                        children.slice(0, 13).forEach(el => el.remove());
-                        return;
-                    }
                     const div = document.createElement('div');
                     div.className = 'terminal-line';
                     div.style.whiteSpace = 'pre';
-                    div.innerHTML = l.html;
+                    div.innerHTML = html;
                     terminal.appendChild(div);
                     terminal.scrollTop = terminal.scrollHeight;
-                }, l.delay);
+                }, d);
+                d += 50;
             });
 
+            const totalDuration = d + 500;
             setTimeout(() => {
                 startupPlaying = false;
                 btn.style.opacity = '1';
@@ -2567,12 +2591,12 @@ node kkclaw-hotswitch.js --restart</code></pre>
 
         // ===== KKClaw Switch Interactive Provider Panel =====
         const PROVIDERS = [
-            { id: 'anthropic', name: 'Anthropic', icon: '✦', color: '#D97757', model: 'Claude Opus 4.6', latency: 280, api: 'anthropic-messages', status: 'healthy' },
-            { id: 'openai', name: 'OpenAI', icon: '◎', color: '#10A37F', model: 'GPT-5.4', latency: 310, api: 'openai-completions', status: 'healthy' },
-            { id: 'google', name: 'Google AI', icon: '✦', color: '#4285F4', model: 'Gemini 3.1 Pro', latency: 250, api: 'openai-completions', status: 'healthy' },
-            { id: 'deepseek', name: 'DeepSeek', icon: '🔮', color: '#4D6BFE', model: 'DeepSeek-R1', latency: 190, api: 'openai-completions', status: 'healthy' },
-            { id: 'minimax', name: 'MiniMax', icon: '🎵', color: '#FF6B9D', model: 'MiniMax-01', latency: 340, api: 'openai-completions', status: 'degraded' },
-            { id: 'zhipu', name: '智谱 AI', icon: '🧠', color: '#7C3AED', model: 'GLM-4-Plus', latency: 160, api: 'openai-completions', status: 'healthy' },
+            { id: 'openai', name: 'OpenAI', icon: '◎', color: '#10A37F', model: 'GPT-5.4', latency: 310, api: 'openai-responses', status: 'healthy', count: 12,
+              models: ['gpt-5.4','gpt-5.3-codex-spark','gpt-5.3-codex','gpt-5.2-codex','gpt-5.2','gpt-5.1-codex-max','gpt-5.1-codex','gpt-5.1-codex-mini','gpt-5.1','gpt-5-codex','gpt-5-codex-mini','gpt-5'] },
+            { id: 'anthropic', name: 'Anthropic', icon: '✦', color: '#D97757', model: 'Claude Opus 4.6', latency: 280, api: 'anthropic-messages', status: 'healthy', count: 3,
+              models: ['claude-opus-4-6','claude-sonnet-4-6','claude-haiku-4-5-20251001'] },
+            { id: 'google', name: 'Google AI', icon: '✦', color: '#4285F4', model: 'Gemini 3.1 Pro Preview', latency: 250, api: 'openai-completions', status: 'healthy', count: 6,
+              models: ['gemini-3.1-pro-preview','gemini-3-pro-preview','gemini-3-flash-preview','gemini-2.5-pro','gemini-2.5-flash','gemini-2.5-flash-lite'] },
         ];
 
         let currentProvider = PROVIDERS[0];
@@ -2598,7 +2622,7 @@ node kkclaw-hotswitch.js --restart</code></pre>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem;">
-                        <span style="font-size:0.75rem;color:var(--text-dim);">${p.api}</span>
+                        <span style="font-size:0.72rem;padding:0.12rem 0.5rem;border-radius:8px;background:${p.color}15;color:${p.color};font-weight:600;">${p.count} models</span>
                         <div style="display:flex;align-items:center;gap:0.4rem;">
                             <span style="font-size:0.78rem;font-weight:600;color:${p.latency < 200 ? 'var(--accent-green)' : p.latency < 300 ? 'var(--accent-yellow)' : 'var(--primary)'};">${p.latency}ms</span>
                             <span style="width:6px;height:6px;border-radius:50%;background:${p.status === 'healthy' ? 'var(--accent-green)' : 'var(--accent-yellow)'};"></span>
