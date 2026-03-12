@@ -6,14 +6,14 @@ const https = require('https');
 
 class QuotaQuery {
   constructor() {
-    this.baseUrl = 'https://gptclubapi.xyz';
+    this.baseUrl = 'https://api.gptclubapi.xyz';
   }
 
   async _request(path, payload) {
     return new Promise((resolve, reject) => {
       const data = JSON.stringify(payload);
       const options = {
-        hostname: 'gptclubapi.xyz',
+        hostname: 'api.gptclubapi.xyz',
         path,
         method: 'POST',
         headers: {

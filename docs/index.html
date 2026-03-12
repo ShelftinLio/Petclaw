@@ -1650,19 +1650,67 @@
                 </p>
 
                 <!-- KKClaw Switch Panel Container -->
-                <div style="max-width: 600px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.12);">
-                    <!-- Current Indicator -->
-                    <div id="demo-current-indicator" style="margin: 12px 16px; padding: 16px; display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 12px; transition: all 0.2s ease;"></div>
-
-                    <!-- Search Bar -->
-                    <div style="margin: 0 16px 10px; position: relative;">
-                        <svg style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: #8E8EA0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                        <input type="text" id="demo-search" placeholder="搜索供应商..." style="width: 100%; box-sizing: border-box; padding: 8px 12px 8px 32px; background: #F7F7F8; border: 1px solid #E5E5E5; border-radius: 8px; color: #000000; font-size: 13px; outline: none; transition: border-color 0.2s ease; font-family: Inter, -apple-system, sans-serif;">
+                <div id="kkclaw-switch-panel" class="kks-panel">
+                    <!-- Header -->
+                    <div class="kks-header">
+                        <div class="kks-header-left">
+                            <span class="kks-header-title">KKClaw Switch</span>
+                        </div>
+                        <div class="kks-header-right">
+                            <span class="kks-lang-toggle" onclick="this.textContent=this.textContent==='中/EN'?'EN/中':'中/EN'">中/EN</span>
+                            <div class="kks-tab active" onclick="kksShowTab('main',this)">服务商</div>
+                            <div class="kks-tab" onclick="kksShowTab('models',this)">模型</div>
+                            <div class="kks-tab" onclick="kksShowTab('logs',this)">日志</div>
+                            <button class="kks-add-btn">+</button>
+                        </div>
                     </div>
 
-                    <!-- Provider List -->
-                    <div id="demo-provider-list" style="padding: 0 16px 16px;"></div>
+                    <!-- Panel: Main (Provider List) -->
+                    <div id="kks-panel-main" class="kks-panel-content active">
+                        <!-- Current Indicator -->
+                        <div id="kks-current" class="kks-current-indicator"></div>
+
+                        <!-- Action Buttons -->
+                        <div class="kks-action-bar">
+                            <button class="kks-btn kks-btn-speed">全部测速</button>
+                            <button class="kks-btn kks-btn-ghost">刷新</button>
+                            <button class="kks-btn kks-btn-ghost">同步CC</button>
+                            <button class="kks-btn kks-btn-ghost">切换统计</button>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="kks-search">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                            <input type="text" id="kks-search-input" placeholder="搜索供应商..." oninput="kksFilterProviders(this.value)">
+                        </div>
+
+                        <!-- Provider List -->
+                        <div id="kks-provider-list" class="kks-provider-list"></div>
+                    </div>
+
+                    <!-- Panel: Models -->
+                    <div id="kks-panel-models" class="kks-panel-content">
+                        <div class="kks-model-panel" id="kks-model-list"></div>
+                    </div>
+
+                    <!-- Panel: Logs -->
+                    <div id="kks-panel-logs" class="kks-panel-content">
+                        <div class="kks-log-toolbar">
+                            <span class="kks-log-filter active">全部</span>
+                            <span class="kks-log-filter">成功</span>
+                            <span class="kks-log-filter">信息</span>
+                            <span class="kks-log-filter">警告</span>
+                            <span class="kks-log-filter">错误</span>
+                            <span style="flex:1"></span>
+                            <button class="kks-btn kks-btn-ghost">刷新</button>
+                        </div>
+                        <div class="kks-log-container" id="kks-log-container"></div>
+                    </div>
+
+                    <!-- Toast -->
+                    <div class="kks-toast" id="kks-toast"></div>
                 </div>
+            </div>
             </div>
 
             <!-- Code Example -->
@@ -2583,70 +2631,364 @@ node kkclaw-hotswitch.js --restart</code></pre>
             startupObs.observe(startupSection);
         }
 
-        // ===== KKClaw Switch Demo (Real App UI) =====
-        const DEMO_PROVIDERS = [
-            { name: 'OpenAI', icon: '◎', color: '#10A37F', baseUrl: 'https://api.openai.com/v1', api: 'openai-responses', modelCount: 12, speedTest: { latencyMs: 310 }, isCurrent: true },
-            { name: 'Anthropic', icon: '✦', color: '#D97757', baseUrl: 'https://api.anthropic.com', api: 'anthropic-messages', modelCount: 3, speedTest: { latencyMs: 280 }, isCurrent: false },
-            { name: 'Google AI', icon: '✦', color: '#4285F4', baseUrl: 'https://generativelanguage.googleapis.com', api: 'openai-completions', modelCount: 6, speedTest: { latencyMs: 250 }, isCurrent: false }
+        // ===== KKClaw Switch Demo (完整照搬 model-settings) =====
+        const KKS_PROVIDERS = [
+            { name: 'Provider-A', icon: 'KK', color: '#E8613C', baseUrl: 'https://api.example.com/v1', api: 'anthropic-messages', modelCount: 22, speedTest: null, isCurrent: true,
+              quota: '无额度数据 (API Key可能无效)' },
+            { name: 'Provider-B', icon: 'KK', color: '#E8613C', baseUrl: 'https://api.example.com/v1', api: 'anthropic-messages', modelCount: 22, speedTest: null, isCurrent: false,
+              quota: '无额度数据 (API Key可能无效)' },
+            { name: 'Provider-C 三人拼', icon: 'KK', color: '#E8613C', baseUrl: 'https://api.example.com/v1', api: 'anthropic-messages', modelCount: 22, speedTest: null, isCurrent: false,
+              quota: '无额度数据 (API Key可能无效)' },
+            { name: 'Provider-D 全模型', icon: 'KK', color: '#E8613C', baseUrl: 'https://api.example.com/v1', api: 'anthropic-messages', modelCount: 22, speedTest: null, isCurrent: false,
+              quota: '无额度数据 (API Key可能无效)' },
         ];
-        let demoCurrentModel = { shortName: 'GPT-5.4', provider: 'OpenAI', modelId: 'gpt-5.4', api: 'openai-responses', icon: '◎', color: '#10A37F' };
+        const KKS_MODELS = {
+            'Provider-A': [
+                { id:'claude-opus-4-6', shortName:'Claude Opus 4.6', icon:'OP', color:'#D97757', reasoning:false, ctx:200 },
+                { id:'claude-sonnet-4-6', shortName:'Claude Sonnet 4.6', icon:'SN', color:'#D97757', reasoning:false, ctx:200 },
+                { id:'claude-haiku-4-5-20251001', shortName:'Claude Haiku 4.5', icon:'HK', color:'#D97757', reasoning:false, ctx:200 },
+                { id:'gpt-5.4', shortName:'GPT-5.4', icon:'◎', color:'#10A37F', reasoning:false, ctx:128 },
+                { id:'gpt-5.3-codex-spark', shortName:'GPT-5.3 Codex Spark', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5.3-codex', shortName:'GPT-5.3 Codex', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5.2-codex', shortName:'GPT-5.2 Codex', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5.2', shortName:'GPT-5.2', icon:'◎', color:'#10A37F', reasoning:false, ctx:128 },
+                { id:'gpt-5.1-codex-max', shortName:'GPT-5.1 Codex Max', icon:'◎', color:'#10A37F', reasoning:true, ctx:256 },
+                { id:'gpt-5.1-codex', shortName:'GPT-5.1 Codex', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5.1-codex-mini', shortName:'GPT-5.1 Codex Mini', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5.1', shortName:'GPT-5.1', icon:'◎', color:'#10A37F', reasoning:false, ctx:128 },
+                { id:'gpt-5-codex', shortName:'GPT-5 Codex', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5-codex-mini', shortName:'GPT-5 Codex Mini', icon:'◎', color:'#10A37F', reasoning:true, ctx:128 },
+                { id:'gpt-5', shortName:'GPT-5', icon:'◎', color:'#10A37F', reasoning:false, ctx:128 },
+                { id:'gemini-3.1-pro-preview', shortName:'Gemini 3.1 Pro', icon:'✦', color:'#4285F4', reasoning:false, ctx:1000 },
+                { id:'gemini-3-pro-preview', shortName:'Gemini 3 Pro', icon:'✦', color:'#4285F4', reasoning:false, ctx:1000 },
+                { id:'gemini-3-flash-preview', shortName:'Gemini 3 Flash', icon:'✦', color:'#4285F4', reasoning:false, ctx:1000 },
+                { id:'gemini-2.5-pro', shortName:'Gemini 2.5 Pro', icon:'✦', color:'#4285F4', reasoning:true, ctx:1000 },
+                { id:'gemini-2.5-flash', shortName:'Gemini 2.5 Flash', icon:'✦', color:'#4285F4', reasoning:true, ctx:1000 },
+                { id:'gemini-2.5-flash-lite', shortName:'Gemini 2.5 Flash Lite', icon:'✦', color:'#4285F4', reasoning:false, ctx:1000 },
+                { id:'deepseek-r1', shortName:'DeepSeek R1', icon:'DS', color:'#5B6EE1', reasoning:true, ctx:128 },
+            ]
+        };
+        let kksCurrentModel = { shortName:'Claude Opus 4.6', provider:'Provider-A', modelId:'claude-opus-4-6', api:'anthropic-messages', icon:'OP', color:'#D97757' };
 
-        function escHtml(v) { return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+        function kksEsc(v) { return String(v??'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 
-        function renderDemoCurrentIndicator() {
-            const el = document.getElementById('demo-current-indicator');
-            if (!el) return;
-            el.innerHTML = `<div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;background:${demoCurrentModel.color}">${escHtml(demoCurrentModel.icon)}</div>
-                <div style="flex:1;"><div style="font-size:10px;color:#8E8EA0;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;">CURRENTLY USING</div>
-                <div style="font-size:16px;font-weight:700;color:#000000;margin-top:2px;">${escHtml(demoCurrentModel.shortName)}</div>
-                <div style="font-size:11px;color:#6B6B6B;margin-top:1px;">${escHtml(demoCurrentModel.provider)} · ${escHtml(demoCurrentModel.modelId)} · ${escHtml(demoCurrentModel.api)}</div></div>`;
+        function kksToast(msg) {
+            const t = document.getElementById('kks-toast');
+            if(!t) return;
+            t.textContent = '✓ ' + msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         }
 
-        function renderDemoProviderList() {
-            const el = document.getElementById('demo-provider-list');
-            if (!el) return;
-            el.innerHTML = DEMO_PROVIDERS.map(p => {
+        function kksShowTab(name, tabEl) {
+            document.querySelectorAll('.kks-panel-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.kks-tab').forEach(t => t.classList.remove('active'));
+            const panel = document.getElementById('kks-panel-' + name);
+            if(panel) panel.classList.add('active');
+            if(tabEl) tabEl.classList.add('active');
+            if(name === 'models') kksRenderModels();
+            if(name === 'logs') kksRenderLogs();
+        }
+
+        function kksRenderCurrent() {
+            const el = document.getElementById('kks-current');
+            if(!el) return;
+            const m = kksCurrentModel;
+            el.innerHTML = `<div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;background:${m.color}">${kksEsc(m.icon)}</div>
+            <div style="flex:1"><div style="font-size:10px;color:#8E8EA0;text-transform:uppercase;letter-spacing:1.2px;font-weight:600">当前使用</div>
+            <div style="font-size:16px;font-weight:700;color:#000;margin-top:2px">${kksEsc(m.shortName)}</div>
+            <div style="font-size:11px;color:#6B6B6B;margin-top:1px">${kksEsc(m.provider)} · ${kksEsc(m.modelId)} · ${kksEsc(m.api)}</div></div>
+            <button class="kks-btn kks-btn-ghost" style="padding:8px 18px;border-radius:8px;font-size:12px" onclick="kksShowTab('models',document.querySelectorAll('.kks-tab')[1])">切换</button>`;
+        }
+
+        function kksRenderProviders() {
+            const el = document.getElementById('kks-provider-list');
+            if(!el) return;
+            el.innerHTML = KKS_PROVIDERS.map((p, idx) => {
                 const cur = p.isCurrent;
-                const ms = p.speedTest?.latencyMs || 0;
-                const statusClass = ms < 1000 ? 'healthy' : ms < 3000 ? 'medium' : 'slow';
-                const statusColor = statusClass === 'healthy' ? '#10A37F' : statusClass === 'medium' ? '#F59E0B' : '#EF4444';
-                return `<div onclick="demoSwitchProvider('${escHtml(p.name)}')" style="padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#FFFFFF;border:1px solid ${cur?'#10A37F':'#E5E5E5'};border-radius:12px;transition:all 0.2s ease;position:relative;${cur?'background:rgba(16,163,127,0.03);':''}" onmouseenter="this.style.background='#F7F7F8';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'" onmouseleave="this.style.background='${cur?'rgba(16,163,127,0.03)':'#FFFFFF'}';this.style.boxShadow=''">
-                    <div style="width:8px;height:8px;border-radius:50%;position:absolute;top:16px;left:8px;border:2px solid #FFFFFF;background:${statusColor}"></div>
-                    <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;background:${p.color}">${escHtml(p.icon)}</div>
-                    <div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="font-size:13px;font-weight:600;color:#000000;">${escHtml(p.name)}</span>${cur?'<span style="font-size:9px;padding:2px 7px;border-radius:6px;font-weight:600;background:rgba(16,163,127,0.08);color:#10A37F;border:1px solid rgba(16,163,127,0.15);">CURRENTLY USING</span>':''}</div>
-                    <div style="font-size:10px;color:#8E8EA0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">${escHtml(p.baseUrl)}</div></div>
-                    <div style="text-align:right;flex-shrink:0;"><div style="font-size:11px;color:${statusColor};margin-bottom:2px;">${ms}ms</div>
-                    <div style="font-size:9px;color:#8E8EA0;margin-bottom:2px;font-family:ui-monospace,monospace;">${escHtml(p.api)}</div>
-                    <div style="font-size:10px;color:#6B6B6B;">${p.modelCount} model${p.modelCount!==1?'s':''}</div></div></div>`;
+                const ms = p.speedTest?.latencyMs;
+                const speedHtml = ms ? `<div class="kks-provider-speed ${ms<1000?'fast':ms<3000?'medium':'slow'}">${ms}ms</div>` : '<div class="kks-provider-speed">--</div>';
+                const statusColor = ms ? (ms<1000?'#10A37F':ms<3000?'#F59E0B':'#EF4444') : '#8E8EA0';
+                return `<div class="kks-provider-card ${cur?'current':''}" data-name="${kksEsc(p.name)}" onclick="kksSwitchProvider('${kksEsc(p.name)}')">
+                    <div class="kks-status-dot" style="background:${statusColor}"></div>
+                    <span class="kks-collapse-btn" onclick="event.stopPropagation();this.parentElement.classList.toggle('collapsed')">▼</span>
+                    <div class="kks-drag-handle"><div class="kks-drag-dot"><span></span><span></span></div><div class="kks-drag-dot"><span></span><span></span></div><div class="kks-drag-dot"><span></span><span></span></div></div>
+                    <div class="kks-provider-icon" style="background:${p.color}">${kksEsc(p.icon)}</div>
+                    <div class="kks-provider-info">
+                        <div class="kks-provider-name-row"><span class="kks-provider-name">${kksEsc(p.name)}</span>${cur?'<span class="kks-provider-badge">当前使用</span>':''}</div>
+                        <div class="kks-provider-url">${kksEsc(p.baseUrl)}</div>
+                        ${p.quota?`<div class="kks-quota-info">${kksEsc(p.quota)}</div>`:''}
+                    </div>
+                    <div class="kks-provider-right">
+                        ${speedHtml}
+                        <div class="kks-provider-api">${kksEsc(p.api)}</div>
+                        <div class="kks-provider-models-count">${p.modelCount} models</div>
+                        <div class="kks-provider-actions">
+                            <div class="kks-action-icon" onclick="event.stopPropagation()" title="探测"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 2v3M7 9v3M2 7h3M9 7h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></div>
+                            <div class="kks-action-icon" onclick="event.stopPropagation()" title="测速"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="8" r="5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M7 5v3l2 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+                            <div class="kks-action-icon" onclick="event.stopPropagation()" title="编辑"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 10l6-6 2 2-6 6H2v-2z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></div>
+                        </div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        function demoSwitchProvider(name) {
-            const p = DEMO_PROVIDERS.find(x => x.name === name);
-            if (!p || p.isCurrent) return;
-            DEMO_PROVIDERS.forEach(x => x.isCurrent = false);
+        function kksSwitchProvider(name) {
+            const p = KKS_PROVIDERS.find(x => x.name === name);
+            if(!p || p.isCurrent) return;
+            KKS_PROVIDERS.forEach(x => x.isCurrent = false);
             p.isCurrent = true;
-            const models = { 'OpenAI': 'GPT-5.4', 'Anthropic': 'Claude Opus 4.6', 'Google AI': 'Gemini 3.1 Pro Preview' };
-            const ids = { 'OpenAI': 'gpt-5.4', 'Anthropic': 'claude-opus-4-6', 'Google AI': 'gemini-3.1-pro-preview' };
-            demoCurrentModel = { shortName: models[name], provider: name, modelId: ids[name], api: p.api, icon: p.icon, color: p.color };
-            renderDemoCurrentIndicator();
-            renderDemoProviderList();
+            const firstModel = (KKS_MODELS[name] || KKS_MODELS['Provider-A'])[0];
+            kksCurrentModel = {
+                shortName: firstModel.shortName, provider: name, modelId: firstModel.id,
+                api: p.api, icon: firstModel.icon, color: firstModel.color
+            };
+            kksRenderCurrent();
+            kksRenderProviders();
+            kksToast('已切换到 ' + name + ' / ' + firstModel.shortName);
         }
 
-        renderDemoCurrentIndicator();
-        renderDemoProviderList();
-
-        document.getElementById('demo-search')?.addEventListener('input', e => {
-            const q = e.target.value.toLowerCase();
-            document.querySelectorAll('#demo-provider-list > div').forEach(card => {
-                const match = !q || card.textContent.toLowerCase().includes(q);
-                card.style.display = match ? 'flex' : 'none';
+        function kksFilterProviders(q) {
+            q = q.toLowerCase().trim();
+            document.querySelectorAll('.kks-provider-card').forEach(card => {
+                const name = card.dataset.name?.toLowerCase() || '';
+                card.style.display = (!q || name.includes(q)) ? 'flex' : 'none';
             });
-        });
+        }
+
+        function kksRenderModels() {
+            const panel = document.getElementById('kks-model-list');
+            if(!panel) return;
+            const currentProviderName = KKS_PROVIDERS.find(p => p.isCurrent)?.name || 'Provider-A';
+            const models = KKS_MODELS[currentProviderName] || KKS_MODELS['Provider-A'];
+            // Group by color (provider family)
+            const groups = {};
+            models.forEach(m => {
+                const g = m.color === '#D97757' ? 'Anthropic' : m.color === '#10A37F' ? 'OpenAI' : m.color === '#4285F4' ? 'Google' : 'Other';
+                if(!groups[g]) groups[g] = [];
+                groups[g].push(m);
+            });
+            let html = '';
+            for(const [gname, gmodels] of Object.entries(groups)) {
+                html += `<div class="kks-model-section-title">${kksEsc(gname)}</div><div class="kks-model-grid">`;
+                gmodels.forEach(m => {
+                    const active = kksCurrentModel.modelId === m.id;
+                    html += `<div class="kks-model-row ${active?'active':''}" onclick="kksSwitchModel('${kksEsc(m.id)}')">
+                        <div class="kks-model-icon-sm" style="background:${m.color}">${kksEsc(m.icon)}</div>
+                        <div class="kks-model-name">${kksEsc(m.shortName)}</div>
+                        <div style="display:flex;gap:3px;align-items:center">
+                            ${m.reasoning?'<span class="kks-model-tag" style="background:rgba(245,158,11,0.08);color:#F59E0B;border-color:rgba(245,158,11,0.15)">🧠</span>':''}
+                            <span class="kks-model-tag">${m.ctx}K</span>
+                        </div>
+                        <div class="kks-model-check">${active?'✓':''}</div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+            panel.innerHTML = html;
+        }
+
+        function kksSwitchModel(id) {
+            const currentProviderName = KKS_PROVIDERS.find(p => p.isCurrent)?.name || 'Provider-A';
+            const models = KKS_MODELS[currentProviderName] || KKS_MODELS['Provider-A'];
+            const m = models.find(x => x.id === id);
+            if(!m) return;
+            const p = KKS_PROVIDERS.find(x => x.isCurrent);
+            kksCurrentModel = { shortName: m.shortName, provider: currentProviderName, modelId: m.id, api: p?.api||'anthropic-messages', icon: m.icon, color: m.color };
+            kksRenderCurrent();
+            kksRenderModels();
+            kksToast('已切换到 ' + m.shortName);
+        }
+
+        function kksRenderLogs() {
+            const el = document.getElementById('kks-log-container');
+            if(!el) return;
+            const logs = [
+                { time:'03-12 14:23:05', level:'success', action:'switch', detail:'Provider-A → claude-opus-4-6 (280ms)' },
+                { time:'03-12 14:22:58', level:'info', action:'probe', detail:'Provider-A → anthropic-messages (recommended)' },
+                { time:'03-12 14:20:12', level:'success', action:'switch', detail:'Provider-B → gpt-5.4 (310ms)' },
+                { time:'03-12 14:18:30', level:'warn', action:'speed', detail:'Provider-C 三人拼 → 2800ms (slow)' },
+                { time:'03-12 14:15:01', level:'info', action:'sync', detail:'CC Switch synced, 4 providers loaded' },
+                { time:'03-12 14:10:45', level:'success', action:'init', detail:'KKClaw Switch initialized, 4 providers ready' },
+            ];
+            el.innerHTML = logs.map(e => `<div class="kks-log-entry">
+                <span class="kks-log-time">${kksEsc(e.time)}</span>
+                <span class="kks-log-level kks-log-level-${e.level}">${kksEsc(e.level)}</span>
+                <span class="kks-log-action">${kksEsc(e.action)}</span>
+                <span class="kks-log-detail">${kksEsc(e.detail)}</span>
+            </div>`).join('');
+        }
+
+        // Init
+        kksRenderCurrent();
+        kksRenderProviders();
     </script>
 
     <style>
         @keyframes waveAnim { from { height: 4px; } to { height: 16px; } }
+
+        /* ===== KKClaw Switch Panel Styles (照搬 model-settings.css) ===== */
+        .kks-panel {
+            max-width: 560px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12); font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #000; user-select: none;
+        }
+        .kks-panel * { box-sizing: border-box; margin: 0; padding: 0; }
+        .kks-header {
+            display: flex; align-items: center; justify-content: space-between; padding: 12px 20px;
+            background: #FFFFFF; border-bottom: 1px solid #E5E5E5;
+        }
+        .kks-header-left { display: flex; align-items: center; gap: 12px; }
+        .kks-header-title { font-size: 18px; font-weight: 600; color: #000; letter-spacing: -0.3px; }
+        .kks-header-right { display: flex; align-items: center; gap: 6px; }
+        .kks-lang-toggle {
+            font-size: 11px; color: #8E8EA0; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+            border: 1px solid #E5E5E5; background: #FFF; transition: all 0.2s; margin-right: 6px;
+        }
+        .kks-lang-toggle:hover { color: #000; background: #F7F7F8; border-color: #D9D9E3; }
+        .kks-tab {
+            padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+            color: #6B6B6B; transition: all 0.2s; background: transparent; border: none;
+        }
+        .kks-tab:hover { color: #000; background: #F7F7F8; }
+        .kks-tab.active { color: #000; background: #ECECF1; }
+        .kks-add-btn {
+            width: 32px; height: 32px; border-radius: 8px; border: none; background: #10A37F; color: #FFF;
+            font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 4px;
+            transition: all 0.2s;
+        }
+        .kks-add-btn:hover { background: #0E8C6F; transform: scale(1.05); }
+        .kks-panel-content { display: none; }
+        .kks-panel-content.active { display: block; }
+        .kks-current-indicator {
+            margin: 12px 16px; padding: 16px; display: flex; align-items: center; gap: 12px;
+            background: #FFF; border: 1px solid #E5E5E5; border-radius: 12px; transition: all 0.2s;
+        }
+        .kks-current-indicator:hover { border-color: #D9D9E3; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .kks-action-bar { padding: 0 16px 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+        .kks-btn {
+            padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 500; cursor: pointer;
+            transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #E5E5E5;
+        }
+        .kks-btn:active { transform: scale(0.95); }
+        .kks-btn-speed { background: rgba(16,163,127,0.06); color: #10A37F; border-color: rgba(16,163,127,0.15); }
+        .kks-btn-speed:hover { background: rgba(16,163,127,0.12); }
+        .kks-btn-ghost { background: #FFF; color: #6B6B6B; }
+        .kks-btn-ghost:hover { background: #F7F7F8; color: #000; }
+        .kks-search { margin: 0 16px 10px; position: relative; }
+        .kks-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: #8E8EA0; }
+        .kks-search input {
+            width: 100%; padding: 8px 12px 8px 32px; background: #F7F7F8; border: 1px solid #E5E5E5;
+            border-radius: 8px; color: #000; font-size: 13px; outline: none; transition: border-color 0.2s;
+        }
+        .kks-search input:focus { border-color: #10A37F; box-shadow: 0 0 0 2px rgba(16,163,127,0.1); }
+        .kks-search input::placeholder { color: #8E8EA0; }
+        .kks-provider-list { padding: 0 16px 16px; }
+        .kks-provider-card {
+            padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+            cursor: pointer; background: #FFF; border: 1px solid #E5E5E5; border-radius: 12px;
+            transition: all 0.2s; position: relative;
+        }
+        .kks-provider-card:hover { background: #F7F7F8; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .kks-provider-card:active { transform: scale(0.99); }
+        .kks-provider-card.current { border-color: #10A37F; background: rgba(16,163,127,0.03); }
+        .kks-status-dot {
+            width: 8px; height: 8px; border-radius: 50%; position: absolute; top: 16px; left: 8px;
+            border: 2px solid #FFF;
+        }
+        .kks-collapse-btn {
+            cursor: pointer; transition: transform 0.2s; user-select: none; font-size: 10px; color: #8E8EA0;
+        }
+        .kks-provider-card.collapsed .kks-collapse-btn { transform: rotate(-90deg); }
+        .kks-provider-card.collapsed .kks-provider-info,
+        .kks-provider-card.collapsed .kks-provider-right { display: none; }
+        .kks-provider-card.collapsed { padding: 8px 12px; }
+        .kks-drag-handle { display: flex; flex-direction: column; gap: 2px; cursor: grab; opacity: 0.2; padding: 3px; transition: opacity 0.2s; }
+        .kks-drag-handle:hover { opacity: 0.5; }
+        .kks-drag-dot { display: flex; gap: 2px; }
+        .kks-drag-dot span { width: 2px; height: 2px; border-radius: 50%; background: #6B6B6B; }
+        .kks-provider-icon {
+            width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex;
+            align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #fff;
+        }
+        .kks-provider-info { flex: 1; min-width: 0; }
+        .kks-provider-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .kks-provider-name { font-size: 13px; font-weight: 600; color: #000; }
+        .kks-provider-badge {
+            font-size: 9px; padding: 2px 7px; border-radius: 6px; font-weight: 600;
+            background: rgba(16,163,127,0.08); color: #10A37F; border: 1px solid rgba(16,163,127,0.15);
+        }
+        .kks-provider-url { font-size: 10px; color: #8E8EA0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+        .kks-quota-info { font-size: 10px; color: #8E8EA0; margin-top: 4px; }
+        .kks-provider-right { text-align: right; flex-shrink: 0; }
+        .kks-provider-speed { font-size: 11px; color: #8E8EA0; margin-bottom: 2px; }
+        .kks-provider-speed.fast { color: #10A37F; }
+        .kks-provider-speed.medium { color: #F59E0B; }
+        .kks-provider-speed.slow { color: #EF4444; }
+        .kks-provider-api { font-size: 9px; color: #8E8EA0; margin-bottom: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .kks-provider-models-count { font-size: 10px; color: #6B6B6B; }
+        .kks-provider-actions { display: flex; gap: 4px; margin-top: 4px; justify-content: flex-end; }
+        .kks-action-icon {
+            width: 28px; height: 28px; border-radius: 6px; border: 1px solid #E5E5E5; background: #FFF;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6B6B6B;
+            transition: all 0.15s; font-size: 12px;
+        }
+        .kks-action-icon:hover { background: #F7F7F8; color: #000; }
+        /* Model Panel */
+        .kks-model-panel { padding: 0 16px 16px; }
+        .kks-model-section-title {
+            font-size: 10px; color: #8E8EA0; text-transform: uppercase; letter-spacing: 1.5px;
+            padding: 10px 0 4px; font-weight: 600;
+        }
+        .kks-model-grid { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+        .kks-model-row {
+            display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .kks-model-row:hover { background: #F7F7F8; }
+        .kks-model-row.active { background: rgba(16,163,127,0.06); box-shadow: inset 0 0 0 1px rgba(16,163,127,0.2); }
+        .kks-model-icon-sm {
+            width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; display: flex;
+            align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: #fff;
+        }
+        .kks-model-name { font-size: 12px; flex: 1; color: #000; }
+        .kks-model-tag {
+            font-size: 9px; padding: 1px 6px; border-radius: 5px; background: #ECECF1;
+            color: #6B6B6B; border: 1px solid #E5E5E5;
+        }
+        .kks-model-check { font-size: 13px; color: #10A37F; width: 18px; text-align: center; }
+        /* Log Panel */
+        .kks-log-toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 16px; flex-wrap: wrap; }
+        .kks-log-filter {
+            padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 500; cursor: pointer;
+            color: #6B6B6B; background: #FFF; border: 1px solid #E5E5E5; transition: all 0.2s;
+        }
+        .kks-log-filter:hover { color: #000; background: #F7F7F8; }
+        .kks-log-filter.active { color: #10A37F; border-color: rgba(16,163,127,0.3); background: rgba(16,163,127,0.06); }
+        .kks-log-container {
+            padding: 0 16px 16px; max-height: 300px; overflow-y: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+        .kks-log-entry { display: flex; align-items: flex-start; gap: 8px; padding: 5px 8px; border-radius: 6px; margin-bottom: 2px; font-size: 11px; line-height: 1.5; transition: background 0.15s; }
+        .kks-log-entry:hover { background: #F7F7F8; }
+        .kks-log-time { color: #8E8EA0; white-space: nowrap; flex-shrink: 0; font-size: 10px; }
+        .kks-log-level { padding: 1px 5px; border-radius: 4px; font-size: 9px; font-weight: 600; flex-shrink: 0; text-transform: uppercase; min-width: 46px; text-align: center; }
+        .kks-log-level-info { background: rgba(59,130,246,0.08); color: #3B82F6; }
+        .kks-log-level-success { background: rgba(16,163,127,0.08); color: #10A37F; }
+        .kks-log-level-warn { background: rgba(245,158,11,0.08); color: #F59E0B; }
+        .kks-log-level-error { background: rgba(239,68,68,0.08); color: #EF4444; }
+        .kks-log-action { color: #000; flex-shrink: 0; }
+        .kks-log-detail { color: #6B6B6B; word-break: break-all; }
+        /* Toast */
+        .kks-toast {
+            position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%) translateY(8px);
+            padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; z-index: 100;
+            background: #10A37F; color: #FFF;
+        }
+        .kks-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        @keyframes kksPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .kks-pulse { animation: kksPulse 1.5s ease infinite; }
     </style>
 </body>
 </html>

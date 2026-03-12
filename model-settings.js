@@ -571,7 +571,7 @@ async function submitProvider() {
   let result; const fi=document.querySelector('#addModelRows .form-row input[data-field="id"]'),hm=fi&&fi.value.trim();
   if(selectedPreset&&!hm){ result=await window.electronAPI.invoke('model-add-from-preset',selectedPreset,apiKey,name,baseUrl||undefined); }
   else { const rows=document.querySelectorAll('#addModelRows .form-row'),models=[]; rows.forEach(r=>{const id=r.querySelector('[data-field="id"]').value.trim(),n=r.querySelector('[data-field="name"]').value.trim();if(id) models.push({id,name:n||id});}); result=await window.electronAPI.invoke('model-add-provider',name,{baseUrl,apiKey,api,models}); }
-  if(result.success){showToast(`${t('added')} "${name}"`,'success');document.getElementById('addName').value='';document.getElementById('addBaseUrl').value='https://api.kk666.online/v1';document.getElementById('addApiKey').value='';selectedPreset=null;showTab('main');}else showToast(result.error,'error');
+  if(result.success){showToast(`${t('added')} "${name}"`,'success');document.getElementById('addName').value='';document.getElementById('addBaseUrl').value='https://api.gptclubapi.xyz/v1';document.getElementById('addApiKey').value='';selectedPreset=null;showTab('main');}else showToast(result.error,'error');
 }
 
 // ===== Utils =====

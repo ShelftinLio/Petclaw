@@ -93,8 +93,8 @@ const PROVIDER_PRESETS = {
   // ── 中转站 ──
   'kkclaw': {
     name: 'KKCLAW 拼车',
-    baseUrl: 'https://gptclubapi.xyz',
-    website: 'https://gptclubapi.xyz',
+    baseUrl: 'https://api.gptclubapi.xyz',
+    website: 'https://api.gptclubapi.xyz',
     api: 'multi-protocol',
     icon: '🚗',
     color: '#FF6B35',
