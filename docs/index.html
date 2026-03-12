@@ -1638,7 +1638,7 @@
                 </div>
             </div>
 
-            <!-- Interactive Provider Panel -->
+            <!-- Interactive Provider Panel (Real KKClaw Switch UI) -->
             <div class="reveal" style="margin-top: 3rem;">
                 <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; color: var(--text);">
                     <span class="en">Interactive Provider Panel</span>
@@ -1648,26 +1648,20 @@
                     <span class="en">Click any provider card to switch — just like in the real app</span>
                     <span class="zh">点击任意 Provider 卡片即可切换——与应用内体验一致</span>
                 </p>
-                <!-- Currently Using Bar -->
-                <div id="switch-status-bar" style="background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.3); border-radius: 10px; padding: 0.8rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-                    <div style="display: flex; align-items: center; gap: 0.8rem;">
-                        <span style="font-size: 0.78rem; color: var(--text-dim);"><span class="en-inline">Currently Using</span><span class="zh-inline">当前使用</span></span>
-                        <span id="switch-current-model" style="font-weight: 700; color: #10A37F; font-size: 1rem;">GPT-5.4</span>
+
+                <!-- KKClaw Switch Panel Container -->
+                <div style="max-width: 600px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.12);">
+                    <!-- Current Indicator -->
+                    <div id="demo-current-indicator" style="margin: 12px 16px; padding: 16px; display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 12px; transition: all 0.2s ease;"></div>
+
+                    <!-- Search Bar -->
+                    <div style="margin: 0 16px 10px; position: relative;">
+                        <svg style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: #8E8EA0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        <input type="text" id="demo-search" placeholder="搜索供应商..." style="width: 100%; box-sizing: border-box; padding: 8px 12px 8px 32px; background: #F7F7F8; border: 1px solid #E5E5E5; border-radius: 8px; color: #000000; font-size: 13px; outline: none; transition: border-color 0.2s ease; font-family: Inter, -apple-system, sans-serif;">
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span id="switch-current-latency" style="font-size: 0.82rem; color: #10A37F; font-weight: 600;">310ms</span>
-                        <span style="font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: rgba(52,211,153,0.15); color: var(--accent-green);">● Connected</span>
-                    </div>
-                </div>
-                <!-- Provider Cards Grid -->
-                <div id="provider-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem;"></div>
-                <!-- Switch History Timeline -->
-                <div style="margin-top: 2rem; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem;">
-                    <h5 style="font-size: 0.88rem; color: var(--text-dim); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span class="en-inline">Switch History</span><span class="zh-inline">切换历史</span>
-                    </h5>
-                    <div id="switch-history" style="font-family: 'SF Mono', monospace; font-size: 0.78rem; color: var(--text-dim); line-height: 2;"></div>
+
+                    <!-- Provider List -->
+                    <div id="demo-provider-list" style="padding: 0 16px 16px;"></div>
                 </div>
             </div>
 
@@ -2429,44 +2423,44 @@ node kkclaw-hotswitch.js --restart</code></pre>
             const terminal = document.getElementById('startup-terminal');
             terminal.innerHTML = '';
 
-            // ASCII Lobster Ball
+            // ASCII Lobster Ball — exact copy from startup-banner.js
             const lobsterClosed = [
-                '            ████░░░░░░░░░░████            ',
-                '          ██░░░░░░████░░░░░░░░██          ',
-                '        ██░░░░████████████░░░░░░██        ',
-                '       █░░░░██████████████████░░░░█       ',
-                '      █░░░████████████████████████░░░█    ',
-                '     █░░░████████████████████████████░░░█ ',
-                '     █░░████████████████████████████████░░█',
-                '     █░░████████████████████████████████░░█',
-                '      █░░░████████████████████████████░░░█',
-                '       █░░░░██████████████████████░░░░█   ',
-                '        ██░░░░████████████████░░░░░░██    ',
-                '          ██░░░░░░████░░░░░░░░░░██        ',
-                '            ████░░░░░░░░░░████            ',
+                '            \u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588            ',
+                '          \u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588          ',
+                '        \u2588\u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588        ',
+                '       \u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2588       ',
+                '      \u2588\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2588      ',
+                '     \u2588\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2588     ',
+                '     \u2588\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2588     ',
+                '     \u2588\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2588     ',
+                '      \u2588\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2588      ',
+                '       \u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2588       ',
+                '        \u2588\u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588        ',
+                '          \u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588          ',
+                '            \u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588            ',
             ];
             const lobsterOpen = [
-                '            ████░░░░░░░░░░████            ',
-                '          ██░░░░░░████░░░░░░░░██          ',
-                '        ██░░░░████████████░░░░░░██        ',
-                '       █░░░░██████████████████░░░░█       ',
-                '      █░░░████████████████████████░░░█    ',
-                '     █░░░████████████████████████████░░░█ ',
-                '     █░░████████ ○ ████████ ○ ████████░░█',
-                '     █░░████████████████████████████████░░█',
-                '      █░░░████████████████████████████░░░█',
-                '       █░░░░██████████████████████░░░░█   ',
-                '        ██░░░░████████████████░░░░░░██    ',
-                '          ██░░░░░░████░░░░░░░░░░██        ',
-                '            ████░░░░░░░░░░████            ',
+                '            \u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588            ',
+                '          \u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588          ',
+                '        \u2588\u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588        ',
+                '       \u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2588       ',
+                '      \u2588\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2588      ',
+                '     \u2588\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2588     ',
+                '     \u2588\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2588     ',
+                '     \u2588\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2588     ',
+                '      \u2588\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2588      ',
+                '       \u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2588       ',
+                '        \u2588\u2588\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588        ',
+                '          \u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588          ',
+                '            \u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2588\u2588\u2588\u2588            ',
             ];
             const titleArt = [
-                ' ██╗  ██╗██╗  ██╗ ██████╗██╗      █████╗ ██╗    ██╗',
-                ' ██║ ██╔╝██║ ██╔╝██╔════╝██║     ██╔══██╗██║    ██║',
-                ' █████╔╝ █████╔╝ ██║     ██║     ███████║██║ █╗ ██║',
-                ' ██╔═██╗ ██╔═██╗ ██║     ██║     ██╔══██║██║███╗██║',
-                ' ██║  ██╗██║  ██╗╚██████╗███████╗██║  ██║╚███╔███╔╝',
-                ' ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ ',
+                ' \u2588\u2588\u2557  \u2588\u2588\u2557\u2588\u2588\u2557  \u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557      \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557    \u2588\u2588\u2557',
+                ' \u2588\u2588\u2551 \u2588\u2588\u2554\u255d\u2588\u2588\u2551 \u2588\u2588\u2554\u255d\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551    \u2588\u2588\u2551',
+                ' \u2588\u2588\u2588\u2588\u2588\u2554\u255d \u2588\u2588\u2588\u2588\u2588\u2554\u255d \u2588\u2588\u2551     \u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551 \u2588\u2557 \u2588\u2588\u2551',
+                ' \u2588\u2588\u2554\u2550\u2588\u2588\u2557 \u2588\u2588\u2554\u2550\u2588\u2588\u2557 \u2588\u2588\u2551     \u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2588\u2557\u2588\u2588\u2551',
+                ' \u2588\u2588\u2551  \u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2557\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2551\u255a\u2588\u2588\u2588\u2554\u2588\u2588\u2588\u2554\u255d',
+                ' \u255a\u2550\u255d  \u255a\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u255d \u255a\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u255d \u255a\u2550\u2550\u255d\u255a\u2550\u2550\u255d ',
             ];
 
             const allLines = [...lobsterClosed, '', ...titleArt];
@@ -2589,123 +2583,66 @@ node kkclaw-hotswitch.js --restart</code></pre>
             startupObs.observe(startupSection);
         }
 
-        // ===== KKClaw Switch Interactive Provider Panel =====
-        const PROVIDERS = [
-            { id: 'openai', name: 'OpenAI', icon: '◎', color: '#10A37F', model: 'GPT-5.4', latency: 310, api: 'openai-responses', status: 'healthy', count: 12,
-              models: ['gpt-5.4','gpt-5.3-codex-spark','gpt-5.3-codex','gpt-5.2-codex','gpt-5.2','gpt-5.1-codex-max','gpt-5.1-codex','gpt-5.1-codex-mini','gpt-5.1','gpt-5-codex','gpt-5-codex-mini','gpt-5'] },
-            { id: 'anthropic', name: 'Anthropic', icon: '✦', color: '#D97757', model: 'Claude Opus 4.6', latency: 280, api: 'anthropic-messages', status: 'healthy', count: 3,
-              models: ['claude-opus-4-6','claude-sonnet-4-6','claude-haiku-4-5-20251001'] },
-            { id: 'google', name: 'Google AI', icon: '✦', color: '#4285F4', model: 'Gemini 3.1 Pro Preview', latency: 250, api: 'openai-completions', status: 'healthy', count: 6,
-              models: ['gemini-3.1-pro-preview','gemini-3-pro-preview','gemini-3-flash-preview','gemini-2.5-pro','gemini-2.5-flash','gemini-2.5-flash-lite'] },
+        // ===== KKClaw Switch Demo (Real App UI) =====
+        const DEMO_PROVIDERS = [
+            { name: 'OpenAI', icon: '◎', color: '#10A37F', baseUrl: 'https://api.openai.com/v1', api: 'openai-responses', modelCount: 12, speedTest: { latencyMs: 310 }, isCurrent: true },
+            { name: 'Anthropic', icon: '✦', color: '#D97757', baseUrl: 'https://api.anthropic.com', api: 'anthropic-messages', modelCount: 3, speedTest: { latencyMs: 280 }, isCurrent: false },
+            { name: 'Google AI', icon: '✦', color: '#4285F4', baseUrl: 'https://generativelanguage.googleapis.com', api: 'openai-completions', modelCount: 6, speedTest: { latencyMs: 250 }, isCurrent: false }
         ];
+        let demoCurrentModel = { shortName: 'GPT-5.4', provider: 'OpenAI', modelId: 'gpt-5.4', api: 'openai-responses', icon: '◎', color: '#10A37F' };
 
-        let currentProvider = PROVIDERS[0];
-        const switchHistoryLog = [];
+        function escHtml(v) { return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 
-        function renderProviderCards() {
-            const container = document.getElementById('provider-cards');
-            if (!container) return;
-            container.innerHTML = PROVIDERS.map(p => `
-                <div id="pcard-${p.id}" onclick="switchToProvider('${p.id}')"
-                     style="background: var(--card); border: 1px solid ${p.id === currentProvider.id ? p.color : 'var(--card-border)'};
-                            border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: all 0.3s ease;
-                            position: relative; overflow: hidden;
-                            ${p.id === currentProvider.id ? 'box-shadow: 0 0 20px ' + p.color + '33;' : ''}"
-                     onmouseenter="this.style.borderColor='${p.color}'; this.style.transform='translateY(-2px)'"
-                     onmouseleave="this.style.borderColor='${p.id === currentProvider.id ? p.color : 'var(--card-border)'}'; this.style.transform=''">
-                    ${p.id === currentProvider.id ? '<div style="position:absolute;top:0;right:0;background:' + p.color + ';color:#fff;font-size:0.65rem;padding:0.15rem 0.6rem;border-radius:0 0 0 8px;font-weight:700;">ACTIVE</div>' : ''}
-                    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
-                        <span style="width:32px;height:32px;border-radius:8px;background:${p.color}22;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">${p.icon}</span>
-                        <div>
-                            <div style="font-weight:700;font-size:0.95rem;">${p.name}</div>
-                            <div style="font-size:0.75rem;color:var(--text-dim);">${p.model}</div>
-                        </div>
-                    </div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem;">
-                        <span style="font-size:0.72rem;padding:0.12rem 0.5rem;border-radius:8px;background:${p.color}15;color:${p.color};font-weight:600;">${p.count} models</span>
-                        <div style="display:flex;align-items:center;gap:0.4rem;">
-                            <span style="font-size:0.78rem;font-weight:600;color:${p.latency < 200 ? 'var(--accent-green)' : p.latency < 300 ? 'var(--accent-yellow)' : 'var(--primary)'};">${p.latency}ms</span>
-                            <span style="width:6px;height:6px;border-radius:50%;background:${p.status === 'healthy' ? 'var(--accent-green)' : 'var(--accent-yellow)'};"></span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+        function renderDemoCurrentIndicator() {
+            const el = document.getElementById('demo-current-indicator');
+            if (!el) return;
+            el.innerHTML = `<div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;background:${demoCurrentModel.color}">${escHtml(demoCurrentModel.icon)}</div>
+                <div style="flex:1;"><div style="font-size:10px;color:#8E8EA0;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;">CURRENTLY USING</div>
+                <div style="font-size:16px;font-weight:700;color:#000000;margin-top:2px;">${escHtml(demoCurrentModel.shortName)}</div>
+                <div style="font-size:11px;color:#6B6B6B;margin-top:1px;">${escHtml(demoCurrentModel.provider)} · ${escHtml(demoCurrentModel.modelId)} · ${escHtml(demoCurrentModel.api)}</div></div>`;
         }
 
-        function switchToProvider(id) {
-            const newProvider = PROVIDERS.find(p => p.id === id);
-            if (!newProvider || newProvider.id === currentProvider.id) return;
+        function renderDemoProviderList() {
+            const el = document.getElementById('demo-provider-list');
+            if (!el) return;
+            el.innerHTML = DEMO_PROVIDERS.map(p => {
+                const cur = p.isCurrent;
+                const ms = p.speedTest?.latencyMs || 0;
+                const statusClass = ms < 1000 ? 'healthy' : ms < 3000 ? 'medium' : 'slow';
+                const statusColor = statusClass === 'healthy' ? '#10A37F' : statusClass === 'medium' ? '#F59E0B' : '#EF4444';
+                return `<div onclick="demoSwitchProvider('${escHtml(p.name)}')" style="padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#FFFFFF;border:1px solid ${cur?'#10A37F':'#E5E5E5'};border-radius:12px;transition:all 0.2s ease;position:relative;${cur?'background:rgba(16,163,127,0.03);':''}" onmouseenter="this.style.background='#F7F7F8';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'" onmouseleave="this.style.background='${cur?'rgba(16,163,127,0.03)':'#FFFFFF'}';this.style.boxShadow=''">
+                    <div style="width:8px;height:8px;border-radius:50%;position:absolute;top:16px;left:8px;border:2px solid #FFFFFF;background:${statusColor}"></div>
+                    <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;background:${p.color}">${escHtml(p.icon)}</div>
+                    <div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><span style="font-size:13px;font-weight:600;color:#000000;">${escHtml(p.name)}</span>${cur?'<span style="font-size:9px;padding:2px 7px;border-radius:6px;font-weight:600;background:rgba(16,163,127,0.08);color:#10A37F;border:1px solid rgba(16,163,127,0.15);">CURRENTLY USING</span>':''}</div>
+                    <div style="font-size:10px;color:#8E8EA0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">${escHtml(p.baseUrl)}</div></div>
+                    <div style="text-align:right;flex-shrink:0;"><div style="font-size:11px;color:${statusColor};margin-bottom:2px;">${ms}ms</div>
+                    <div style="font-size:9px;color:#8E8EA0;margin-bottom:2px;font-family:ui-monospace,monospace;">${escHtml(p.api)}</div>
+                    <div style="font-size:10px;color:#6B6B6B;">${p.modelCount} model${p.modelCount!==1?'s':''}</div></div></div>`;
+            }).join('');
+        }
 
-            const oldProvider = currentProvider;
-            currentProvider = newProvider;
+        function demoSwitchProvider(name) {
+            const p = DEMO_PROVIDERS.find(x => x.name === name);
+            if (!p || p.isCurrent) return;
+            DEMO_PROVIDERS.forEach(x => x.isCurrent = false);
+            p.isCurrent = true;
+            const models = { 'OpenAI': 'GPT-5.4', 'Anthropic': 'Claude Opus 4.6', 'Google AI': 'Gemini 3.1 Pro Preview' };
+            const ids = { 'OpenAI': 'gpt-5.4', 'Anthropic': 'claude-opus-4-6', 'Google AI': 'gemini-3.1-pro-preview' };
+            demoCurrentModel = { shortName: models[name], provider: name, modelId: ids[name], api: p.api, icon: p.icon, color: p.color };
+            renderDemoCurrentIndicator();
+            renderDemoProviderList();
+        }
 
-            // Update status bar
-            const modelEl = document.getElementById('switch-current-model');
-            const latencyEl = document.getElementById('switch-current-latency');
-            if (modelEl) {
-                modelEl.textContent = newProvider.model;
-                modelEl.style.color = newProvider.color;
-            }
-            if (latencyEl) {
-                latencyEl.textContent = newProvider.latency + 'ms';
-                latencyEl.style.color = newProvider.color;
-            }
+        renderDemoCurrentIndicator();
+        renderDemoProviderList();
 
-            // Flash animation on status bar
-            const bar = document.getElementById('switch-status-bar');
-            if (bar) {
-                bar.style.borderColor = newProvider.color + '66';
-                bar.style.background = newProvider.color + '11';
-                setTimeout(() => {
-                    bar.style.borderColor = 'rgba(52,211,153,0.3)';
-                    bar.style.background = 'rgba(52,211,153,0.08)';
-                }, 1500);
-            }
-
-            // Add to history
-            const now = new Date();
-            const timeStr = now.toTimeString().slice(0, 8);
-            switchHistoryLog.unshift({
-                time: timeStr,
-                from: oldProvider,
-                to: newProvider
+        document.getElementById('demo-search')?.addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#demo-provider-list > div').forEach(card => {
+                const match = !q || card.textContent.toLowerCase().includes(q);
+                card.style.display = match ? 'flex' : 'none';
             });
-            if (switchHistoryLog.length > 6) switchHistoryLog.pop();
-            renderSwitchHistory();
-
-            // Re-render cards
-            renderProviderCards();
-        }
-
-        function renderSwitchHistory() {
-            const container = document.getElementById('switch-history');
-            if (!container) return;
-            if (switchHistoryLog.length === 0) {
-                container.innerHTML = '<span style="color:var(--text-muted);font-style:italic;">No switches yet — click a provider card above</span>';
-                return;
-            }
-            container.innerHTML = switchHistoryLog.map(h => `
-                <div style="display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0;border-bottom:1px solid var(--card-border);">
-                    <span style="color:var(--text-muted);min-width:65px;">${h.time}</span>
-                    <span style="color:${h.from.color};font-weight:600;">${h.from.icon} ${h.from.name}</span>
-                    <span style="color:var(--text-muted);">→</span>
-                    <span style="color:${h.to.color};font-weight:600;">${h.to.icon} ${h.to.name}</span>
-                    <span style="margin-left:auto;font-size:0.72rem;padding:0.1rem 0.4rem;border-radius:8px;background:${h.to.color}18;color:${h.to.color};">${h.to.model}</span>
-                </div>
-            `).join('');
-        }
-
-        // Initialize provider panel
-        renderProviderCards();
-        renderSwitchHistory();
-
-        // Auto-randomize latency to make it feel alive
-        setInterval(() => {
-            PROVIDERS.forEach(p => {
-                p.latency = Math.max(80, p.latency + Math.floor(Math.random() * 40 - 20));
-            });
-            renderProviderCards();
-        }, 4000);
+        });
     </script>
 
     <style>
