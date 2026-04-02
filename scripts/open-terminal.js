@@ -1,55 +1,88 @@
-// Open a system terminal and run KKClaw (npm start)
+// Open a system terminal and run KKClaw.
 const { execFile } = require('child_process');
 const path = require('path');
 
-const projectPath = path.resolve(__dirname, '..');
-const runCmd = `cd "${projectPath}" && npm start`;
+const DEFAULT_PROJECT_PATH = path.resolve(__dirname, '..');
 
-function onError(err) {
-  console.error('Failed to open terminal:', err.message);
-  console.error(`Fallback: run manually -> ${runCmd}`);
-  process.exitCode = 1;
+function buildRunCommand(options = {}) {
+  const projectPath = options.projectPath || DEFAULT_PROJECT_PATH;
+  const npmScript = options.npmScript || 'start';
+  return `cd "${projectPath}" && npm ${npmScript === 'start' ? 'start' : `run ${npmScript}`}`;
 }
 
-if (process.platform === 'darwin') {
-  const osaScript = [
-    'tell application "Terminal"',
-    'activate',
-    `do script "${runCmd.replace(/"/g, '\\"')}"`,
-    'end tell',
-  ].join('\n');
-  execFile('osascript', ['-e', osaScript], (err) => {
-    if (err) onError(err);
-  });
-} else if (process.platform === 'win32') {
-  const cmd = `start "" cmd.exe /k "cd /d ${projectPath} && npm start"`;
-  execFile('cmd.exe', ['/d', '/s', '/c', cmd], (err) => {
-    if (err) onError(err);
-  });
-} else {
-  const candidates = [
-    ['x-terminal-emulator', ['-e', 'sh', '-lc', runCmd]],
-    ['gnome-terminal', ['--', 'sh', '-lc', runCmd]],
-    ['konsole', ['-e', 'sh', '-lc', runCmd]],
-    ['xterm', ['-e', 'sh', '-lc', runCmd]],
-  ];
-  let launched = false;
-  const tryNext = () => {
-    if (candidates.length === 0) {
-      onError(new Error('No supported terminal found'));
+function openTerminal(options = {}) {
+  const projectPath = options.projectPath || DEFAULT_PROJECT_PATH;
+  const runCmd = buildRunCommand(options);
+
+  return new Promise((resolve, reject) => {
+    const onError = (err) => {
+      console.error('Failed to open terminal:', err.message);
+      console.error(`Fallback: run manually -> ${runCmd}`);
+      reject(err);
+    };
+
+    if (process.platform === 'darwin') {
+      const osaScript = [
+        'tell application "Terminal"',
+        'activate',
+        `do script "${runCmd.replace(/"/g, '\\"')}"`,
+        'end tell',
+      ].join('\n');
+      execFile('osascript', ['-e', osaScript], (err) => {
+        if (err) {
+          onError(err);
+          return;
+        }
+        resolve({ launched: true, command: runCmd });
+      });
       return;
     }
-    const [bin, args] = candidates.shift();
-    execFile(bin, args, (err) => {
-      if (err) {
-        tryNext();
+
+    if (process.platform === 'win32') {
+      const cmd = `start "" cmd.exe /k "cd /d ${projectPath} && npm start"`;
+      execFile('cmd.exe', ['/d', '/s', '/c', cmd], (err) => {
+        if (err) {
+          onError(err);
+          return;
+        }
+        resolve({ launched: true, command: runCmd });
+      });
+      return;
+    }
+
+    const candidates = [
+      ['x-terminal-emulator', ['-e', 'sh', '-lc', runCmd]],
+      ['gnome-terminal', ['--', 'sh', '-lc', runCmd]],
+      ['konsole', ['-e', 'sh', '-lc', runCmd]],
+      ['xterm', ['-e', 'sh', '-lc', runCmd]],
+    ];
+
+    const tryNext = () => {
+      if (candidates.length === 0) {
+        onError(new Error('No supported terminal found'));
         return;
       }
-      launched = true;
-    });
-  };
-  tryNext();
-  if (!launched) {
-    // async fallback will call onError if all fail
-  }
+      const [bin, args] = candidates.shift();
+      execFile(bin, args, (err) => {
+        if (err) {
+          tryNext();
+          return;
+        }
+        resolve({ launched: true, command: runCmd });
+      });
+    };
+
+    tryNext();
+  });
+}
+
+module.exports = {
+  buildRunCommand,
+  openTerminal,
+};
+
+if (require.main === module) {
+  openTerminal().catch(() => {
+    process.exitCode = 1;
+  });
 }

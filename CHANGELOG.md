@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-04-02
+
+### Added
+- **`kkclaw` CLI entrypoint** — Added a native command surface with `kkclaw gateway`, `kkclaw doctor`, `kkclaw status`, and `kkclaw dashboard`
+- **Gateway companion commands** — Added `kkclaw gateway status`, `kkclaw gateway logs`, `kkclaw gateway open`, `kkclaw gateway restart`, and `kkclaw gateway stop`
+- **Gateway log tailing** — Added command output for recent gateway logs and error logs with configurable tail length
+
+### Improved
+- **Animated terminal launcher reuse** — Reworked the terminal-opening helper so `kkclaw gateway` launches the same animated console flow as `npm start`
+- **Doctor observability** — Added Gateway ownership checks, Dashboard URL output, OpenClaw CLI version reporting, and process summaries to make port conflicts easier to diagnose
+
 ## [3.5.2] - 2026-03-12
 
 ### Added
@@ -199,6 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenClaw 集成
 - 简单语音系统
 
+[3.6.0]: https://github.com/kk43994/kkclaw/compare/v3.5.2...v3.6.0
 [3.5.2]: https://github.com/kk43994/kkclaw/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/kk43994/kkclaw/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/kk43994/kkclaw/compare/v3.1.2...v3.5.0

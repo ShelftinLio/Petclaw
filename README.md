@@ -16,7 +16,7 @@
 
 *OpenClaw Core + Desktop Embodiment = A living interface with emotion, voice, and presence*
 
-[![Version](https://img.shields.io/badge/version-3.5.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.6.0-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/kk43994/kkclaw/ci.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=CI)](https://github.com/kk43994/kkclaw/actions/workflows/ci.yml)
 [![Stars](https://img.shields.io/github/stars/kk43994/kkclaw?style=for-the-badge&logo=github&color=FFD700)](https://github.com/kk43994/kkclaw/stargazers)
 [![Downloads](https://img.shields.io/github/downloads/kk43994/kkclaw/total?style=for-the-badge&logo=github&color=8B5CF6)](https://github.com/kk43994/kkclaw/releases)
@@ -134,6 +134,16 @@
 | 💬 **多平台消息同步** | Discord / Telegram / 飞书 / 企业微信消息统一同步并语音播报（multi-channel message sync） |
 | 🍎 **跨平台支持** | Windows 10/11 + macOS（Intel & Apple Silicon）双平台原生支持（cross-platform Electron） |
 | 📱 **托盘菜单** | 右键系统托盘即可切换模型、查看状态、启动诊断、管理会话（system tray context menu） |
+
+### 🆕 v3.6.0 — 原生命令入口 + KKClaw Gateway CLI
+
+> 🦞 **命令体验升级！** `kkclaw gateway` 现在直接打开带开场动画的终端，并补齐 `doctor / status / logs / dashboard`
+
+- 🆕 **`kkclaw gateway` 主入口** — 直接打开现在 `npm start` 的动画终端体验，启动习惯更接近原生 OpenClaw
+- 🆕 **`kkclaw doctor`** — 增加 KKClaw 风格体检，检查 OpenClaw CLI、Gateway 连通性、Dashboard 地址和进程归属
+- 🆕 **`kkclaw gateway status / logs / open / restart / stop`** — 提供贴近 OpenClaw 使用习惯的子命令
+- 🆕 **`kkclaw dashboard`** — 直接转发到底层 `openclaw dashboard`
+- 🔧 **状态可观测性增强** — `doctor` 会提示当前 Gateway 端口是否由 KKClaw 自身占用，帮助排查旧进程/端口冲突
 
 ### 🆕 v3.5.2 — Setup Wizard 修复 + 一键安装缺失依赖
 
@@ -265,15 +275,15 @@
 
 ## 📦 下载安装
 
-### 最新版本：v3.5.2
+### 最新版本：v3.6.0
 
 <div align="center">
 
 | 平台 | 架构 | 下载链接 | 大小 |
 |------|------|----------|------|
-| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.5.2-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.5.2-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.5.2-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.6.0-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.6.0/KKClaw-Desktop-Pet-3.6.0-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.6.0-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.6.0/KKClaw-Desktop-Pet-3.6.0-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.6.0-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.6.0/KKClaw-Desktop-Pet-3.6.0-arm64.dmg) | ~160MB |
 
 [📦 查看所有版本](https://github.com/kk43994/kkclaw/releases) | [🎥 在线演示](https://kk43994.github.io/kkclaw/)
 
@@ -295,6 +305,18 @@
 > ```
 >
 > 发行版适合只想快速体验的用户，长期使用推荐源码运行。
+
+### 命令行入口（推荐）
+
+```bash
+npm link
+
+kkclaw gateway          # 打开带开场动画的 KKClaw Gateway 终端
+kkclaw gateway status   # 查看网关状态 / 端口 / Dashboard 地址
+kkclaw gateway logs     # 查看 Gateway 日志
+kkclaw doctor           # 做一轮 KKClaw 体检
+kkclaw dashboard        # 打开 OpenClaw Dashboard
+```
 
 ### 安装说明
 
@@ -734,6 +756,7 @@ desktop-pet/
 ```bash
 npm start              # 启动应用
 npm run dev            # 开发模式（热重载）
+npm run console        # 打开系统终端并运行 npm start
 npm test               # 运行测试
 npm run build          # 构建发布版
 ```
@@ -841,6 +864,19 @@ node kkclaw-hotswitch.js --restart
 ---
 
 ## 📝 更新日志
+
+### [3.6.0] - 2026-04-02
+
+#### 🦞 KKClaw CLI
+- 新增 `kkclaw` 命令入口，支持 `kkclaw gateway`
+- `kkclaw gateway` / `kkclaw gateway start` 直接打开带开场动画的终端（当前 `npm start` 体验）
+- 新增 `kkclaw gateway status / logs / open / restart / stop`
+- 新增 `kkclaw doctor` 和顶层 `kkclaw status`
+
+#### 🔍 诊断与可观测性
+- `kkclaw doctor` 增加 Gateway ownership 检查，能发现端口被旧进程或外部实例占用
+- `kkclaw gateway status` 增加 Dashboard 地址、日志路径、OpenClaw CLI 版本和进程摘要
+- `kkclaw gateway logs` 支持查看标准日志 / 错误日志并设置 tail 行数
 
 ### [3.5.2] - 2026-03-12
 
@@ -1078,7 +1114,7 @@ node kkclaw-hotswitch.js --restart
 
 ![Hero Banner](docs/images/hero-banner.png)
 
-[![Version](https://img.shields.io/badge/version-3.5.2-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.6.0-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/kkclaw)
 
@@ -1182,6 +1218,15 @@ Give your OpenClaw AI a **visible, audible** desktop embodiment.
 | 🍎 **Win + Mac Support** | Windows 10/11 and macOS (Intel & Apple Silicon) both supported (cross-platform Electron) |
 | 📱 **Tray Menu Control Center** | Right-click tray icon to switch models, check status, run diagnostics, manage sessions (system tray context menu) |
 
+### 🆕 What's New in v3.6.0
+
+> 🦞 **Native command workflow!** `kkclaw gateway` now opens the same animated console as `npm start`, with companion commands for status, logs, doctor, and dashboard access
+
+- 🆕 **`kkclaw gateway` entrypoint** — Opens the animated KKClaw terminal and makes startup feel closer to native OpenClaw workflows
+- 🆕 **`kkclaw doctor`** — Adds a KKClaw-oriented health check for OpenClaw CLI, Gateway reachability, Dashboard URL, and process ownership
+- 🆕 **Gateway subcommands** — `status / logs / open / restart / stop` bring a more familiar command surface
+- 🔧 **Gateway ownership diagnostics** — Detects when the Gateway port is alive but owned by an older or external process
+
 ### 🆕 What's New in v3.5.2
 
 > ⚡ **UX polish!** Wizard blank page fix + One-click missing dependency installer + Cross-platform support
@@ -1245,13 +1290,25 @@ npm start
 
 > 🧙 **Setup Wizard** will launch automatically on first run — just follow the guide!
 
+#### CLI Entry (Recommended)
+
+```bash
+npm link
+
+kkclaw gateway          # Open the animated KKClaw terminal (same experience as npm start)
+kkclaw gateway status   # Show gateway state, port, and Dashboard URL
+kkclaw gateway logs     # Tail gateway logs
+kkclaw doctor           # Run a KKClaw-oriented health check
+kkclaw dashboard        # Open the OpenClaw dashboard
+```
+
 ### 📦 Downloads
 
 | Platform | Arch | Download | Size |
 |----------|------|----------|------|
-| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.5.2/KKClaw-Desktop-Pet-3.5.2-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.6.0/KKClaw-Desktop-Pet-3.6.0-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.6.0/KKClaw-Desktop-Pet-3.6.0-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.6.0/KKClaw-Desktop-Pet-3.6.0-arm64.dmg) | ~160MB |
 
 [📦 All Releases](https://github.com/kk43994/kkclaw/releases)
 
