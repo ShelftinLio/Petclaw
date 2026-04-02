@@ -1,7 +1,14 @@
-jest.mock('child_process', () => ({
-  execSync: jest.fn(() => ''),
-  spawn: jest.fn(),
-}))
+jest.mock('child_process', () => {
+  const { EventEmitter } = require('events')
+  return {
+    execSync: jest.fn(() => ''),
+    spawn: jest.fn(() => {
+      const child = new EventEmitter()
+      process.nextTick(() => child.emit('close', 0))
+      return child
+    }),
+  }
+})
 
 jest.mock('../../scripts/open-terminal', () => ({
   openTerminal: jest.fn(() => Promise.resolve({ launched: true })),
@@ -43,7 +50,7 @@ jest.mock('../../utils/path-resolver', () => ({
   getOpenClawConfigPath: jest.fn(() => '/Users/test/.openclaw/openclaw.json'),
 }))
 
-const { execSync } = require('child_process')
+const { execSync, spawn } = require('child_process')
 const { openTerminal } = require('../../scripts/open-terminal')
 const { formatHelp, parseArgs, run } = require('../../bin/kkclaw')
 
@@ -55,6 +62,7 @@ describe('kkclaw cli', () => {
   beforeEach(() => {
     execSync.mockReset()
     execSync.mockImplementation(() => '')
+    spawn.mockClear()
     openTerminal.mockClear()
     global.fetch = jest.fn(() => Promise.resolve({ status: 200 }))
   })
@@ -123,5 +131,33 @@ describe('kkclaw cli', () => {
 
     await expect(run({ type: 'gateway-status', json: false })).resolves.toBe(0)
     expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('/opt/homebrew/bin/openclaw'))
+    expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('KKClaw processes: none'))
+  })
+
+  test('stops the installed gateway before force cleanup', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ status: 200 })
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockRejectedValueOnce(new Error('offline'))
+
+    execSync
+      .mockImplementationOnce(() => 'COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME\nnode 1653 user 15u IPv4 0t0 TCP 127.0.0.1:18789 (LISTEN)')
+      .mockImplementationOnce(
+        () =>
+          '33814 /Users/test/kkclaw/node_modules/.bin/electron .\n33996 /Users/test/kkclaw/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Helper (GPU).app/Contents/MacOS/Electron Helper (GPU) --user-data-dir=/Users/test/Library/Application Support/openclaw-kkclaw'
+      )
+      .mockImplementationOnce(() => '')
+      .mockImplementationOnce(() => '')
+      .mockImplementationOnce(() => '')
+      .mockImplementationOnce(() => '')
+
+    await expect(run({ type: 'gateway-stop' })).resolves.toBe(0)
+    expect(spawn).toHaveBeenCalledWith(
+      '/opt/homebrew/bin/openclaw',
+      ['gateway', 'stop'],
+      expect.objectContaining({ cwd: '/opt/homebrew/bin', stdio: 'inherit' })
+    )
+    expect(stdoutSpy).toHaveBeenCalledWith('Requested installed OpenClaw gateway stop.')
   })
 })

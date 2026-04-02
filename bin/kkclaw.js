@@ -207,7 +207,16 @@ function dedupeListeners(listeners) {
   return [...new Map(listeners.map((entry) => [`${entry.command}:${entry.pid}`, entry])).values()];
 }
 
-function listKkclawProcesses(projectRoot = pathResolver.getProjectRoot()) {
+function isKkclawProcessCommand(command) {
+  return (
+    command.includes('/node_modules/.bin/electron .') ||
+    command.includes('/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron .') ||
+    command.includes('KKClaw Desktop Pet') ||
+    (command.includes('Electron Helper') && command.includes('openclaw-kkclaw'))
+  );
+}
+
+function listKkclawProcesses() {
   if (process.platform === 'win32') {
     return [];
   }
@@ -237,11 +246,7 @@ function listKkclawProcesses(projectRoot = pathResolver.getProjectRoot()) {
         if (entry.pid === process.pid) {
           return false;
         }
-        return (
-          entry.command.includes(projectRoot) ||
-          entry.command.includes('KKClaw Desktop Pet') ||
-          entry.command.includes(`${path.sep}kkclaw${path.sep}`)
-        );
+        return isKkclawProcessCommand(entry.command);
       });
   } catch {
     return [];
@@ -455,17 +460,33 @@ function killPid(pid) {
 }
 
 async function stopGatewayProcesses() {
+  const initialStatus = await gatherStatus();
+
+  if (initialStatus.gateway.http.ok || initialStatus.gateway.listeners.length > 0) {
+    try {
+      const stopCode = await runOpenClawCommand(['gateway', 'stop']);
+      if (stopCode === 0) {
+        console.log('Requested installed OpenClaw gateway stop.');
+      }
+    } catch (error) {
+      console.warn(`OpenClaw gateway stop failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    await sleep(1000);
+  }
+
   const status = await gatherStatus();
   const pids = new Set();
 
   for (const processInfo of status.kkclaw.processes) {
-    pids.add(processInfo.pid);
+    if (isKkclawProcessCommand(processInfo.command)) {
+      pids.add(processInfo.pid);
+    }
   }
   for (const listener of status.gateway.listeners) {
     pids.add(listener.pid);
   }
 
-  if (pids.size === 0) {
+  if (pids.size === 0 && !status.gateway.http.ok) {
     console.log('KKClaw gateway is not running.');
     return 0;
   }
@@ -489,6 +510,12 @@ async function stopGatewayProcesses() {
       } catch (_) {}
     }
     await sleep(500);
+  }
+
+  const finalStatus = await gatherStatus();
+  if (finalStatus.gateway.http.ok || finalStatus.gateway.listeners.length > 0) {
+    console.error('Failed to stop all gateway listeners.');
+    return 1;
   }
 
   console.log('Stopped KKClaw gateway processes.');
