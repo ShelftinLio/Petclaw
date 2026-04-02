@@ -1,10 +1,12 @@
 // OpenClaw 自动更新检查器
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const { promisify } = require('util');
 const path = require('path');
 const fs = require('fs');
+const openClawPathResolver = require('./openclaw-path-resolver');
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 class OpenClawUpdater {
     constructor(voiceSystem = null, workLogger = null) {
@@ -45,12 +47,25 @@ class OpenClawUpdater {
         }
     }
 
+    async _runOpenClawCommand(args, timeout = 5000) {
+        const invocation = openClawPathResolver.resolveOpenClawInvocation(args);
+        if (!invocation) {
+            throw new Error('未检测到已安装的 openclaw');
+        }
+
+        return await execFileAsync(invocation.command, invocation.args, {
+            cwd: invocation.cwd,
+            windowsHide: invocation.windowsHide ?? true,
+            timeout,
+        });
+    }
+
     /**
      * 获取当前版本
      */
     async getCurrentVersion() {
         try {
-            const { stdout } = await execAsync('openclaw --version', { timeout: 5000, windowsHide: true });
+            const { stdout } = await this._runOpenClawCommand(['--version'], 5000);
             return stdout.trim();
         } catch (err) {
             console.error('获取当前版本失败:', err.message);
@@ -99,10 +114,13 @@ class OpenClawUpdater {
      * 获取 openclaw 安装目录和关键入口文件路径
      */
     _getOpenclawPaths() {
-        const home = process.env.HOME || process.env.USERPROFILE;
-        const installDir = path.join(home, '.npm-global', 'node_modules', 'openclaw');
-        const entryFile = path.join(installDir, 'dist', 'index.js');
-        const backupDir = path.join(home, '.npm-global', 'node_modules', '.openclaw-backup');
+        const entryFile = openClawPathResolver.findOpenClawPath();
+        if (!entryFile) {
+            return { installDir: null, entryFile: null, backupDir: null };
+        }
+
+        const installDir = path.dirname(path.dirname(entryFile));
+        const backupDir = path.join(path.dirname(installDir), '.openclaw-backup');
         return { installDir, entryFile, backupDir };
     }
 
@@ -124,7 +142,7 @@ class OpenClawUpdater {
             }
 
             // 备份旧版本
-            if (fs.existsSync(installDir)) {
+            if (installDir && fs.existsSync(installDir)) {
                 if (fs.existsSync(backupDir)) {
                     fs.rmSync(backupDir, { recursive: true, force: true });
                 }
@@ -141,9 +159,9 @@ class OpenClawUpdater {
             console.log(stdout);
 
             // 验证关键文件是否存在
-            if (!fs.existsSync(entryFile)) {
+            if (!entryFile || !fs.existsSync(entryFile)) {
                 console.error('❌ 更新后 dist/index.js 不存在，回滚到旧版本');
-                if (fs.existsSync(backupDir)) {
+                if (backupDir && fs.existsSync(backupDir) && installDir) {
                     if (fs.existsSync(installDir)) {
                         fs.rmSync(installDir, { recursive: true, force: true });
                     }
@@ -158,7 +176,7 @@ class OpenClawUpdater {
             }
 
             // 更新成功，清理备份
-            if (fs.existsSync(backupDir)) {
+            if (backupDir && fs.existsSync(backupDir)) {
                 fs.rmSync(backupDir, { recursive: true, force: true });
             }
 
@@ -175,7 +193,7 @@ class OpenClawUpdater {
             console.error('❌ OpenClaw 更新失败:', err.message);
 
             // npm install 失败时也尝试回滚
-            if (fs.existsSync(backupDir) && !fs.existsSync(entryFile)) {
+            if (backupDir && fs.existsSync(backupDir) && (!entryFile || !fs.existsSync(entryFile)) && installDir) {
                 try {
                     if (fs.existsSync(installDir)) {
                         fs.rmSync(installDir, { recursive: true, force: true });
@@ -201,7 +219,7 @@ class OpenClawUpdater {
     async runDoctor() {
         try {
             console.log('🔧 运行 openclaw doctor...');
-            const { stdout } = await execAsync('openclaw doctor', { timeout: 30000, windowsHide: true });
+            const { stdout } = await this._runOpenClawCommand(['doctor'], 30000);
             console.log(stdout);
         } catch (err) {
             console.error('运行 doctor 失败:', err.message);

@@ -2,6 +2,7 @@
 const { spawn, exec } = require('child_process');
 const EventEmitter = require('events');
 const configManager = require('./utils/config-manager');
+const openClawPathResolver = require('./utils/openclaw-path-resolver');
 
 class ServiceManager extends EventEmitter {
     constructor() {
@@ -255,10 +256,9 @@ class ServiceManager extends EventEmitter {
             }
         }
 
-        const pathResolver = require('./utils/openclaw-path-resolver');
-        const openclawPath = pathResolver.findOpenClawPath();
+        const invocation = openClawPathResolver.resolveOpenClawInvocation(['gateway', '--port', String(gatewayPort)]);
 
-        if (!openclawPath) {
+        if (!invocation) {
             this.log('error', 'openclaw 未找到！请确认已安装: npm/pnpm install -g openclaw', 'gateway');
             return {
                 success: false,
@@ -266,10 +266,17 @@ class ServiceManager extends EventEmitter {
             };
         }
 
-        const child = spawn('node', [openclawPath, 'gateway', '--port', String(gatewayPort)], {
+        this.log(
+            'info',
+            `使用已安装 OpenClaw: ${invocation.cliPath}`,
+            'gateway'
+        );
+
+        const child = spawn(invocation.command, invocation.args, {
+            cwd: invocation.cwd,
             stdio: ['ignore', 'pipe', 'pipe'], // 捕获 stdout + stderr 用于诊断
-            shell: false,
-            windowsHide: true
+            shell: invocation.shell ?? false,
+            windowsHide: invocation.windowsHide ?? true
         });
 
         // 收集 stdout + stderr 输出（各保留最后 2KB）

@@ -259,8 +259,9 @@ async function gatherStatus() {
   const kkclawProcesses = listKkclawProcesses();
   const primaryKkclawPid = kkclawProcesses[0]?.pid ?? null;
   const managedByKkclaw =
-    listeners.length === 0 ||
-    listeners.some((listener) => kkclawProcesses.some((entry) => entry.pid === listener.pid));
+    listeners.length === 0
+      ? null
+      : listeners.some((listener) => kkclawProcesses.some((entry) => entry.pid === listener.pid));
 
   return {
     ok: Boolean(openclaw.installed),
@@ -305,8 +306,10 @@ function printStatus(status) {
   console.log(`- Dashboard: ${status.gateway.dashboardUrl}`);
   console.log(`- Logs: ${status.gateway.logs.out}`);
   console.log(`- KKClaw processes: ${processLine}`);
-  if (!status.gateway.managedByKkclaw) {
+  if (status.gateway.managedByKkclaw === false) {
     console.log('- Warning: the gateway port is active, but the listener does not look like a KKClaw-managed process.');
+  } else if (status.gateway.managedByKkclaw === null) {
+    console.log('- Warning: no gateway listener is active on the configured port.');
   }
 }
 
@@ -352,8 +355,10 @@ function printDoctor(status) {
     },
     {
       name: 'Gateway ownership',
-      ok: Boolean(status.gateway.managedByKkclaw),
-      detail: status.gateway.managedByKkclaw
+      ok: status.gateway.managedByKkclaw !== false,
+      detail: status.gateway.managedByKkclaw === null
+        ? 'no active listener on the configured gateway port'
+        : status.gateway.managedByKkclaw
         ? 'listener matches the running KKClaw app'
         : 'port is occupied by a process outside the current KKClaw runtime',
     },
@@ -379,8 +384,10 @@ function printDoctor(status) {
   if (!status.gateway.http.ok) {
     console.log('- Hint: run `kkclaw gateway` to launch the animated KKClaw console.');
   }
-  if (!status.gateway.managedByKkclaw) {
+  if (status.gateway.managedByKkclaw === false) {
     console.log('- Hint: another process owns the gateway port. Use `kkclaw gateway stop` before relaunching KKClaw.');
+  } else if (status.gateway.managedByKkclaw === null) {
+    console.log('- Hint: no gateway listener is active yet. Launch the animated console or start OpenClaw separately.');
   }
 }
 
@@ -411,9 +418,14 @@ function waitForChild(child) {
 }
 
 async function runOpenClawCommand(args) {
-  const child = require('child_process').spawn('openclaw', args, {
+  const invocation = require('../utils/openclaw-path-resolver').resolveOpenClawInvocation(args);
+  if (!invocation) {
+    throw new Error('OpenClaw CLI not found');
+  }
+  const child = require('child_process').spawn(invocation.command, invocation.args, {
+    cwd: invocation.cwd,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
+    shell: invocation.shell ?? process.platform === 'win32',
   });
   return waitForChild(child);
 }

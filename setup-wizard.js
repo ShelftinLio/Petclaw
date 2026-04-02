@@ -9,6 +9,7 @@ const { promisify } = require('util');
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 const pathResolver = require('./utils/path-resolver');
+const openClawPathResolver = require('./utils/openclaw-path-resolver');
 const openclawDetector = require('./utils/openclaw-detector');
 const dependencyChecker = require('./utils/dependency-checker');
 
@@ -197,6 +198,19 @@ class SetupWizard {
     });
   }
 
+  async _runOpenClawCommand(args, options = {}) {
+    const invocation = openClawPathResolver.resolveOpenClawInvocation(args);
+    if (!invocation) {
+      throw new Error('未检测到已安装的 openclaw');
+    }
+
+    return await execFileAsync(invocation.command, invocation.args, {
+      cwd: invocation.cwd,
+      windowsHide: invocation.windowsHide ?? true,
+      timeout: options.timeout ?? 5000,
+    });
+  }
+
   // ─── Step 4: 灵魂注入（分步进度版）──────────────────────
 
   async _infuseSoul(config, sender) {
@@ -334,67 +348,17 @@ class SetupWizard {
     }
 
     // 2. OpenClaw 安装 & 路径检测
-    try {
-      // 方法1: npm root -g
-      const { stdout: npmRoot } = await execAsync('npm root -g', { windowsHide: true, timeout: 5000 });
-      const p1 = path.join(npmRoot.trim(), 'openclaw', 'dist', 'index.js');
-      if (fs.existsSync(p1)) {
-        results.openclaw.ok = true;
-        results.openclaw.path = p1;
-      }
-    } catch (e) { /* fallback */ }
-
-    if (!results.openclaw.ok) {
-      try {
-        // 方法2: where/which
-        const cmd = process.platform === 'win32' ? 'where openclaw' : 'which openclaw';
-        const { stdout } = await execAsync(cmd, { windowsHide: true, timeout: 5000 });
-        const binPath = stdout.trim().split('\n')[0];
-        const binDir = path.dirname(binPath);
-        const candidates = [
-          path.join(binDir, '..', 'node_modules', 'openclaw', 'dist', 'index.js'),
-          path.join(binDir, '..', 'lib', 'node_modules', 'openclaw', 'dist', 'index.js'),
-        ];
-        for (const c of candidates) {
-          if (fs.existsSync(path.normalize(c))) {
-            results.openclaw.ok = true;
-            results.openclaw.path = path.normalize(c);
-            break;
-          }
-        }
-      } catch (e) { /* fallback */ }
-    }
-
-    if (!results.openclaw.ok) {
-      // 方法3: 常见路径
-      const home = this.homeDir;
-      const fallbacks = [
-        path.join(home, '.npm-global', 'node_modules', 'openclaw', 'dist', 'index.js'),
-        path.join(home, 'AppData', 'Roaming', 'npm', 'node_modules', 'openclaw', 'dist', 'index.js'),
-        '/usr/local/lib/node_modules/openclaw/dist/index.js',
-        '/usr/lib/node_modules/openclaw/dist/index.js',
-      ];
-      for (const p of fallbacks) {
-        if (fs.existsSync(p)) {
-          results.openclaw.ok = true;
-          results.openclaw.path = p;
-          break;
-        }
-      }
-    }
-
-    if (!results.openclaw.ok) {
+    const detection = await openclawDetector.detect();
+    if (detection.installed) {
+      results.openclaw.ok = true;
+      results.openclaw.path =
+        openClawPathResolver.findOpenClawPath() ||
+        detection.installRoot ||
+        detection.cliPath ||
+        '';
+      results.openclaw.version = detection.version || '(版本未知)';
+    } else {
       results.openclaw.error = '未检测到 openclaw，请先安装: npm install -g openclaw';
-    }
-
-    // 获取 OpenClaw 版本
-    if (results.openclaw.ok) {
-      try {
-        const { stdout } = await execAsync('openclaw --version', { windowsHide: true, timeout: 5000 });
-        results.openclaw.version = stdout.trim();
-      } catch (e) {
-        results.openclaw.version = '(版本未知)';
-      }
     }
 
     // 3. Gateway 连接检测
@@ -523,10 +487,18 @@ class SetupWizard {
 
   async _startGateway() {
     try {
+      const invocation = openClawPathResolver.resolveOpenClawInvocation(['gateway', 'start']);
+      if (!invocation) {
+        return { success: false, error: '未检测到已安装的 openclaw' };
+      }
+
       // 用 spawn 后台启动
-      const { spawn } = require('child_process');
-      const child = spawn('openclaw', ['gateway', 'start'], {
-        detached: true, shell: true, windowsHide: true, stdio: 'ignore'
+      const child = spawn(invocation.command, invocation.args, {
+        cwd: invocation.cwd,
+        detached: true,
+        shell: invocation.shell ?? false,
+        windowsHide: invocation.windowsHide ?? true,
+        stdio: 'ignore'
       });
       child.unref();
 

@@ -112,9 +112,17 @@ function buildGatewayDashboardUrl(port, token) {
 
 function resolveDashboardUrlFromCli() {
   return new Promise((resolve, reject) => {
-    const child = process.platform === 'win32'
-      ? spawn('cmd.exe', ['/d', '/s', '/c', 'openclaw dashboard --no-open'], { windowsHide: true })
-      : spawn('openclaw', ['dashboard', '--no-open'], { windowsHide: true });
+    const invocation = pathResolver.resolveOpenClawInvocation(['dashboard', '--no-open']);
+    if (!invocation) {
+      reject(new Error('openclaw command not found'));
+      return;
+    }
+
+    const child = spawn(invocation.command, invocation.args, {
+      cwd: invocation.cwd,
+      shell: invocation.shell ?? false,
+      windowsHide: invocation.windowsHide ?? true,
+    });
 
     let output = '';
     child.stdout.on('data', (chunk) => {

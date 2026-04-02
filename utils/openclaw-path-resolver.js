@@ -90,6 +90,34 @@ class OpenClawPathResolver {
         return openclawPath;
     }
 
+    findOpenClawCliPath() {
+        try {
+            const cmd = process.platform === 'win32' ? 'where openclaw' : 'which openclaw';
+            const binPath = execSync(cmd, { encoding: 'utf8', windowsHide: true }).trim().split('\n')[0];
+            return binPath && fs.existsSync(binPath) ? path.normalize(binPath) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    resolveOpenClawInvocation(cliArgs = []) {
+        const cliPath = this.findOpenClawCliPath();
+        if (!cliPath) {
+            return null;
+        }
+
+        return {
+            source: 'installed-cli',
+            installRoot: path.dirname(path.dirname(cliPath)),
+            cliPath,
+            command: cliPath,
+            args: cliArgs,
+            cwd: path.dirname(cliPath),
+            shell: process.platform === 'win32',
+            windowsHide: true,
+        };
+    }
+
     /**
      * 获取 openclaw 配置目录
      * @returns {string} ~/.openclaw 目录路径

@@ -25,6 +25,18 @@ jest.mock('../../utils/openclaw-detector', () => ({
   ),
 }))
 
+jest.mock('../../utils/openclaw-path-resolver', () => ({
+  resolveOpenClawInvocation: jest.fn((args = []) => ({
+    source: 'installed-cli',
+    installRoot: '/opt/homebrew/lib/node_modules/openclaw',
+    cliPath: '/opt/homebrew/bin/openclaw',
+    command: '/opt/homebrew/bin/openclaw',
+    args,
+    cwd: '/opt/homebrew/bin',
+    shell: false,
+  })),
+}))
+
 jest.mock('../../utils/path-resolver', () => ({
   getProjectRoot: jest.fn(() => '/repo/kkclaw'),
   getOpenClawConfigDir: jest.fn(() => '/Users/test/.openclaw'),
@@ -102,5 +114,14 @@ describe('kkclaw cli', () => {
     await expect(run({ type: 'doctor', json: false })).resolves.toBe(0)
     expect(stdoutSpy).toHaveBeenCalledWith('KKClaw Doctor')
     expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('Gateway ownership'))
+  })
+
+  test('reports the installed openclaw cli in status output', async () => {
+    execSync
+      .mockImplementationOnce(() => '')
+      .mockImplementationOnce(() => '')
+
+    await expect(run({ type: 'gateway-status', json: false })).resolves.toBe(0)
+    expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('/opt/homebrew/bin/openclaw'))
   })
 })
