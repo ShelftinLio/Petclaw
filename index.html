@@ -546,6 +546,7 @@ let activeAppearance = { mode: 'cow-cat', activePetId: 'cow-cat', customPets: []
 let activePetManifest = null;
 let spriteFrameTimer = null;
 let spriteFrameIndex = 0;
+let spriteReactionTimer = null;
 
 function setAppearanceNote(text) {
     if (appearanceNote) appearanceNote.textContent = text || '';
@@ -618,6 +619,22 @@ function startSpriteAnimation() {
     const duration = state?.duration || 140;
     updateSpriteFrame();
     spriteFrameTimer = setInterval(updateSpriteFrame, duration);
+}
+
+function hasSpritePet() {
+    return Boolean(activePetManifest && activePetManifest.renderer === 'spritesheet' && pet.classList.contains('custom-image'));
+}
+
+function playSpriteReaction(mood, duration = 900) {
+    if (!hasSpritePet()) return false;
+    const restoreMood = currentMood === 'offline' ? 'idle' : currentMood;
+    clearTimeout(spriteReactionTimer);
+    setMood(activePetManifest.states?.[mood] ? mood : 'happy');
+    spriteReactionTimer = setTimeout(() => {
+        setMood(restoreMood);
+        spriteReactionTimer = null;
+    }, duration);
+    return true;
 }
 
 async function loadAppearance() {
@@ -984,44 +1001,51 @@ pet.addEventListener('click', () => {
     if (isDrag) return;
     clickCount++;
     clearTimeout(clickTimer);
-    squishing = true;
-    
-    // 🎨 增强点击动画：带颜色脉冲
-    pet.style.animation = 'squish 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
-    // 点击时球体稍微变亮
-    pet.style.filter = 'brightness(1.15)';
-    
-    setTimeout(() => { 
-        pet.style.animation = ''; 
-        pet.style.filter = '';
-        squishing = false; 
-    }, 350);
-    
+
+    const spritePet = hasSpritePet();
+    if (!spritePet) {
+        squishing = true;
+        pet.style.animation = 'squish 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        pet.style.filter = 'brightness(1.15)';
+        setTimeout(() => {
+            pet.style.animation = '';
+            pet.style.filter = '';
+            squishing = false;
+        }, 350);
+    } else {
+        pet.style.filter = 'brightness(1.08)';
+        setTimeout(() => { pet.style.filter = ''; }, 260);
+    }
+
     spawnParticles();
     mouseTracking = false;
 
     if (clickCount >= 3) {
-        // 💖 三击超开心模式
-        EXPR.superHappy();
-        blushL.style.background = 'rgba(255,100,100,0.6)';
-        blushR.style.background = 'rgba(255,100,100,0.6)';
-        targetScale = 1.1;
-        // 眼睛也要跟着放大
-        eyeL.style.transform = 'scale(1.15)';
-        eyeR.style.transform = 'scale(1.15)';
-        
-        // 三击打开历史消息
+        if (spritePet) {
+            playSpriteReaction('surprised', 1200);
+        } else {
+            EXPR.superHappy();
+            blushL.style.background = 'rgba(255,100,100,0.6)';
+            blushR.style.background = 'rgba(255,100,100,0.6)';
+            targetScale = 1.1;
+            eyeL.style.transform = 'scale(1.15)';
+            eyeR.style.transform = 'scale(1.15)';
+        }
         if (electronAPI) electronAPI.invoke('show-history');
-        setTimeout(() => { 
-            resetClick(); 
+        setTimeout(() => {
+            resetClick();
             clickCount = 0;
             eyeL.style.transform = '';
             eyeR.style.transform = '';
         }, 1200);
     } else {
-        // 随机表情 + 眼睛动画
-        const rr = ['happy','wink','winkR','surprised','curious','giggle','sparkle','wow'];
-        EXPR[rr[Math.floor(Math.random()*rr.length)]]();
+        if (spritePet) {
+            const rr = ['happy', 'talking', 'thinking'];
+            playSpriteReaction(rr[Math.floor(Math.random() * rr.length)], 820);
+        } else {
+            const rr = ['happy','wink','winkR','surprised','curious','giggle','sparkle','wow'];
+            EXPR[rr[Math.floor(Math.random()*rr.length)]]();
+        }
         clickTimer = setTimeout(() => { resetClick(); clickCount = 0; }, 800);
     }
 });
