@@ -682,9 +682,9 @@ async function createWindow() {
   });
 
   mainWindow = new BrowserWindow({
-    width: 200,
-    height: 260,
-    x: petConfig.get('position')?.x || width - 200,
+    width: 240,
+    height: 300,
+    x: petConfig.get('position')?.x || width - 240,
     y: petConfig.get('position')?.y || height - 200,
     frame: false,
     transparent: true,
