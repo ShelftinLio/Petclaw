@@ -683,9 +683,9 @@ async function createWindow() {
 
   mainWindow = new BrowserWindow({
     width: 260,
-    height: 280,
+    height: 380,
     x: petConfig.get('position')?.x || width - 260,
-    y: petConfig.get('position')?.y || height - 280,
+    y: petConfig.get('position')?.y || height - 380,
     frame: false,
     transparent: true,
     backgroundColor: '#00000000', // macOS 全透明背景，消除淡粉色方框
@@ -1585,7 +1585,7 @@ function reopenSetupWizard() {
 }
 
 // 屏幕边界约束 — 防止球体跑到屏幕外
-function clampToScreen(x, y, winWidth = 260, winHeight = 280) {
+function clampToScreen(x, y, winWidth = 260, winHeight = 380) {
   const displays = screen.getAllDisplays();
   // 获取所有显示器的总边界
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
