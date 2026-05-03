@@ -5,6 +5,7 @@ const {
   validatePetManifest,
   createCustomPetRecord,
   createImagePetManifest,
+  createImagegenPetRequest,
   upsertCustomPet,
   setActivePet,
   inferRendererFromFiles,
@@ -122,6 +123,40 @@ describe('Pet appearance helpers', () => {
       },
     })
     expect(validatePetManifest(manifest)).toEqual({ ok: true })
+  })
+
+  test('createImagegenPetRequest creates a hatch-style generation package request', () => {
+    const request = createImagegenPetRequest({
+      id: 'imagegen-1',
+      name: 'Moon Cat',
+      description: 'a sleepy black cat with a moon collar',
+      referenceImage: 'reference.png',
+      createdAt: '2026-05-03T12:00:00.000Z',
+    })
+
+    expect(request.record).toEqual({
+      id: 'imagegen-1',
+      name: 'Moon Cat',
+      source: 'imagegen',
+      renderer: 'spritesheet',
+      assetDir: 'assets/pets/custom/imagegen-1',
+      manifestPath: 'assets/pets/custom/imagegen-1/pet.json',
+      createdAt: '2026-05-03T12:00:00.000Z',
+    })
+    expect(request.manifest).toMatchObject({
+      id: 'imagegen-1',
+      name: 'Moon Cat',
+      source: 'imagegen',
+      renderer: 'spritesheet',
+      spritesheet: 'spritesheet.webp',
+      cell: { width: 192, height: 208 },
+      layout: { columns: 8 },
+    })
+    expect(request.prompt).toContain('$imagegen')
+    expect(request.prompt).toContain('a sleepy black cat with a moon collar')
+    expect(request.prompt).toContain('reference.png')
+    expect(request.readme).toContain('spritesheet.webp')
+    expect(validatePetManifest(request.manifest)).toEqual({ ok: true })
   })
 
   test('upsertCustomPet replaces existing pet records by id', () => {

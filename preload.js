@@ -58,6 +58,7 @@ const VALID_INVOKE_CHANNELS = [
   'appearance-upload-image',
   'appearance-save-generated-image',
   'appearance-import-package',
+  'appearance-create-imagegen-request',
   'appearance-imagegen-status'
 ];
 

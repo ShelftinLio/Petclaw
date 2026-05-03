@@ -642,7 +642,17 @@ async function importPetPackage() {
 async function showImagegenHelp() {
     if (!window.electronAPI) return;
     const status = await electronAPI.invoke('appearance-imagegen-status');
-    setAppearanceNote(status.message || 'Use $imagegen, then import the pet package.');
+    const name = prompt('Pet name for $imagegen package:', 'Generated Pet');
+    if (name === null) { setAppearanceNote('AI generation canceled.'); return; }
+    const description = prompt('Describe the pet. You can mention species, colors, outfit, personality:', 'a tiny friendly pixel pet with vertical i-like glowing eyes');
+    if (description === null) { setAppearanceNote('AI generation canceled.'); return; }
+    const includeReference = confirm('Add a reference image for this pet?');
+    const result = await electronAPI.invoke('appearance-create-imagegen-request', {
+        name: name.trim() || 'Generated Pet',
+        description: description.trim() || 'a friendly custom desktop pet',
+        includeReference
+    });
+    setAppearanceNote(result.message || status.message || 'Imagegen request package created.');
 }
 
 // ===== 60fps 动画 =====

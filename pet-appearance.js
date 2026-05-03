@@ -61,6 +61,81 @@ function createImagePetManifest({ id, name, image = 'generated.png', source = 'l
   };
 }
 
+function createImagegenPetRequest({
+  id,
+  name,
+  description,
+  referenceImage,
+  createdAt,
+} = {}) {
+  const safeId = id || createPetId();
+  const petName = name || 'Generated Pet';
+  const subject = description || 'a friendly custom desktop pet';
+  const record = createCustomPetRecord({
+    id: safeId,
+    name: petName,
+    source: 'imagegen',
+    renderer: 'spritesheet',
+    createdAt,
+  });
+  const manifest = {
+    id: safeId,
+    name: petName,
+    description: `Generated with Codex $imagegen from: ${subject}`,
+    source: 'imagegen',
+    renderer: 'spritesheet',
+    version: 1,
+    spritesheet: 'spritesheet.webp',
+    cell: { width: 192, height: 208 },
+    layout: { columns: 8 },
+    states: {
+      idle: { row: 0, frames: 8, duration: 140 },
+      happy: { row: 1, frames: 8, duration: 120 },
+      talking: { row: 2, frames: 8, duration: 100 },
+      thinking: { row: 3, frames: 8, duration: 160 },
+      sleepy: { row: 4, frames: 8, duration: 180 },
+      surprised: { row: 5, frames: 8, duration: 110 },
+      focused: { row: 6, frames: 8, duration: 140 },
+      offline: { row: 7, frames: 8, duration: 180 },
+      sad: { row: 8, frames: 8, duration: 160 },
+    },
+  };
+  const referenceLine = referenceImage
+    ? `Reference image: ${referenceImage}. Use it as the character reference while simplifying the design.`
+    : 'Reference image: none. Generate from the written description only.';
+  const prompt = [
+    'Use $imagegen to create a Codex/Hatch-style desktop pet spritesheet.',
+    '',
+    `Pet name: ${petName}`,
+    `Primary request: ${subject}`,
+    referenceLine,
+    '',
+    'Asset type: transparent pixel-art desktop pet spritesheet',
+    'Style: compact chibi pixel art, chunky readable silhouette, thick dark 1-2 px outline, flat cel shading, vertical i-like glowing eyes, tiny ears/paws/tail where appropriate.',
+    'Spritesheet: 8 columns x 9 rows, each cell 192x208 px, final file named spritesheet.webp.',
+    'Rows in order: idle, happy, talking, thinking, sleepy, surprised, focused, offline, sad.',
+    'Background workflow: generate on a perfectly flat solid #00ff00 chroma-key background for local removal, or true transparency if available.',
+    'Constraints: no text, no watermark, no scenery, no shadows, no gradients, no detached effects, keep each frame centered with consistent scale.',
+  ].join('\n');
+  const readme = [
+    `# ${petName} Imagegen Request`,
+    '',
+    'This folder is a Petclaw custom pet package scaffold.',
+    '',
+    '1. Use the prompt in `imagegen-prompt.md` with Codex `$imagegen`.',
+    '2. Save the final generated atlas as `spritesheet.webp` in this folder.',
+    '3. Keep `pet.json` next to `spritesheet.webp`.',
+    '4. Import this folder from the Petclaw appearance panel.',
+    '',
+    'Expected output:',
+    '- `pet.json`',
+    '- `spritesheet.webp`',
+    referenceImage ? `- \`${referenceImage}\` as the optional reference image` : '',
+  ].filter(Boolean).join('\n');
+
+  return { record, manifest, prompt, readme };
+}
+
 function validatePetManifest(manifest) {
   if (!manifest || typeof manifest !== 'object') {
     return { ok: false, error: 'pet.json must contain an object' };
@@ -146,6 +221,7 @@ module.exports = {
   normalizeAppearanceConfig,
   createBuiltInCowCatManifest,
   createImagePetManifest,
+  createImagegenPetRequest,
   validatePetManifest,
   createCustomPetRecord,
   createPetId,

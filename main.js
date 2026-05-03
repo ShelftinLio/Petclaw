@@ -83,6 +83,7 @@ const {
   normalizeAppearanceConfig,
   createBuiltInCowCatManifest,
   createImagePetManifest,
+  createImagegenPetRequest,
   createCustomPetRecord,
   createPetId,
   inferRendererFromFiles,
@@ -1791,9 +1792,52 @@ ipcMain.handle('appearance-import-package', async () => {
   return { canceled: false, success: true, pet: record, manifest, state: getAppearanceState() };
 });
 
+ipcMain.handle('appearance-create-imagegen-request', async (event, payload = {}) => {
+  const id = createPetId();
+  const petDir = path.join(customPetsRoot, id);
+  await fsp.mkdir(petDir, { recursive: true });
+
+  let referenceImage = '';
+  if (payload.includeReference) {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Choose reference image for $imagegen',
+      properties: ['openFile'],
+      filters: [
+        { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }
+      ]
+    });
+    if (!result.canceled && result.filePaths[0]) {
+      const ext = path.extname(result.filePaths[0]).toLowerCase() || '.png';
+      referenceImage = `reference${ext}`;
+      await fsp.copyFile(result.filePaths[0], path.join(petDir, referenceImage));
+    }
+  }
+
+  const request = createImagegenPetRequest({
+    id,
+    name: payload.name || 'Generated Pet',
+    description: payload.description || 'a friendly custom desktop pet',
+    referenceImage,
+  });
+
+  await writeJson(path.join(petDir, 'pet.json'), request.manifest);
+  await fsp.writeFile(path.join(petDir, 'imagegen-prompt.md'), request.prompt, 'utf-8');
+  await fsp.writeFile(path.join(petDir, 'README.md'), request.readme, 'utf-8');
+  await shell.openPath(petDir);
+
+  return {
+    success: true,
+    pet: request.record,
+    manifest: request.manifest,
+    prompt: request.prompt,
+    folderPath: petDir,
+    message: 'Imagegen request package created. Use imagegen-prompt.md with Codex $imagegen, save spritesheet.webp into this folder, then import the package.'
+  };
+});
+
 ipcMain.handle('appearance-imagegen-status', async () => ({
-  available: false,
-  message: 'Use Codex $imagegen to create multi-state pet assets, then import the generated pet package here.'
+  available: true,
+  message: 'Create a $imagegen request package, generate spritesheet.webp with Codex, then import that package.'
 }));
 
 // 三击查看历史消息
