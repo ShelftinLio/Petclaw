@@ -373,12 +373,22 @@
         inset: 0;
         width: 100%;
         height: 100%;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
+        overflow: hidden;
         image-rendering: pixelated;
         z-index: 4;
         pointer-events: none;
+    }
+    .custom-pet-sheet {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        object-fit: fill;
+        image-rendering: pixelated;
+        transform-origin: 0 0;
     }
     .pet-wrapper.custom-image .inner-fluid,
     .pet-wrapper.custom-image .fluid-blob,
@@ -391,6 +401,10 @@
     .pet-wrapper.custom-image::before,
     .pet-wrapper.custom-image::after {
         display: none;
+    }
+    .pet-wrapper.custom-image {
+        width: 96px;
+        height: 104px;
     }
     .pet-wrapper.custom-image .custom-pet-image {
         display: block;
@@ -462,7 +476,9 @@
         <div class="blush blush-r" id="blushR"></div>
         <div class="bub bub-1"></div>
         <div class="bub bub-2"></div>
-        <div class="custom-pet-image" id="customPetImage"></div>
+        <div class="custom-pet-image" id="customPetImage">
+            <img class="custom-pet-sheet" id="customPetSheet" alt="">
+        </div>
         <div class="particles" id="particles"></div>
     </div>
 
@@ -519,6 +535,7 @@ const inputBar = document.getElementById('inputBar');
 const inputEl = document.getElementById('input');
 const btnVoice = document.getElementById('btnVoice');
 const customPetImage = document.getElementById('customPetImage');
+const customPetSheet = document.getElementById('customPetSheet');
 const appearancePanel = document.getElementById('appearancePanel');
 const appearanceCurrent = document.getElementById('appearanceCurrent');
 const appearanceNote = document.getElementById('appearanceNote');
@@ -546,21 +563,27 @@ function renderAppearance(state) {
     const isCustomImage = state.activePet && ['image','spritesheet','frames'].includes(state.activePet.renderer) && state.activeImageUrl;
     pet.classList.toggle('custom-image', Boolean(isCustomImage));
     if (isCustomImage) {
-        customPetImage.style.backgroundImage = `url("${state.activeImageUrl}")`;
+        customPetSheet.src = state.activeImageUrl;
         if (state.activePet.renderer === 'spritesheet') {
             const columns = activePetManifest?.layout?.columns || 8;
             const rows = activePetManifest?.layout?.rows || Object.keys(activePetManifest?.states || {}).length || 9;
-            customPetImage.style.backgroundSize = `${columns * 100}% ${rows * 100}%`;
-            customPetImage.style.backgroundPosition = '0 0';
+            customPetSheet.style.width = `${columns * 100}%`;
+            customPetSheet.style.height = `${rows * 100}%`;
+            customPetSheet.style.objectFit = 'fill';
+            customPetSheet.style.transform = 'translate3d(0, 0, 0)';
         } else {
-            customPetImage.style.backgroundSize = 'contain';
-            customPetImage.style.backgroundPosition = 'center';
+            customPetSheet.style.width = '100%';
+            customPetSheet.style.height = '100%';
+            customPetSheet.style.objectFit = 'contain';
+            customPetSheet.style.transform = 'translate3d(0, 0, 0)';
         }
         appearanceCurrent.textContent = state.activePet.name || 'Custom Pet';
     } else {
-        customPetImage.style.backgroundImage = '';
-        customPetImage.style.backgroundSize = 'contain';
-        customPetImage.style.backgroundPosition = 'center';
+        customPetSheet.removeAttribute('src');
+        customPetSheet.style.width = '100%';
+        customPetSheet.style.height = '100%';
+        customPetSheet.style.objectFit = 'contain';
+        customPetSheet.style.transform = 'translate3d(0, 0, 0)';
         appearanceCurrent.textContent = 'Cow Cat';
         fluid.style.background = '';
         blob1.style.background = '';
@@ -583,9 +606,8 @@ function updateSpriteFrame() {
     const frames = state.frames || 8;
     const columns = activePetManifest.layout?.columns || 8;
     const rows = activePetManifest.layout?.rows || Object.keys(activePetManifest.states || {}).length || 9;
-    const x = columns <= 1 ? 0 : (spriteFrameIndex % frames) / (columns - 1) * 100;
-    const y = rows <= 1 ? 0 : state.row / (rows - 1) * 100;
-    customPetImage.style.backgroundPosition = `${x}% ${y}%`;
+    const frame = spriteFrameIndex % Math.min(frames, columns);
+    customPetSheet.style.transform = `translate3d(${-frame * (100 / columns)}%, ${-state.row * (100 / rows)}%, 0)`;
     spriteFrameIndex = (spriteFrameIndex + 1) % frames;
 }
 

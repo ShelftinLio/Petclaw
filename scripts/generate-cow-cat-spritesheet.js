@@ -42,8 +42,8 @@ function catFrame(state, frame, row) {
   const dim = offline ? ' opacity="0.52"' : '';
 
   return `
-  <g transform="translate(${frame * W},${row * H})">
-    <g transform="translate(0 ${y}) rotate(${tilt} 96 92)"${dim}>
+  <g clip-path="url(#clip-${row}-${frame})">
+    <g transform="translate(${frame * W} ${row * H}) translate(0 ${y}) rotate(${tilt} 96 92)"${dim}>
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 ${88 + tail} 165 ${126 + tail} 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -65,6 +65,13 @@ function catFrame(state, frame, row) {
 }
 
 let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * COLS}" height="${H * ROWS}" viewBox="0 0 ${W * COLS} ${H * ROWS}" shape-rendering="crispEdges">`;
+svg += '<defs>';
+for (let row = 0; row < states.length; row++) {
+  for (let frame = 0; frame < COLS; frame++) {
+    svg += `<clipPath id="clip-${row}-${frame}"><rect x="${frame * W}" y="${row * H}" width="${W}" height="${H}"/></clipPath>`;
+  }
+}
+svg += '</defs>';
 for (let row = 0; row < states.length; row++) {
   for (let frame = 0; frame < COLS; frame++) {
     svg += catFrame(states[row], frame, row);

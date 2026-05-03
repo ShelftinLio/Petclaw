@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1872" viewBox="0 0 1536 1872" shape-rendering="crispEdges">
-  <g transform="translate(0,0)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1872" viewBox="0 0 1536 1872" shape-rendering="crispEdges"><defs><clipPath id="clip-0-0"><rect x="0" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-1"><rect x="192" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-2"><rect x="384" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-3"><rect x="576" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-4"><rect x="768" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-5"><rect x="960" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-6"><rect x="1152" y="0" width="192" height="208"/></clipPath><clipPath id="clip-0-7"><rect x="1344" y="0" width="192" height="208"/></clipPath><clipPath id="clip-1-0"><rect x="0" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-1"><rect x="192" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-2"><rect x="384" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-3"><rect x="576" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-4"><rect x="768" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-5"><rect x="960" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-6"><rect x="1152" y="208" width="192" height="208"/></clipPath><clipPath id="clip-1-7"><rect x="1344" y="208" width="192" height="208"/></clipPath><clipPath id="clip-2-0"><rect x="0" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-1"><rect x="192" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-2"><rect x="384" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-3"><rect x="576" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-4"><rect x="768" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-5"><rect x="960" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-6"><rect x="1152" y="416" width="192" height="208"/></clipPath><clipPath id="clip-2-7"><rect x="1344" y="416" width="192" height="208"/></clipPath><clipPath id="clip-3-0"><rect x="0" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-1"><rect x="192" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-2"><rect x="384" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-3"><rect x="576" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-4"><rect x="768" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-5"><rect x="960" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-6"><rect x="1152" y="624" width="192" height="208"/></clipPath><clipPath id="clip-3-7"><rect x="1344" y="624" width="192" height="208"/></clipPath><clipPath id="clip-4-0"><rect x="0" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-1"><rect x="192" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-2"><rect x="384" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-3"><rect x="576" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-4"><rect x="768" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-5"><rect x="960" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-6"><rect x="1152" y="832" width="192" height="208"/></clipPath><clipPath id="clip-4-7"><rect x="1344" y="832" width="192" height="208"/></clipPath><clipPath id="clip-5-0"><rect x="0" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-1"><rect x="192" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-2"><rect x="384" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-3"><rect x="576" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-4"><rect x="768" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-5"><rect x="960" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-6"><rect x="1152" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-5-7"><rect x="1344" y="1040" width="192" height="208"/></clipPath><clipPath id="clip-6-0"><rect x="0" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-1"><rect x="192" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-2"><rect x="384" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-3"><rect x="576" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-4"><rect x="768" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-5"><rect x="960" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-6"><rect x="1152" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-6-7"><rect x="1344" y="1248" width="192" height="208"/></clipPath><clipPath id="clip-7-0"><rect x="0" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-1"><rect x="192" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-2"><rect x="384" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-3"><rect x="576" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-4"><rect x="768" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-5"><rect x="960" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-6"><rect x="1152" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-7-7"><rect x="1344" y="1456" width="192" height="208"/></clipPath><clipPath id="clip-8-0"><rect x="0" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-1"><rect x="192" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-2"><rect x="384" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-3"><rect x="576" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-4"><rect x="768" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-5"><rect x="960" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-6"><rect x="1152" y="1664" width="192" height="208"/></clipPath><clipPath id="clip-8-7"><rect x="1344" y="1664" width="192" height="208"/></clipPath></defs>
+  <g clip-path="url(#clip-0-0)">
+    <g transform="translate(0 0) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -19,8 +19,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,0)">
-    <g transform="translate(0 16) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-1)">
+    <g transform="translate(192 0) translate(0 16) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -39,8 +39,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,0)">
-    <g transform="translate(0 17) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-2)">
+    <g transform="translate(384 0) translate(0 17) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -59,8 +59,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,0)">
-    <g transform="translate(0 16) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-3)">
+    <g transform="translate(576 0) translate(0 16) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -79,8 +79,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,0)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-4)">
+    <g transform="translate(768 0) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -99,8 +99,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,0)">
-    <g transform="translate(0 12) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-5)">
+    <g transform="translate(960 0) translate(0 12) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -119,8 +119,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,0)">
-    <g transform="translate(0 11) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-6)">
+    <g transform="translate(1152 0) translate(0 11) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -139,8 +139,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,0)">
-    <g transform="translate(0 12) rotate(0 96 92)">
+  <g clip-path="url(#clip-0-7)">
+    <g transform="translate(1344 0) translate(0 12) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -159,8 +159,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,208)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-0)">
+    <g transform="translate(0 208) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -179,8 +179,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,208)">
-    <g transform="translate(0 11) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-1)">
+    <g transform="translate(192 208) translate(0 11) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -199,8 +199,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,208)">
-    <g transform="translate(0 10) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-2)">
+    <g transform="translate(384 208) translate(0 10) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -219,8 +219,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,208)">
-    <g transform="translate(0 11) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-3)">
+    <g transform="translate(576 208) translate(0 11) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -239,8 +239,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,208)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-4)">
+    <g transform="translate(768 208) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -259,8 +259,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,208)">
-    <g transform="translate(0 17) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-5)">
+    <g transform="translate(960 208) translate(0 17) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -279,8 +279,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,208)">
-    <g transform="translate(0 18) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-6)">
+    <g transform="translate(1152 208) translate(0 18) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -299,8 +299,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,208)">
-    <g transform="translate(0 17) rotate(0 96 92)">
+  <g clip-path="url(#clip-1-7)">
+    <g transform="translate(1344 208) translate(0 17) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -319,8 +319,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,416)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-0)">
+    <g transform="translate(0 416) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -339,8 +339,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,416)">
-    <g transform="translate(0 16) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-1)">
+    <g transform="translate(192 416) translate(0 16) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -359,8 +359,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,416)">
-    <g transform="translate(0 17) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-2)">
+    <g transform="translate(384 416) translate(0 17) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -379,8 +379,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,416)">
-    <g transform="translate(0 16) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-3)">
+    <g transform="translate(576 416) translate(0 16) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -399,8 +399,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,416)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-4)">
+    <g transform="translate(768 416) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -419,8 +419,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,416)">
-    <g transform="translate(0 12) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-5)">
+    <g transform="translate(960 416) translate(0 12) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -439,8 +439,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,416)">
-    <g transform="translate(0 11) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-6)">
+    <g transform="translate(1152 416) translate(0 11) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -459,8 +459,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,416)">
-    <g transform="translate(0 12) rotate(0 96 92)">
+  <g clip-path="url(#clip-2-7)">
+    <g transform="translate(1344 416) translate(0 12) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -479,8 +479,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,624)">
-    <g transform="translate(0 14) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-0)">
+    <g transform="translate(0 624) translate(0 14) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -499,8 +499,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,624)">
-    <g transform="translate(0 16) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-1)">
+    <g transform="translate(192 624) translate(0 16) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -519,8 +519,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,624)">
-    <g transform="translate(0 17) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-2)">
+    <g transform="translate(384 624) translate(0 17) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -539,8 +539,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,624)">
-    <g transform="translate(0 16) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-3)">
+    <g transform="translate(576 624) translate(0 16) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -559,8 +559,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,624)">
-    <g transform="translate(0 14) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-4)">
+    <g transform="translate(768 624) translate(0 14) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -579,8 +579,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,624)">
-    <g transform="translate(0 12) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-5)">
+    <g transform="translate(960 624) translate(0 12) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -599,8 +599,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,624)">
-    <g transform="translate(0 11) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-6)">
+    <g transform="translate(1152 624) translate(0 11) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -619,8 +619,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,624)">
-    <g transform="translate(0 12) rotate(-4 96 92)">
+  <g clip-path="url(#clip-3-7)">
+    <g transform="translate(1344 624) translate(0 12) rotate(-4 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -639,8 +639,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,832)">
-    <g transform="translate(0 22) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-0)">
+    <g transform="translate(0 832) translate(0 22) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -659,8 +659,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,832)">
-    <g transform="translate(0 24) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-1)">
+    <g transform="translate(192 832) translate(0 24) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -679,8 +679,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,832)">
-    <g transform="translate(0 25) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-2)">
+    <g transform="translate(384 832) translate(0 25) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -699,8 +699,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,832)">
-    <g transform="translate(0 24) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-3)">
+    <g transform="translate(576 832) translate(0 24) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -719,8 +719,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,832)">
-    <g transform="translate(0 22) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-4)">
+    <g transform="translate(768 832) translate(0 22) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -739,8 +739,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,832)">
-    <g transform="translate(0 20) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-5)">
+    <g transform="translate(960 832) translate(0 20) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -759,8 +759,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,832)">
-    <g transform="translate(0 19) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-6)">
+    <g transform="translate(1152 832) translate(0 19) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -779,8 +779,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,832)">
-    <g transform="translate(0 20) rotate(0 96 92)">
+  <g clip-path="url(#clip-4-7)">
+    <g transform="translate(1344 832) translate(0 20) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -799,8 +799,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,1040)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-0)">
+    <g transform="translate(0 1040) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -819,8 +819,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,1040)">
-    <g transform="translate(0 16) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-1)">
+    <g transform="translate(192 1040) translate(0 16) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -839,8 +839,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,1040)">
-    <g transform="translate(0 17) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-2)">
+    <g transform="translate(384 1040) translate(0 17) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -859,8 +859,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,1040)">
-    <g transform="translate(0 16) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-3)">
+    <g transform="translate(576 1040) translate(0 16) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -879,8 +879,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,1040)">
-    <g transform="translate(0 14) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-4)">
+    <g transform="translate(768 1040) translate(0 14) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -899,8 +899,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,1040)">
-    <g transform="translate(0 12) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-5)">
+    <g transform="translate(960 1040) translate(0 12) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -919,8 +919,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,1040)">
-    <g transform="translate(0 11) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-6)">
+    <g transform="translate(1152 1040) translate(0 11) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -939,8 +939,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,1040)">
-    <g transform="translate(0 12) rotate(0 96 92)">
+  <g clip-path="url(#clip-5-7)">
+    <g transform="translate(1344 1040) translate(0 12) rotate(0 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -959,8 +959,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,1248)">
-    <g transform="translate(0 14) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-0)">
+    <g transform="translate(0 1248) translate(0 14) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -979,8 +979,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(192,1248)">
-    <g transform="translate(0 16) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-1)">
+    <g transform="translate(192 1248) translate(0 16) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -999,8 +999,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(384,1248)">
-    <g transform="translate(0 17) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-2)">
+    <g transform="translate(384 1248) translate(0 17) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1019,8 +1019,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(576,1248)">
-    <g transform="translate(0 16) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-3)">
+    <g transform="translate(576 1248) translate(0 16) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1039,8 +1039,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(768,1248)">
-    <g transform="translate(0 14) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-4)">
+    <g transform="translate(768 1248) translate(0 14) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1059,8 +1059,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(960,1248)">
-    <g transform="translate(0 12) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-5)">
+    <g transform="translate(960 1248) translate(0 12) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1079,8 +1079,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(1152,1248)">
-    <g transform="translate(0 11) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-6)">
+    <g transform="translate(1152 1248) translate(0 11) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1099,8 +1099,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(1344,1248)">
-    <g transform="translate(0 12) rotate(3 96 92)">
+  <g clip-path="url(#clip-6-7)">
+    <g transform="translate(1344 1248) translate(0 12) rotate(3 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1119,8 +1119,8 @@
       <rect x="60" y="52" width="25" height="6" fill="#111"/><rect x="108" y="52" width="25" height="6" fill="#111"/>
     </g>
   </g>
-  <g transform="translate(0,1456)">
-    <g transform="translate(0 14) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-0)">
+    <g transform="translate(0 1456) translate(0 14) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1139,8 +1139,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,1456)">
-    <g transform="translate(0 16) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-1)">
+    <g transform="translate(192 1456) translate(0 16) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1159,8 +1159,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,1456)">
-    <g transform="translate(0 17) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-2)">
+    <g transform="translate(384 1456) translate(0 17) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1179,8 +1179,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,1456)">
-    <g transform="translate(0 16) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-3)">
+    <g transform="translate(576 1456) translate(0 16) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1199,8 +1199,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,1456)">
-    <g transform="translate(0 14) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-4)">
+    <g transform="translate(768 1456) translate(0 14) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1219,8 +1219,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,1456)">
-    <g transform="translate(0 12) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-5)">
+    <g transform="translate(960 1456) translate(0 12) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1239,8 +1239,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,1456)">
-    <g transform="translate(0 11) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-6)">
+    <g transform="translate(1152 1456) translate(0 11) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1259,8 +1259,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,1456)">
-    <g transform="translate(0 12) rotate(0 96 92)" opacity="0.52">
+  <g clip-path="url(#clip-7-7)">
+    <g transform="translate(1344 1456) translate(0 12) rotate(0 96 92)" opacity="0.52">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1279,8 +1279,8 @@
       
     </g>
   </g>
-  <g transform="translate(0,1664)">
-    <g transform="translate(0 20) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-0)">
+    <g transform="translate(0 1664) translate(0 20) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1299,8 +1299,8 @@
       
     </g>
   </g>
-  <g transform="translate(192,1664)">
-    <g transform="translate(0 22) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-1)">
+    <g transform="translate(192 1664) translate(0 22) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1319,8 +1319,8 @@
       
     </g>
   </g>
-  <g transform="translate(384,1664)">
-    <g transform="translate(0 23) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-2)">
+    <g transform="translate(384 1664) translate(0 23) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 97 165 135 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1339,8 +1339,8 @@
       
     </g>
   </g>
-  <g transform="translate(576,1664)">
-    <g transform="translate(0 22) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-3)">
+    <g transform="translate(576 1664) translate(0 22) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 94 165 132 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1359,8 +1359,8 @@
       
     </g>
   </g>
-  <g transform="translate(768,1664)">
-    <g transform="translate(0 20) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-4)">
+    <g transform="translate(768 1664) translate(0 20) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 88 165 126 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1379,8 +1379,8 @@
       
     </g>
   </g>
-  <g transform="translate(960,1664)">
-    <g transform="translate(0 18) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-5)">
+    <g transform="translate(960 1664) translate(0 18) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1399,8 +1399,8 @@
       
     </g>
   </g>
-  <g transform="translate(1152,1664)">
-    <g transform="translate(0 17) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-6)">
+    <g transform="translate(1152 1664) translate(0 17) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 79 165 117 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
@@ -1419,8 +1419,8 @@
       
     </g>
   </g>
-  <g transform="translate(1344,1664)">
-    <g transform="translate(0 18) rotate(-2 96 92)">
+  <g clip-path="url(#clip-8-7)">
+    <g transform="translate(1344 1664) translate(0 18) rotate(-2 96 92)">
       <rect x="70" y="142" width="18" height="28" rx="4" fill="#111"/>
       <rect x="108" y="142" width="18" height="28" rx="4" fill="#111"/>
       <path d="M126 100 C160 82 165 120 132 128" fill="none" stroke="#111" stroke-width="18" stroke-linecap="round"/>
