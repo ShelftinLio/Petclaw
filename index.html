@@ -148,7 +148,7 @@
         transition: opacity 0.25s ease;
         z-index: 20;
     }
-    .container:hover .toolbar {
+    .toolbar.show {
         opacity: 1;
         pointer-events: auto;
     }
@@ -534,6 +534,7 @@ const glassShell = document.querySelector('.glass-shell');
 const inputBar = document.getElementById('inputBar');
 const inputEl = document.getElementById('input');
 const btnVoice = document.getElementById('btnVoice');
+const toolbar = document.getElementById('toolbar');
 const customPetImage = document.getElementById('customPetImage');
 const customPetSheet = document.getElementById('customPetSheet');
 const appearancePanel = document.getElementById('appearancePanel');
@@ -547,6 +548,10 @@ let activePetManifest = null;
 let spriteFrameTimer = null;
 let spriteFrameIndex = 0;
 let spriteReactionTimer = null;
+let petFacing = 1;
+let roamDirection = Math.random() < 0.5 ? -1 : 1;
+let roamPausedUntil = Date.now() + 4000;
+let roamInFlight = false;
 
 function setAppearanceNote(text) {
     if (appearanceNote) appearanceNote.textContent = text || '';
@@ -555,7 +560,28 @@ function setAppearanceNote(text) {
 function toggleAppearancePanel() {
     appearancePanel.classList.toggle('show');
     setAppearanceNote('');
+    pauseRoam(2500);
 }
+
+function togglePetOptions() {
+    toolbar.classList.toggle('show');
+    if (!toolbar.classList.contains('show')) {
+        appearancePanel.classList.remove('show');
+        inputBar.classList.remove('show');
+    }
+    pauseRoam(2500);
+}
+
+pet.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    togglePetOptions();
+});
+
+document.addEventListener('click', e => {
+    if (pet.contains(e.target) || toolbar.contains(e.target) || appearancePanel.contains(e.target) || inputBar.contains(e.target)) return;
+    toolbar.classList.remove('show');
+    appearancePanel.classList.remove('show');
+});
 
 function renderAppearance(state) {
     if (!state) return;
@@ -635,6 +661,41 @@ function playSpriteReaction(mood, duration = 900) {
         spriteReactionTimer = null;
     }, duration);
     return true;
+}
+
+function pauseRoam(ms = 2500) {
+    roamPausedUntil = Date.now() + ms;
+    if (currentMood === 'walking') setMood('idle');
+}
+
+function shouldRoam() {
+    if (!window.electronAPI || !hasSpritePet()) return false;
+    if (Date.now() < roamPausedUntil || isDrag) return false;
+    if (toolbar.classList.contains('show') || appearancePanel.classList.contains('show') || inputBar.classList.contains('show')) return false;
+    return currentMood === 'idle' || currentMood === 'walking';
+}
+
+async function roamStep() {
+    if (roamInFlight) return;
+    if (!shouldRoam()) {
+        if (currentMood === 'walking') setMood('idle');
+        return;
+    }
+    roamInFlight = true;
+    petFacing = roamDirection > 0 ? 1 : -1;
+    if (currentMood !== 'walking') setMood('walking');
+    try {
+        const result = await electronAPI.invoke('roam-pet', { dx: roamDirection * 5, dy: 0 });
+        if (result?.hitX || Math.random() < 0.015) {
+            roamDirection *= -1;
+            petFacing = roamDirection > 0 ? 1 : -1;
+            roamPausedUntil = Date.now() + 350 + Math.random() * 900;
+        }
+    } catch (err) {
+        roamPausedUntil = Date.now() + 3000;
+    } finally {
+        roamInFlight = false;
+    }
 }
 
 async function loadAppearance() {
@@ -764,7 +825,7 @@ function loop() {
     const bounce = breathExtra > 0 ? Math.sin(t * 12) * breathExtra : 0;
 
     if (!squishing) {
-        pet.style.transform = `translateX(${fidgetX}px) translateY(${floatY + bounce}px) rotate(${floatR + fidgetR}deg) scale(${curScale * breathScale})`;
+        pet.style.transform = `translateX(${fidgetX}px) translateY(${floatY + bounce}px) rotate(${floatR + fidgetR}deg) scaleX(${petFacing}) scale(${curScale * breathScale})`;
     }
     requestAnimationFrame(loop);
 }
@@ -974,6 +1035,7 @@ schedBlink();
 let isDrag = false, startX, startY, dragOffsetX, dragOffsetY, clickCount = 0, clickTimer = null;
 
 pet.addEventListener('mousedown', e => { 
+    pauseRoam(3000);
     isDrag = false; 
     startX = e.screenX; 
     startY = e.screenY; 
@@ -999,6 +1061,7 @@ document.addEventListener('mouseup', () => { setTimeout(() => { isDrag = false; 
 
 pet.addEventListener('click', () => {
     if (isDrag) return;
+    pauseRoam(2400);
     clickCount++;
     clearTimeout(clickTimer);
 
@@ -1056,6 +1119,8 @@ function resetClick() {
     targetScale = MOODS[currentMood]?.scale || 1;
     mouseTracking = true;
 }
+
+setInterval(roamStep, 110);
 
 // 🎨 Hover 交互动画
 pet.addEventListener('mouseenter', () => {
@@ -1195,6 +1260,13 @@ const MOODS = {
         b2:'radial-gradient(circle at 60% 30%,rgba(128,222,234,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(0,131,143,0.3),transparent 35%)',
         glow:'0 0 40px rgba(0,151,167,0.3), 0 0 80px rgba(38,166,154,0.15)',
         eyes:'focus', scale:1.02, bounce:0, speed:'10s'
+    },
+    walking:   {
+        fluid:'linear-gradient(135deg,#ffb3b3,#fed6e3)',
+        b1:'radial-gradient(circle at 30% 30%,rgba(235,87,87,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,154,108,0.8),transparent 40%)',
+        b2:'radial-gradient(circle at 60% 30%,rgba(255,200,150,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(220,60,60,0.3),transparent 35%)',
+        glow:'0 0 40px rgba(255,107,74,0.22), 0 0 80px rgba(255,107,74,0.08)',
+        eyes:'normal', scale:1, bounce:0, speed:'5s'
     },
 };
 let currentMood = 'idle', talkInterval = null;
@@ -1657,6 +1729,7 @@ document.addEventListener('keydown', () => { lastInteraction = Date.now(); });
 
 // ===== 工具栏 =====
 function toggleInput() {
+    pauseRoam(3500);
     inputBar.classList.toggle('show');
     if (inputBar.classList.contains('show')) inputEl.focus();
 }
@@ -1779,9 +1852,11 @@ if (electronAPI) {
         if (!wasConnected && isConnected) {
             // 复活动画！从灰色→彩色
             setMood('happy');
-            squishing = true;
-            pet.style.animation = 'squish 0.5s ease';
-            setTimeout(() => { pet.style.animation = ''; squishing = false; }, 500);
+            if (!hasSpritePet()) {
+                squishing = true;
+                pet.style.animation = 'squish 0.5s ease';
+                setTimeout(() => { pet.style.animation = ''; squishing = false; }, 500);
+            }
             spawnParticles();
             spawnParticles(); // 双倍粒子庆祝
             setTimeout(() => setMood('idle'), 3000);
@@ -1800,9 +1875,11 @@ if (electronAPI) {
         if (!wasConnected && isConnected && currentMood === 'offline') {
             // 复活！
             setMood('happy');
-            squishing = true;
-            pet.style.animation = 'squish 0.5s ease';
-            setTimeout(() => { pet.style.animation = ''; squishing = false; }, 500);
+            if (!hasSpritePet()) {
+                squishing = true;
+                pet.style.animation = 'squish 0.5s ease';
+                setTimeout(() => { pet.style.animation = ''; squishing = false; }, 500);
+            }
             spawnParticles();
             spawnParticles();
             setTimeout(() => setMood('idle'), 3000);
@@ -1820,9 +1897,11 @@ if (electronAPI) {
         isConnected = s.connected;
         if (isConnected) {
             setMood('happy');
-            squishing = true;
-            pet.style.animation = 'squish 0.5s ease';
-            setTimeout(() => { pet.style.animation = ''; squishing = false; }, 500);
+            if (!hasSpritePet()) {
+                squishing = true;
+                pet.style.animation = 'squish 0.5s ease';
+                setTimeout(() => { pet.style.animation = ''; squishing = false; }, 500);
+            }
             spawnParticles();
             setTimeout(() => setMood('idle'), 2000);
         }

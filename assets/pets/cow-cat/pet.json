@@ -7,7 +7,7 @@
   "version": 1,
   "spritesheet": "spritesheet.svg",
   "cell": { "width": 192, "height": 208 },
-  "layout": { "columns": 8, "rows": 9 },
+  "layout": { "columns": 8, "rows": 10 },
   "states": {
     "idle": { "row": 0, "frames": 8, "duration": 140 },
     "happy": { "row": 1, "frames": 8, "duration": 120 },
@@ -17,6 +17,7 @@
     "surprised": { "row": 5, "frames": 8, "duration": 110 },
     "focused": { "row": 6, "frames": 8, "duration": 140 },
     "offline": { "row": 7, "frames": 8, "duration": 180 },
-    "sad": { "row": 8, "frames": 8, "duration": 160 }
+    "sad": { "row": 8, "frames": 8, "duration": 160 },
+    "walking": { "row": 9, "frames": 8, "duration": 90 }
   }
 }

@@ -53,12 +53,13 @@ describe('Pet appearance helpers', () => {
       renderer: 'spritesheet',
       spritesheet: 'spritesheet.svg',
       cell: { width: 192, height: 208 },
-      layout: { columns: 8, rows: 9 },
+      layout: { columns: 8, rows: 10 },
       states: expect.objectContaining({
         idle: { row: 0, frames: 8, duration: 140 },
         happy: { row: 1, frames: 8, duration: 120 },
         talking: { row: 2, frames: 8, duration: 100 },
         thinking: { row: 3, frames: 8, duration: 160 },
+        walking: { row: 9, frames: 8, duration: 90 },
       }),
     })
   })
@@ -154,7 +155,7 @@ describe('Pet appearance helpers', () => {
       renderer: 'spritesheet',
       spritesheet: 'spritesheet.webp',
       cell: { width: 192, height: 208 },
-      layout: { columns: 8 },
+      layout: { columns: 8, rows: 10 },
     })
     expect(request.prompt).toContain('$imagegen')
     expect(request.prompt).toContain('a sleepy black cat with a moon collar')
@@ -163,14 +164,14 @@ describe('Pet appearance helpers', () => {
     expect(validatePetManifest(request.manifest)).toEqual({ ok: true })
   })
 
-  test('createHatchPetJobs creates base plus nine grounded row jobs', () => {
+  test('createHatchPetJobs creates base plus ten grounded row jobs', () => {
     const jobs = createHatchPetJobs({
       petName: 'Moon Cat',
       description: 'a sleepy black cat with a moon collar',
       referenceImage: 'reference.png',
     })
 
-    expect(jobs).toHaveLength(10)
+    expect(jobs).toHaveLength(11)
     expect(jobs[0]).toMatchObject({
       id: 'base',
       kind: 'base',
@@ -185,12 +186,12 @@ describe('Pet appearance helpers', () => {
       output: 'rows/idle.png',
       inputs: ['base-reference.png', 'reference.png'],
     })
-    expect(jobs[9]).toMatchObject({
-      id: 'row-sad',
+    expect(jobs[10]).toMatchObject({
+      id: 'row-walking',
       kind: 'row',
-      state: 'sad',
-      row: 8,
-      output: 'rows/sad.png',
+      state: 'walking',
+      row: 9,
+      output: 'rows/walking.png',
       inputs: ['base-reference.png', 'reference.png'],
     })
     expect(jobs[1].prompt).toContain('8-frame horizontal strip')

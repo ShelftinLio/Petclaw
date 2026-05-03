@@ -13,6 +13,7 @@ const HATCH_STATES = [
   ['focused', 'review-like concentrated pose, tiny lean forward'],
   ['offline', 'quiet dim low-energy idle pose'],
   ['sad', 'small disappointed pose, lowered expression'],
+  ['walking', 'sideways walking loop, alternating paws, body moving with a gentle step rhythm'],
 ];
 
 function normalizeAppearanceConfig(appearance = {}) {
@@ -37,7 +38,7 @@ function createBuiltInCowCatManifest() {
     version: 1,
     spritesheet: 'spritesheet.svg',
     cell: { width: 192, height: 208 },
-    layout: { columns: 8, rows: 9 },
+    layout: { columns: 8, rows: 10 },
     states: {
       idle: { row: 0, frames: 8, duration: 140 },
       happy: { row: 1, frames: 8, duration: 120 },
@@ -48,6 +49,7 @@ function createBuiltInCowCatManifest() {
       focused: { row: 6, frames: 8, duration: 140 },
       offline: { row: 7, frames: 8, duration: 180 },
       sad: { row: 8, frames: 8, duration: 160 },
+      walking: { row: 9, frames: 8, duration: 90 },
     },
   };
 }
@@ -101,7 +103,7 @@ function createImagegenPetRequest({
     version: 1,
     spritesheet: 'spritesheet.webp',
     cell: { width: 192, height: 208 },
-    layout: { columns: 8, rows: 9 },
+    layout: { columns: 8, rows: 10 },
     states: {
       idle: { row: 0, frames: 8, duration: 140 },
       happy: { row: 1, frames: 8, duration: 120 },
@@ -112,6 +114,7 @@ function createImagegenPetRequest({
       focused: { row: 6, frames: 8, duration: 140 },
       offline: { row: 7, frames: 8, duration: 180 },
       sad: { row: 8, frames: 8, duration: 160 },
+      walking: { row: 9, frames: 8, duration: 90 },
     },
   };
   const referenceLine = referenceImage
@@ -131,7 +134,7 @@ function createImagegenPetRequest({
     '',
     'Asset type: transparent pixel-art desktop pet spritesheet',
     'Style: compact chibi pixel art, chunky readable silhouette, thick dark 1-2 px outline, flat cel shading, vertical i-like glowing eyes, tiny ears/paws/tail where appropriate.',
-    'Spritesheet: 8 columns x 9 rows, each cell 192x208 px, final file named spritesheet.webp.',
+    'Spritesheet: 8 columns x 10 rows, each cell 192x208 px, final file named spritesheet.webp.',
     `Rows in order: ${HATCH_STATES.map(([state]) => state).join(', ')}.`,
     'Background workflow: prefer true transparency. If the image tool cannot output transparency, use a perfectly flat solid #00ff00 chroma-key background for local removal.',
     'Constraints: no text, no watermark, no scenery, no shadows, no gradients, no detached effects, keep each frame centered with consistent scale.',
@@ -144,7 +147,7 @@ function createImagegenPetRequest({
     '1. Open `imagegen-jobs.json` and run each job through Codex `$imagegen`.',
     '2. First generate `base-reference.png`; use it as the canonical reference for every row job.',
     '3. Generate each 8-frame row strip into `rows/<state>.png`.',
-    '4. Assemble the rows into `spritesheet.webp` using the same 8x9, 192x208-cell layout.',
+    '4. Assemble the rows into `spritesheet.webp` using the same 8x10, 192x208-cell layout.',
     '5. Keep `pet.json` next to `spritesheet.webp`.',
     '6. Import this folder from the Petclaw appearance panel.',
     '',

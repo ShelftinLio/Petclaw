@@ -1619,6 +1619,26 @@ ipcMain.on('drag-pet', (event, { x, y, offsetX, offsetY }) => {
   petConfig.set('position', { x: newX, y: newY });
 });
 
+ipcMain.handle('roam-pet', async (event, { dx = 0, dy = 0 } = {}) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return { success: false };
+  const bounds = mainWindow.getBounds();
+  const rawX = bounds.x + Number(dx || 0);
+  const rawY = bounds.y + Number(dy || 0);
+  const next = clampToScreen(rawX, rawY, bounds.width, bounds.height);
+  mainWindow.setPosition(next.x, next.y);
+  if (lyricsWindow && !lyricsWindow.isDestroyed()) {
+    lyricsWindow.setPosition(next.x - 100, next.y - 110);
+  }
+  petConfig.set('position', { x: next.x, y: next.y });
+  return {
+    success: true,
+    x: next.x,
+    y: next.y,
+    hitX: next.x !== rawX,
+    hitY: next.y !== rawY,
+  };
+});
+
 const customPetsRoot = path.join(__dirname, 'assets', 'pets', 'custom');
 
 function petAssetUrl(relativePath) {

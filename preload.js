@@ -6,6 +6,7 @@ const VALID_SEND_CHANNELS = [
 ];
 
 const VALID_INVOKE_CHANNELS = [
+  'roam-pet',
   'show-history',
   'set-voice-enabled',
   'model-next',

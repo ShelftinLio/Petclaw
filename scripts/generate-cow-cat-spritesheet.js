@@ -6,7 +6,7 @@ const W = 192;
 const H = 208;
 const CELL = 4;
 const COLS = 8;
-const ROWS = 9;
+const ROWS = 10;
 
 const states = [
   'idle',
@@ -18,6 +18,7 @@ const states = [
   'focused',
   'offline',
   'sad',
+  'walking',
 ];
 
 const loop = [0, 1, 2, 3, 4, 3, 2, 1];
@@ -40,14 +41,17 @@ function drawBody(parts, dx, dy, state, frame) {
   const focused = state === 'focused';
   const offline = state === 'offline';
   const sad = state === 'sad';
+  const walking = state === 'walking';
   const blink = state === 'idle' && frame === 4;
-  const bob = happy ? -Math.abs(step - 2) : step === 4 ? -1 : 0;
+  const bob = walking ? -Math.abs(step - 2) % 2 : happy ? -Math.abs(step - 2) : step === 4 ? -1 : 0;
   const y = dy + bob + (sleepy ? 2 : 0) + (sad ? 1 : 0);
   const dim = offline ? ' opacity="0.55"' : '';
   const eyeY = y + (surprised ? 15 : 16);
   const eyeH = blink || sleepy ? 1 : surprised ? 7 : 6;
-  const tailLift = happy ? Math.max(0, 3 - Math.abs(step - 2)) : Math.max(0, 2 - Math.abs(step - 2));
+  const tailLift = walking ? (frame % 2) + 1 : happy ? Math.max(0, 3 - Math.abs(step - 2)) : Math.max(0, 2 - Math.abs(step - 2));
   const mouthOpen = talking && frame % 2 === 1;
+  const leftFootX = walking && frame % 4 < 2 ? -1 : 0;
+  const rightFootX = walking && frame % 4 >= 2 ? 1 : 0;
 
   parts.push(`<g${dim}>`);
 
@@ -58,8 +62,8 @@ function drawBody(parts, dx, dy, state, frame) {
   pixelRect(parts, dx + 35, y + 20 - tailLift, 2, 2, '#ffffff');
 
   // Feet.
-  pixelRect(parts, dx + 16, y + 37, 5, 5, '#111111');
-  pixelRect(parts, dx + 27, y + 37, 5, 5, '#111111');
+  pixelRect(parts, dx + 16 + leftFootX, y + 37, 5, 5, '#111111');
+  pixelRect(parts, dx + 27 + rightFootX, y + 37, 5, 5, '#111111');
 
   // Body outline and fill.
   pixelRect(parts, dx + 9, y + 16, 30, 21, '#111111');
