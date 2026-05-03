@@ -682,10 +682,10 @@ async function createWindow() {
   });
 
   mainWindow = new BrowserWindow({
-    width: 240,
-    height: 300,
-    x: petConfig.get('position')?.x || width - 240,
-    y: petConfig.get('position')?.y || height - 200,
+    width: 260,
+    height: 280,
+    x: petConfig.get('position')?.x || width - 260,
+    y: petConfig.get('position')?.y || height - 280,
     frame: false,
     transparent: true,
     backgroundColor: '#00000000', // macOS 全透明背景，消除淡粉色方框
@@ -1585,7 +1585,7 @@ function reopenSetupWizard() {
 }
 
 // 屏幕边界约束 — 防止球体跑到屏幕外
-function clampToScreen(x, y, winWidth = 200, winHeight = 260) {
+function clampToScreen(x, y, winWidth = 260, winHeight = 280) {
   const displays = screen.getAllDisplays();
   // 获取所有显示器的总边界
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -1596,11 +1596,9 @@ function clampToScreen(x, y, winWidth = 200, winHeight = 260) {
     maxX = Math.max(maxX, dx + dw);
     maxY = Math.max(maxY, dy + dh);
   }
-  // 球体在窗口中居中，约67px大小，窗口200x260
-  // 确保窗口不超出屏幕边界（留少量边距让球体始终可见可拖）
-  const padding = 10; // 窗口边缘到屏幕边缘的最小距离
-  const clampedX = Math.max(minX - padding, Math.min(x, maxX - winWidth + padding));
-  const clampedY = Math.max(minY - padding, Math.min(y, maxY - winHeight + padding));
+  const padding = 0;
+  const clampedX = Math.max(minX + padding, Math.min(x, maxX - winWidth - padding));
+  const clampedY = Math.max(minY + padding, Math.min(y, maxY - winHeight - padding));
   return { x: clampedX, y: clampedY };
 }
 
@@ -1610,7 +1608,8 @@ ipcMain.on('drag-pet', (event, { x, y, offsetX, offsetY }) => {
   // 用鼠标的相对偏移精确定位，避免跳跃
   const rawX = x - (offsetX || 100);
   const rawY = y - (offsetY || 80);
-  const { x: newX, y: newY } = clampToScreen(rawX, rawY);
+  const bounds = mainWindow.getBounds();
+  const { x: newX, y: newY } = clampToScreen(rawX, rawY, bounds.width, bounds.height);
   mainWindow.setPosition(newX, newY);
   // 歌词窗口跟随（在球体上方）
   if (lyricsWindow) {
