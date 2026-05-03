@@ -192,14 +192,6 @@
     .tool-icon:hover svg { stroke: var(--hud-invert); }
     .tool-icon:active { transform: translateY(1px); }
 
-    /* 模型切换按钮 */
-    .model-switch-btn {
-        min-width: 30px;
-        padding: 0 4px;
-    }
-    .model-switch-btn:hover {
-        background: #111111;
-    }
     .tool-icon.active {
         background: #e8e8e2;
         box-shadow: inset -2px -2px 0 rgba(0,0,0,0.18), 0 0 0 2px rgba(255,255,255,0.7);
@@ -437,16 +429,18 @@
     .pet-wrapper.mood-sleepy { filter: saturate(0.75) brightness(0.92); }
     .pet-wrapper.mood-sad { filter: saturate(0.7) hue-rotate(165deg); }
     .pet-wrapper.mood-surprised .eye { height: 18px; background: #ffffff; }
-    .appearance-panel {
+    .settings-panel {
         position: absolute;
         bottom: 174px;
         left: 50%;
         transform: translateX(-50%);
-        width: 202px;
+        width: 216px;
+        max-height: 198px;
         padding: 8px;
         display: none;
         grid-template-columns: 1fr 1fr;
         gap: 6px;
+        overflow-y: auto;
         border-radius: 0;
         border: 2px solid var(--hud-line);
         background: var(--hud-bg);
@@ -454,18 +448,26 @@
         z-index: 30;
         clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
     }
-    .appearance-panel.show { display: grid; }
-    .appearance-title,
-    .appearance-current,
-    .appearance-note {
+    .settings-panel.show { display: grid; }
+    .settings-title,
+    .settings-current,
+    .settings-note,
+    .settings-section {
         grid-column: 1 / -1;
         font-size: 10px;
         color: var(--hud-text);
     }
-    .appearance-title { font-weight: 800; letter-spacing: 0; color: #000; text-transform: uppercase; }
-    .appearance-current { color: var(--hud-muted); }
-    .appearance-note { color: #3d3d3d; line-height: 1.25; }
-    .appearance-panel button {
+    .settings-title { font-weight: 800; letter-spacing: 0; color: #000; text-transform: uppercase; }
+    .settings-current { color: var(--hud-muted); }
+    .settings-section {
+        margin-top: 3px;
+        padding-top: 5px;
+        border-top: 2px solid rgba(0,0,0,0.18);
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .settings-note { color: #3d3d3d; line-height: 1.25; }
+    .settings-panel button {
         border: 2px solid var(--hud-line);
         border-radius: 0;
         padding: 6px 4px;
@@ -475,7 +477,8 @@
         cursor: pointer;
         box-shadow: inset -2px -2px 0 rgba(0,0,0,0.38);
     }
-    .appearance-panel button:hover { background: #111111; color: var(--hud-invert); }
+    .settings-panel button:hover { background: #111111; color: var(--hud-invert); }
+    .settings-panel .wide { grid-column: 1 / -1; }
     @keyframes cow-tail {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
@@ -519,23 +522,27 @@
         <div class="tool-icon" id="btnScreenshot" title="截图" onclick="screenshot()">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
-        <div class="tool-icon model-switch-btn" id="btnModelSwitch" title="切换模型" onclick="cycleModel()">
-            <span id="modelBadge" style="font-size:9px;font-weight:800;color:#111;user-select:none;">OP</span>
-        </div>
-        <div class="tool-icon" id="btnAppearance" title="形象" onclick="toggleAppearancePanel()">
-            <svg viewBox="0 0 24 24"><path d="M4 10l3-5 4 3h2l4-3 3 5-3 2v7H7v-7z"/><path d="M9 15h6"/></svg>
+        <div class="tool-icon" id="btnSettings" title="设置" onclick="toggleSettingsPanel()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12h3M2 12h3M12 2v3M12 19v3M17 7l2-2M5 19l2-2M7 7 5 5M17 17l2 2"/></svg>
         </div>
     </div>
 
-    <div class="appearance-panel" id="appearancePanel">
-        <div class="appearance-title">Pet</div>
-        <div class="appearance-current" id="appearanceCurrent">Cow Cat</div>
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-title">Settings</div>
+        <div class="settings-current">Model <span id="modelBadge" style="font-weight:800;color:#111;">OP</span></div>
+        <button class="wide" onclick="cycleModel()">Switch Model</button>
+        <button class="wide" onclick="openModelPanel()">Model Panel</button>
+        <div class="settings-section">Pet</div>
+        <div class="settings-current" id="appearanceCurrent">Cow Cat</div>
         <button onclick="useCowCat()">Cow Cat</button>
-        <button onclick="uploadPetImage()">Upload Image</button>
-        <button onclick="importPetPackage()">Import Package</button>
-        <button onclick="showImagegenHelp()">AI Generate</button>
-        <button onclick="resetAppearance()">Reset</button>
-        <div class="appearance-note" id="appearanceNote"></div>
+        <button onclick="uploadPetImage()">Upload</button>
+        <button onclick="importPetPackage()">Import</button>
+        <button onclick="showImagegenHelp()">AI Gen</button>
+        <button class="wide" onclick="resetAppearance()">Reset Pet</button>
+        <div class="settings-section">Tools</div>
+        <button id="settingsVoiceButton" onclick="toggleVoice()">Voice On</button>
+        <button onclick="screenshot()">Screenshot</button>
+        <div class="settings-note" id="settingsNote"></div>
     </div>
 
     <!-- 输入条 -->
@@ -560,12 +567,13 @@ const glassShell = document.querySelector('.glass-shell');
 const inputBar = document.getElementById('inputBar');
 const inputEl = document.getElementById('input');
 const btnVoice = document.getElementById('btnVoice');
+const settingsVoiceButton = document.getElementById('settingsVoiceButton');
 const toolbar = document.getElementById('toolbar');
 const customPetImage = document.getElementById('customPetImage');
 const customPetSheet = document.getElementById('customPetSheet');
-const appearancePanel = document.getElementById('appearancePanel');
+const settingsPanel = document.getElementById('settingsPanel');
 const appearanceCurrent = document.getElementById('appearanceCurrent');
-const appearanceNote = document.getElementById('appearanceNote');
+const settingsNote = document.getElementById('settingsNote');
 
 let voiceOn = true;
 let isConnected = false;
@@ -580,19 +588,20 @@ let roamPausedUntil = Date.now() + 4000;
 let roamInFlight = false;
 
 function setAppearanceNote(text) {
-    if (appearanceNote) appearanceNote.textContent = text || '';
+    if (settingsNote) settingsNote.textContent = text || '';
 }
 
-function toggleAppearancePanel() {
-    appearancePanel.classList.toggle('show');
+function toggleSettingsPanel() {
+    settingsPanel.classList.toggle('show');
     setAppearanceNote('');
+    inputBar.classList.remove('show');
     pauseRoam(2500);
 }
 
 function togglePetOptions() {
     toolbar.classList.toggle('show');
     if (!toolbar.classList.contains('show')) {
-        appearancePanel.classList.remove('show');
+        settingsPanel.classList.remove('show');
         inputBar.classList.remove('show');
     }
     pauseRoam(2500);
@@ -604,9 +613,9 @@ pet.addEventListener('contextmenu', e => {
 });
 
 document.addEventListener('click', e => {
-    if (pet.contains(e.target) || toolbar.contains(e.target) || appearancePanel.contains(e.target) || inputBar.contains(e.target)) return;
+    if (pet.contains(e.target) || toolbar.contains(e.target) || settingsPanel.contains(e.target) || inputBar.contains(e.target)) return;
     toolbar.classList.remove('show');
-    appearancePanel.classList.remove('show');
+    settingsPanel.classList.remove('show');
 });
 
 function renderAppearance(state) {
@@ -697,7 +706,7 @@ function pauseRoam(ms = 2500) {
 function shouldRoam() {
     if (!window.electronAPI || !hasSpritePet()) return false;
     if (Date.now() < roamPausedUntil || isDrag) return false;
-    if (toolbar.classList.contains('show') || appearancePanel.classList.contains('show') || inputBar.classList.contains('show')) return false;
+    if (toolbar.classList.contains('show') || settingsPanel.classList.contains('show') || inputBar.classList.contains('show')) return false;
     return currentMood === 'idle' || currentMood === 'walking';
 }
 
@@ -1756,6 +1765,7 @@ document.addEventListener('keydown', () => { lastInteraction = Date.now(); });
 // ===== 工具栏 =====
 function toggleInput() {
     pauseRoam(3500);
+    settingsPanel.classList.remove('show');
     inputBar.classList.toggle('show');
     if (inputBar.classList.contains('show')) inputEl.focus();
 }
@@ -1766,6 +1776,7 @@ function toggleVoice() {
         ? '<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
         : '<svg viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.12 1.5-.35 2.18"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
     btnVoice.classList.toggle('active', voiceOn);
+    if (settingsVoiceButton) settingsVoiceButton.textContent = voiceOn ? 'Voice On' : 'Voice Off';
     if (electronAPI) electronAPI.invoke('set-voice-enabled', voiceOn);
     setMood('happy');
     setTimeout(() => setMood('idle'), 1500);
@@ -1791,6 +1802,12 @@ async function cycleModel() {
     } else {
         setMood('idle');
     }
+}
+
+async function openModelPanel() {
+    if (!electronAPI) return;
+    await electronAPI.invoke('model-open-settings');
+    setAppearanceNote('Model panel opened.');
 }
 
 function updateModelBadge(model) {

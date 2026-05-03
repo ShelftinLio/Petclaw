@@ -14,6 +14,7 @@ const VALID_INVOKE_CHANNELS = [
   'gateway-send',
   'openclaw-send',
   'model-current',
+  'model-open-settings',
   'gateway-status',
   'openclaw-status',
   'model-full-status',

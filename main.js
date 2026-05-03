@@ -2252,6 +2252,11 @@ ipcMain.handle('model-current', async () => {
   return modelSwitcher ? modelSwitcher.getCurrent() : null;
 });
 
+ipcMain.handle('model-open-settings', async () => {
+  openModelSettings();
+  return { success: true };
+});
+
 ipcMain.handle('model-switch', async (event, modelId) => {
   if (!modelSwitcher) return { success: false, error: 'not initialized', model: null };
   const model = await modelSwitcher.switchTo(modelId);
