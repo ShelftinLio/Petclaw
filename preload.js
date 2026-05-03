@@ -51,7 +51,14 @@ const VALID_INVOKE_CHANNELS = [
   'gateway-metrics',
   'gateway-anomalies',
   'gateway-full-status',
-  'gateway-clear-metrics'
+  'gateway-clear-metrics',
+  'appearance-get',
+  'appearance-set-active',
+  'appearance-reset',
+  'appearance-upload-image',
+  'appearance-save-generated-image',
+  'appearance-import-package',
+  'appearance-imagegen-status'
 ];
 
 const VALID_ON_CHANNELS = [

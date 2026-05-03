@@ -2,6 +2,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { safeStorage } = require('electron');
+const { normalizeAppearanceConfig } = require('./pet-appearance');
 
 // Keys that contain sensitive data and should be encrypted
 const SENSITIVE_KEYS = ['minimax.apiKey', 'dashscope.apiKey'];
@@ -13,6 +14,7 @@ class PetConfig {
             position: { x: null, y: null },
             mood: 'happy', // happy, thinking, busy, sleepy
             theme: 'default',
+            appearance: normalizeAppearanceConfig(),
             voiceEnabled: true,
             lastSeen: Date.now()
         };
@@ -72,6 +74,7 @@ class PetConfig {
         try {
             const data = await fs.readFile(this.configPath, 'utf-8');
             this.config = { ...this.config, ...JSON.parse(data) };
+            this.config.appearance = normalizeAppearanceConfig(this.config.appearance);
             this._decryptSensitive(this.config);
             const { colorLog } = require('./utils/color-log');
             colorLog('✅ 配置加载成功');

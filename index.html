@@ -246,6 +246,203 @@
         75% { transform: scale(1.05, 0.95); }
         100% { transform: scale(1, 1); }
     }
+    /* ===== Codex-style cow-cat appearance ===== */
+    .pet-wrapper {
+        width: 86px;
+        height: 82px;
+        image-rendering: pixelated;
+        transform-origin: 50% 72%;
+    }
+    .pet-wrapper::before {
+        content: '';
+        position: absolute;
+        width: 30px;
+        height: 14px;
+        right: -12px;
+        top: 44px;
+        background: #f8f5ef;
+        border: 3px solid #1a1a1a;
+        border-left: 0;
+        border-radius: 0 12px 12px 0;
+        box-shadow: inset -12px 0 0 #1d1d1d;
+        transform-origin: left center;
+        animation: cow-tail 2.2s steps(3) infinite;
+        z-index: 0;
+    }
+    .pet-wrapper::after {
+        content: '';
+        position: absolute;
+        left: 28px;
+        bottom: 1px;
+        width: 12px;
+        height: 8px;
+        background: #1a1a1a;
+        box-shadow: 20px 0 0 #1a1a1a;
+        border-radius: 2px;
+        z-index: 4;
+    }
+    .inner-fluid {
+        top: 13px;
+        left: 10px;
+        right: 8px;
+        bottom: 8px;
+        border-radius: 18px 20px 16px 16px;
+        overflow: visible;
+        background: #f8f5ef;
+        border: 3px solid #1a1a1a;
+        box-shadow: inset -4px -4px 0 rgba(0,0,0,0.08), 0 3px 0 rgba(0,0,0,0.18);
+        z-index: 2;
+    }
+    .fluid-blob {
+        width: 25px;
+        height: 21px;
+        top: 8px;
+        left: 3px;
+        border-radius: 8px 10px 6px 9px;
+        background: #1b1b1b;
+        animation: cow-spot 2.8s steps(2) infinite;
+    }
+    .fluid-blob-2 {
+        width: 20px;
+        height: 18px;
+        top: 28px;
+        left: 41px;
+        border-radius: 8px 5px 9px 5px;
+        background: #202020;
+        animation: none;
+    }
+    .glass-shell {
+        top: 6px;
+        left: 18px;
+        width: 48px;
+        height: 42px;
+        border-radius: 16px 16px 14px 14px;
+        background: #f8f5ef;
+        border: 3px solid #1a1a1a;
+        box-shadow: inset -3px -3px 0 rgba(0,0,0,0.08);
+        z-index: 3;
+    }
+    .glass-shell::before,
+    .glass-shell::after {
+        content: '';
+        position: absolute;
+        top: -12px;
+        width: 17px;
+        height: 17px;
+        background: #f8f5ef;
+        border: 3px solid #1a1a1a;
+        filter: none;
+        border-radius: 4px 10px 4px 10px;
+        transform: rotate(45deg);
+    }
+    .glass-shell::before { left: 3px; box-shadow: inset 4px 4px 0 #202020; }
+    .glass-shell::after { right: 3px; box-shadow: inset -4px -4px 0 #202020; }
+    .eyes-container {
+        top: 20px;
+        left: 23px;
+        width: 39px;
+        height: 18px;
+        gap: 13px;
+        z-index: 5;
+    }
+    .eye {
+        width: 5px;
+        height: 15px;
+        border-radius: 1px;
+        background: #dff8ff;
+        border: 2px solid #111;
+        box-shadow: inset 0 3px 0 #ffffff, 0 0 5px rgba(160,236,255,0.75);
+    }
+    .blush {
+        top: 41px;
+        width: 7px;
+        height: 5px;
+        background: #f0a7a2;
+        filter: none;
+        opacity: 0.7;
+        border-radius: 2px;
+        z-index: 5;
+    }
+    .blush-l { left: 25px; }
+    .blush-r { right: 25px; }
+    .bub { display: none; }
+    .custom-pet-image {
+        display: none;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        image-rendering: pixelated;
+        z-index: 4;
+        pointer-events: none;
+    }
+    .pet-wrapper.custom-image .inner-fluid,
+    .pet-wrapper.custom-image .fluid-blob,
+    .pet-wrapper.custom-image .fluid-blob-2,
+    .pet-wrapper.custom-image .glass-shell,
+    .pet-wrapper.custom-image .eyes-container,
+    .pet-wrapper.custom-image .blush {
+        display: none;
+    }
+    .pet-wrapper.custom-image::before,
+    .pet-wrapper.custom-image::after {
+        display: none;
+    }
+    .pet-wrapper.custom-image .custom-pet-image {
+        display: block;
+    }
+    .pet-wrapper.mood-happy .glass-shell { transform: translateY(-1px); }
+    .pet-wrapper.mood-thinking .glass-shell { transform: rotate(-3deg); }
+    .pet-wrapper.mood-sleepy { filter: saturate(0.75) brightness(0.92); }
+    .pet-wrapper.mood-sad { filter: saturate(0.7) hue-rotate(165deg); }
+    .pet-wrapper.mood-surprised .eye { height: 18px; background: #ffffff; }
+    .appearance-panel {
+        position: absolute;
+        top: calc(50% + 78px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 164px;
+        padding: 8px;
+        display: none;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.92);
+        box-shadow: 0 8px 26px rgba(0,0,0,0.18);
+        z-index: 30;
+    }
+    .appearance-panel.show { display: grid; }
+    .appearance-title,
+    .appearance-current,
+    .appearance-note {
+        grid-column: 1 / -1;
+        font-size: 10px;
+        color: #303030;
+    }
+    .appearance-title { font-weight: 800; letter-spacing: 0; }
+    .appearance-current { color: #666; }
+    .appearance-note { color: #8a5a00; line-height: 1.25; }
+    .appearance-panel button {
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 6px;
+        padding: 5px 4px;
+        background: #fff;
+        color: #333;
+        font-size: 10px;
+        cursor: pointer;
+    }
+    .appearance-panel button:hover { background: #f5f5f5; }
+    @keyframes cow-tail {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(10deg); }
+    }
+    @keyframes cow-spot {
+        0%, 100% { transform: translate(0,0); }
+        50% { transform: translate(1px,1px); }
+    }
 </style>
 </head>
 <body>
@@ -264,6 +461,7 @@
         <div class="blush blush-r" id="blushR"></div>
         <div class="bub bub-1"></div>
         <div class="bub bub-2"></div>
+        <div class="custom-pet-image" id="customPetImage"></div>
         <div class="particles" id="particles"></div>
     </div>
 
@@ -281,6 +479,20 @@
         <div class="tool-icon model-switch-btn" id="btnModelSwitch" title="切换模型" onclick="cycleModel()">
             <span id="modelBadge" style="font-size:9px;font-weight:700;color:#666;user-select:none;">OP</span>
         </div>
+        <div class="tool-icon" id="btnAppearance" title="形象" onclick="toggleAppearancePanel()">
+            <svg viewBox="0 0 24 24"><path d="M4 10l3-5 4 3h2l4-3 3 5-3 2v7H7v-7z"/><path d="M9 15h6"/></svg>
+        </div>
+    </div>
+
+    <div class="appearance-panel" id="appearancePanel">
+        <div class="appearance-title">Pet</div>
+        <div class="appearance-current" id="appearanceCurrent">Cow Cat</div>
+        <button onclick="useCowCat()">Cow Cat</button>
+        <button onclick="uploadPetImage()">Upload Image</button>
+        <button onclick="importPetPackage()">Import Package</button>
+        <button onclick="showImagegenHelp()">AI Generate</button>
+        <button onclick="resetAppearance()">Reset</button>
+        <div class="appearance-note" id="appearanceNote"></div>
     </div>
 
     <!-- 输入条 -->
@@ -305,9 +517,133 @@ const glassShell = document.querySelector('.glass-shell');
 const inputBar = document.getElementById('inputBar');
 const inputEl = document.getElementById('input');
 const btnVoice = document.getElementById('btnVoice');
+const customPetImage = document.getElementById('customPetImage');
+const appearancePanel = document.getElementById('appearancePanel');
+const appearanceCurrent = document.getElementById('appearanceCurrent');
+const appearanceNote = document.getElementById('appearanceNote');
 
 let voiceOn = true;
 let isConnected = false;
+let activeAppearance = { mode: 'cow-cat', activePetId: 'cow-cat', customPets: [] };
+
+function setAppearanceNote(text) {
+    if (appearanceNote) appearanceNote.textContent = text || '';
+}
+
+function toggleAppearancePanel() {
+    appearancePanel.classList.toggle('show');
+    setAppearanceNote('');
+}
+
+function renderAppearance(state) {
+    if (!state) return;
+    activeAppearance = state.appearance || activeAppearance;
+    const isCustomImage = state.activePet && ['image','spritesheet','frames'].includes(state.activePet.renderer) && state.activeImageUrl;
+    pet.classList.toggle('custom-image', Boolean(isCustomImage));
+    if (isCustomImage) {
+        customPetImage.style.backgroundImage = `url("${state.activeImageUrl}")`;
+        if (state.activePet.renderer === 'spritesheet') {
+            customPetImage.style.backgroundSize = '800% 900%';
+            customPetImage.style.backgroundPosition = '0 0';
+        } else {
+            customPetImage.style.backgroundSize = 'contain';
+            customPetImage.style.backgroundPosition = 'center';
+        }
+        appearanceCurrent.textContent = state.activePet.name || 'Custom Pet';
+    } else {
+        customPetImage.style.backgroundImage = '';
+        customPetImage.style.backgroundSize = 'contain';
+        customPetImage.style.backgroundPosition = 'center';
+        appearanceCurrent.textContent = 'Cow Cat';
+        fluid.style.background = '';
+        blob1.style.background = '';
+        blob2.style.background = '';
+    }
+    setMood(currentMood || 'idle');
+}
+
+async function loadAppearance() {
+    if (!window.electronAPI) return;
+    try {
+        renderAppearance(await electronAPI.invoke('appearance-get'));
+    } catch (err) {
+        setAppearanceNote(err.message || 'Appearance unavailable');
+    }
+}
+
+async function useCowCat() {
+    if (!window.electronAPI) return;
+    renderAppearance(await electronAPI.invoke('appearance-set-active', 'cow-cat'));
+    setAppearanceNote('Default cow-cat selected.');
+}
+
+async function resetAppearance() {
+    if (!window.electronAPI) return;
+    renderAppearance(await electronAPI.invoke('appearance-reset'));
+    setAppearanceNote('Reset to cow-cat.');
+}
+
+function pixelizeImage(dataUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const small = document.createElement('canvas');
+            const size = 44;
+            small.width = size;
+            small.height = size;
+            const sctx = small.getContext('2d');
+            sctx.imageSmoothingEnabled = true;
+            sctx.clearRect(0, 0, size, size);
+            const scale = Math.min(size / img.width, size / img.height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            sctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+
+            const out = document.createElement('canvas');
+            out.width = 172;
+            out.height = 164;
+            const ctx = out.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, out.width, out.height);
+            ctx.drawImage(small, 0, 0, size, size, 0, 0, out.width, out.height);
+            resolve(out.toDataURL('image/png'));
+        };
+        img.onerror = () => reject(new Error('Unable to read selected image'));
+        img.src = dataUrl;
+    });
+}
+
+async function uploadPetImage() {
+    if (!window.electronAPI) return;
+    setAppearanceNote('Choosing image...');
+    const picked = await electronAPI.invoke('appearance-upload-image');
+    if (!picked || picked.canceled) { setAppearanceNote('Upload canceled.'); return; }
+    setAppearanceNote('Generating pixel pet...');
+    const dataUrl = await pixelizeImage(picked.sourceUrl);
+    const saved = await electronAPI.invoke('appearance-save-generated-image', {
+        id: picked.id,
+        name: picked.name,
+        source: 'local-image',
+        dataUrl
+    });
+    renderAppearance(saved.state);
+    setAppearanceNote('Custom image pet saved.');
+}
+
+async function importPetPackage() {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('appearance-import-package');
+    if (!result || result.canceled) { setAppearanceNote('Import canceled.'); return; }
+    if (!result.success) { setAppearanceNote(result.error || 'Import failed.'); return; }
+    renderAppearance(result.state);
+    setAppearanceNote('Pet package imported.');
+}
+
+async function showImagegenHelp() {
+    if (!window.electronAPI) return;
+    const status = await electronAPI.invoke('appearance-imagegen-status');
+    setAppearanceNote(status.message || 'Use $imagegen, then import the pet package.');
+}
 
 // ===== 60fps 动画 =====
 let t = 0, squishing = false, targetScale = 1, curScale = 1, breathExtra = 0;
@@ -350,6 +686,7 @@ function loop() {
     requestAnimationFrame(loop);
 }
 loop();
+loadAppearance();
 
 // 深呼吸/叹气：每 20-40 秒触发一次
 setInterval(() => {
@@ -782,6 +1119,11 @@ function setMood(mood) {
     mood = map[mood] || mood;
     if (!MOODS[mood]) mood = 'idle';
     const m = MOODS[mood];
+    pet.className = pet.className
+        .split(/\s+/)
+        .filter(c => c && !c.startsWith('mood-'))
+        .concat('mood-' + mood)
+        .join(' ');
 
     // 任何情绪变化都算互动
     lastInteraction = Date.now();
@@ -796,9 +1138,11 @@ function setMood(mood) {
 
         _moodTimer = setTimeout(() => {
             // 峰值时瞬间换色（人眼在高亮度下感知不到跳变）
-            fluid.style.background = m.fluid;
-            blob1.style.background = m.b1;
-            blob2.style.background = m.b2;
+            if (pet.classList.contains('custom-image')) {
+                fluid.style.background = m.fluid;
+                blob1.style.background = m.b1;
+                blob2.style.background = m.b2;
+            }
             // 🔮 应用情绪发光效果
             if (m.glow && glassShell) {
                 glassShell.style.boxShadow = 'inset -2px -2px 8px rgba(255,255,255,0.08), inset 2px 2px 8px rgba(255,255,255,0.35), ' + m.glow;

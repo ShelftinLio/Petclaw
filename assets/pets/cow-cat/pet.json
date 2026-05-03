@@ -1,0 +1,19 @@
+{
+  "id": "cow-cat",
+  "name": "Cow Cat",
+  "description": "A tiny Codex-style pixel cow-cat companion.",
+  "source": "built-in",
+  "renderer": "dom-cow-cat",
+  "version": 1,
+  "states": {
+    "idle": { "duration": 180 },
+    "happy": { "duration": 150 },
+    "talking": { "duration": 120 },
+    "thinking": { "duration": 220 },
+    "sleepy": { "duration": 260 },
+    "sad": { "duration": 220 },
+    "surprised": { "duration": 140 },
+    "focused": { "duration": 180 },
+    "offline": { "duration": 260 }
+  }
+}

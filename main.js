@@ -21,6 +21,7 @@ if (process.env.ELECTRON_RUN_AS_NODE === '1') {
 }
 
 const fs = require('fs');
+const fsp = require('fs').promises;
 
 // macOS GUI apps inherit a minimal PATH from launchd, so Homebrew-installed
 // tools like npm/openclaw disappear unless we re-add the common prefixes.
@@ -51,7 +52,7 @@ if (process.platform === 'darwin') {
   }
 }
 
-const { app, BrowserWindow, ipcMain, screen, Menu, Tray, Notification, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Menu, Tray, Notification, shell, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const GatewayClient = require('./gateway-client');
@@ -77,6 +78,18 @@ const SecureStorage = require('./utils/secure-storage'); // 🔒 安全存储
 const pathResolver = require('./utils/openclaw-path-resolver'); // 🔧 路径解析
 const SessionLockManager = require('./utils/session-lock-manager');
 const { printHero, printReady } = require('./startup-banner'); // 🦞 启动动画
+const {
+  COW_CAT_ID,
+  normalizeAppearanceConfig,
+  createBuiltInCowCatManifest,
+  createImagePetManifest,
+  createCustomPetRecord,
+  createPetId,
+  inferRendererFromFiles,
+  setActivePet,
+  upsertCustomPet,
+  validatePetManifest
+} = require('./pet-appearance');
 
 // Windows透明窗口修复 — 禁用硬件加速彻底解决浅色背景矩形框
 // macOS 上禁用硬件加速反而会破坏透明度，仅在 Windows 上启用
@@ -1604,6 +1617,184 @@ ipcMain.on('drag-pet', (event, { x, y, offsetX, offsetY }) => {
   }
   petConfig.set('position', { x: newX, y: newY });
 });
+
+const customPetsRoot = path.join(__dirname, 'assets', 'pets', 'custom');
+
+function petAssetUrl(relativePath) {
+  if (!relativePath) return '';
+  return `file://${path.join(__dirname, relativePath).replace(/\\/g, '/')}`;
+}
+
+function getAppearanceState() {
+  const appearance = normalizeAppearanceConfig(petConfig.get('appearance'));
+  const activePet = appearance.customPets.find(pet => pet.id === appearance.activePetId) || null;
+  let activeManifest = null;
+  let activeImageUrl = '';
+  if (activePet) {
+    try {
+      const manifestPath = path.join(__dirname, activePet.manifestPath);
+      activeManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      const idle = activeManifest.states && activeManifest.states.idle;
+      const image = idle && idle.image;
+      if (image) activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, image));
+      if (!activeImageUrl && activePet.renderer === 'spritesheet') {
+        activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, 'spritesheet.webp'));
+      }
+    } catch (err) {
+      activeManifest = null;
+    }
+  }
+  return {
+    appearance,
+    activePet,
+    activeManifest,
+    activeImageUrl,
+    cowCat: createBuiltInCowCatManifest()
+  };
+}
+
+async function writeJson(filePath, value) {
+  await fsp.mkdir(path.dirname(filePath), { recursive: true });
+  await fsp.writeFile(filePath, JSON.stringify(value, null, 2), 'utf-8');
+}
+
+function dataUrlToBuffer(dataUrl) {
+  const match = /^data:image\/(png|webp|jpeg);base64,(.+)$/i.exec(String(dataUrl || ''));
+  if (!match) throw new Error('Invalid generated image data');
+  const ext = match[1].toLowerCase() === 'jpeg' ? 'jpg' : match[1].toLowerCase();
+  return { buffer: Buffer.from(match[2], 'base64'), ext };
+}
+
+async function copyFileToPetDir(sourcePath, targetDir, preferredName) {
+  await fsp.mkdir(targetDir, { recursive: true });
+  const ext = path.extname(sourcePath).toLowerCase() || '.png';
+  const targetPath = path.join(targetDir, `${preferredName}${ext}`);
+  await fsp.copyFile(sourcePath, targetPath);
+  return targetPath;
+}
+
+ipcMain.handle('appearance-get', async () => getAppearanceState());
+
+ipcMain.handle('appearance-set-active', async (event, petId) => {
+  const next = setActivePet(petConfig.get('appearance'), petId || COW_CAT_ID);
+  petConfig.set('appearance', next);
+  return getAppearanceState();
+});
+
+ipcMain.handle('appearance-reset', async () => {
+  const next = setActivePet(petConfig.get('appearance'), COW_CAT_ID);
+  petConfig.set('appearance', next);
+  return getAppearanceState();
+});
+
+ipcMain.handle('appearance-upload-image', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Choose a character image',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }
+    ]
+  });
+  if (result.canceled || !result.filePaths[0]) return { canceled: true };
+
+  const id = createPetId();
+  const petDir = path.join(customPetsRoot, id);
+  const sourcePath = await copyFileToPetDir(result.filePaths[0], petDir, 'source');
+  const bytes = await fsp.readFile(sourcePath);
+  const ext = path.extname(sourcePath).toLowerCase();
+  const mime = ext === '.webp' ? 'image/webp' : ext === '.png' ? 'image/png' : 'image/jpeg';
+
+  return {
+    canceled: false,
+    id,
+    name: path.basename(result.filePaths[0], path.extname(result.filePaths[0])),
+    sourcePath,
+    sourceUrl: `data:${mime};base64,${bytes.toString('base64')}`,
+  };
+});
+
+ipcMain.handle('appearance-save-generated-image', async (event, payload = {}) => {
+  const id = payload.id || createPetId();
+  const petDir = path.join(customPetsRoot, id);
+  await fsp.mkdir(petDir, { recursive: true });
+
+  const { buffer, ext } = dataUrlToBuffer(payload.dataUrl);
+  const generatedName = `generated.${ext}`;
+  await fsp.writeFile(path.join(petDir, generatedName), buffer);
+
+  const manifest = createImagePetManifest({
+    id,
+    name: payload.name || 'Custom Pet',
+    image: generatedName,
+    source: payload.source || 'local-image'
+  });
+  const validation = validatePetManifest(manifest);
+  if (!validation.ok) throw new Error(validation.error);
+
+  await writeJson(path.join(petDir, 'pet.json'), manifest);
+  const record = createCustomPetRecord({
+    id,
+    name: manifest.name,
+    source: manifest.source,
+    renderer: manifest.renderer
+  });
+  let appearance = upsertCustomPet(petConfig.get('appearance'), record);
+  appearance = setActivePet(appearance, id);
+  petConfig.set('appearance', appearance);
+
+  return {
+    success: true,
+    pet: record,
+    manifest,
+    imageUrl: petAssetUrl(path.posix.join(record.assetDir, generatedName)),
+    state: getAppearanceState()
+  };
+});
+
+ipcMain.handle('appearance-import-package', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Import pet package',
+    properties: ['openDirectory']
+  });
+  if (result.canceled || !result.filePaths[0]) return { canceled: true };
+
+  const sourceDir = result.filePaths[0];
+  const files = await fsp.readdir(sourceDir);
+  if (!files.includes('pet.json')) {
+    return { canceled: false, success: false, error: 'Package must contain pet.json' };
+  }
+
+  const rawManifest = JSON.parse(await fsp.readFile(path.join(sourceDir, 'pet.json'), 'utf-8'));
+  const renderer = rawManifest.renderer || inferRendererFromFiles(files);
+  const id = rawManifest.id && rawManifest.id !== COW_CAT_ID ? rawManifest.id : createPetId();
+  const manifest = { ...rawManifest, id, renderer, source: rawManifest.source || 'package' };
+  const validation = validatePetManifest(manifest);
+  if (!validation.ok) {
+    return { canceled: false, success: false, error: validation.error };
+  }
+
+  const petDir = path.join(customPetsRoot, id);
+  await fsp.rm(petDir, { recursive: true, force: true });
+  await fsp.cp(sourceDir, petDir, { recursive: true });
+  await writeJson(path.join(petDir, 'pet.json'), manifest);
+
+  const record = createCustomPetRecord({
+    id,
+    name: manifest.name,
+    source: 'package',
+    renderer: manifest.renderer
+  });
+  let appearance = upsertCustomPet(petConfig.get('appearance'), record);
+  appearance = setActivePet(appearance, id);
+  petConfig.set('appearance', appearance);
+
+  return { canceled: false, success: true, pet: record, manifest, state: getAppearanceState() };
+});
+
+ipcMain.handle('appearance-imagegen-status', async () => ({
+  available: false,
+  message: 'Use Codex $imagegen to create multi-state pet assets, then import the generated pet package here.'
+}));
 
 // 三击查看历史消息
 ipcMain.handle('show-history', async () => {

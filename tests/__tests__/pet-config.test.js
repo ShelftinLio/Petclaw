@@ -15,6 +15,11 @@ describe('PetConfig', () => {
     expect(config.config.voiceEnabled).toBe(true)
     expect(config.config.theme).toBe('default')
     expect(config.config.position).toEqual({ x: null, y: null })
+    expect(config.config.appearance).toEqual({
+      mode: 'cow-cat',
+      activePetId: 'cow-cat',
+      customPets: [],
+    })
   })
 
   test('should have configPath pointing to pet-config.json', () => {

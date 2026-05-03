@@ -1,0 +1,151 @@
+const {
+  COW_CAT_ID,
+  normalizeAppearanceConfig,
+  createBuiltInCowCatManifest,
+  validatePetManifest,
+  createCustomPetRecord,
+  createImagePetManifest,
+  upsertCustomPet,
+  setActivePet,
+  inferRendererFromFiles,
+} = require('../../pet-appearance')
+
+describe('Pet appearance helpers', () => {
+  test('normalizeAppearanceConfig fills safe cow-cat defaults', () => {
+    expect(normalizeAppearanceConfig()).toEqual({
+      mode: 'cow-cat',
+      activePetId: COW_CAT_ID,
+      customPets: [],
+    })
+  })
+
+  test('normalizeAppearanceConfig preserves valid custom pets', () => {
+    const customPets = [
+      {
+        id: 'custom-1',
+        name: 'Sketch',
+        source: 'local-image',
+        renderer: 'image',
+        assetDir: 'assets/pets/custom/custom-1',
+        manifestPath: 'assets/pets/custom/custom-1/pet.json',
+        createdAt: '2026-05-03T12:00:00.000Z',
+      },
+    ]
+
+    expect(normalizeAppearanceConfig({
+      mode: 'custom-image',
+      activePetId: 'custom-1',
+      customPets,
+    })).toEqual({
+      mode: 'custom-image',
+      activePetId: 'custom-1',
+      customPets,
+    })
+  })
+
+  test('createBuiltInCowCatManifest declares DOM cow-cat renderer', () => {
+    expect(createBuiltInCowCatManifest()).toMatchObject({
+      id: COW_CAT_ID,
+      name: 'Cow Cat',
+      source: 'built-in',
+      renderer: 'dom-cow-cat',
+      states: expect.objectContaining({
+        idle: expect.any(Object),
+        happy: expect.any(Object),
+        talking: expect.any(Object),
+        thinking: expect.any(Object),
+      }),
+    })
+  })
+
+  test('validatePetManifest rejects missing renderer', () => {
+    expect(validatePetManifest({ id: 'bad', name: 'Bad Pet' })).toEqual({
+      ok: false,
+      error: 'pet.json renderer must be one of: dom-cow-cat, image, spritesheet, frames',
+    })
+  })
+
+  test('validatePetManifest accepts image pets with a default state', () => {
+    expect(validatePetManifest({
+      id: 'custom-1',
+      name: 'Sketch',
+      source: 'local-image',
+      renderer: 'image',
+      states: {
+        idle: { image: 'generated.png', duration: 180 },
+      },
+    })).toEqual({ ok: true })
+  })
+
+  test('createCustomPetRecord uses stable manifest and asset paths', () => {
+    expect(createCustomPetRecord({
+      id: 'custom-20260503-120000',
+      name: 'Sketch',
+      source: 'local-image',
+      renderer: 'image',
+      createdAt: '2026-05-03T12:00:00.000Z',
+    })).toEqual({
+      id: 'custom-20260503-120000',
+      name: 'Sketch',
+      source: 'local-image',
+      renderer: 'image',
+      assetDir: 'assets/pets/custom/custom-20260503-120000',
+      manifestPath: 'assets/pets/custom/custom-20260503-120000/pet.json',
+      createdAt: '2026-05-03T12:00:00.000Z',
+    })
+  })
+
+  test('inferRendererFromFiles prefers spritesheet over generated image', () => {
+    expect(inferRendererFromFiles(['pet.json', 'spritesheet.webp', 'generated.png'])).toBe('spritesheet')
+    expect(inferRendererFromFiles(['pet.json', 'generated.png'])).toBe('image')
+    expect(inferRendererFromFiles(['pet.json', 'idle.png', 'happy.png'])).toBe('frames')
+  })
+
+  test('createImagePetManifest creates a valid single-image pet', () => {
+    const manifest = createImagePetManifest({
+      id: 'custom-1',
+      name: 'Sketch',
+      image: 'generated.png',
+      source: 'local-image',
+    })
+
+    expect(manifest).toMatchObject({
+      id: 'custom-1',
+      name: 'Sketch',
+      source: 'local-image',
+      renderer: 'image',
+      states: {
+        idle: { image: 'generated.png', duration: 180 },
+        happy: { image: 'generated.png', duration: 150 },
+        talking: { image: 'generated.png', duration: 120 },
+        thinking: { image: 'generated.png', duration: 220 },
+      },
+    })
+    expect(validatePetManifest(manifest)).toEqual({ ok: true })
+  })
+
+  test('upsertCustomPet replaces existing pet records by id', () => {
+    const appearance = normalizeAppearanceConfig({
+      customPets: [
+        createCustomPetRecord({ id: 'custom-1', name: 'Old', source: 'local-image', renderer: 'image' }),
+      ],
+    })
+    const nextRecord = createCustomPetRecord({ id: 'custom-1', name: 'New', source: 'package', renderer: 'spritesheet' })
+
+    expect(upsertCustomPet(appearance, nextRecord).customPets).toEqual([nextRecord])
+  })
+
+  test('setActivePet switches built-in and custom modes', () => {
+    const custom = createCustomPetRecord({ id: 'custom-1', name: 'New', source: 'package', renderer: 'spritesheet' })
+    const appearance = normalizeAppearanceConfig({ customPets: [custom] })
+
+    expect(setActivePet(appearance, 'custom-1')).toMatchObject({
+      activePetId: 'custom-1',
+      mode: 'custom',
+    })
+    expect(setActivePet(appearance, COW_CAT_ID)).toMatchObject({
+      activePetId: COW_CAT_ID,
+      mode: 'cow-cat',
+    })
+  })
+})
