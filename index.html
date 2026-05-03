@@ -548,7 +548,9 @@ function renderAppearance(state) {
     if (isCustomImage) {
         customPetImage.style.backgroundImage = `url("${state.activeImageUrl}")`;
         if (state.activePet.renderer === 'spritesheet') {
-            customPetImage.style.backgroundSize = '800% 900%';
+            const columns = activePetManifest?.layout?.columns || 8;
+            const rows = activePetManifest?.layout?.rows || Object.keys(activePetManifest?.states || {}).length || 9;
+            customPetImage.style.backgroundSize = `${columns * 100}% ${rows * 100}%`;
             customPetImage.style.backgroundPosition = '0 0';
         } else {
             customPetImage.style.backgroundSize = 'contain';
@@ -580,8 +582,9 @@ function updateSpriteFrame() {
     if (!state || typeof state.row !== 'number') return;
     const frames = state.frames || 8;
     const columns = activePetManifest.layout?.columns || 8;
+    const rows = activePetManifest.layout?.rows || Object.keys(activePetManifest.states || {}).length || 9;
     const x = columns <= 1 ? 0 : (spriteFrameIndex % frames) / (columns - 1) * 100;
-    const y = state.row / 8 * 100;
+    const y = rows <= 1 ? 0 : state.row / (rows - 1) * 100;
     customPetImage.style.backgroundPosition = `${x}% ${y}%`;
     spriteFrameIndex = (spriteFrameIndex + 1) % frames;
 }

@@ -33,18 +33,21 @@ function createBuiltInCowCatManifest() {
     name: 'Cow Cat',
     description: 'A tiny pixel cow-cat companion for focused desktop work.',
     source: 'built-in',
-    renderer: 'dom-cow-cat',
+    renderer: 'spritesheet',
     version: 1,
+    spritesheet: 'spritesheet.svg',
+    cell: { width: 192, height: 208 },
+    layout: { columns: 8, rows: 9 },
     states: {
-      idle: { duration: 180 },
-      happy: { duration: 150 },
-      talking: { duration: 120 },
-      thinking: { duration: 220 },
-      sleepy: { duration: 260 },
-      sad: { duration: 220 },
-      surprised: { duration: 140 },
-      focused: { duration: 180 },
-      offline: { duration: 260 },
+      idle: { row: 0, frames: 8, duration: 140 },
+      happy: { row: 1, frames: 8, duration: 120 },
+      talking: { row: 2, frames: 8, duration: 100 },
+      thinking: { row: 3, frames: 8, duration: 160 },
+      sleepy: { row: 4, frames: 8, duration: 180 },
+      surprised: { row: 5, frames: 8, duration: 110 },
+      focused: { row: 6, frames: 8, duration: 140 },
+      offline: { row: 7, frames: 8, duration: 180 },
+      sad: { row: 8, frames: 8, duration: 160 },
     },
   };
 }
@@ -98,7 +101,7 @@ function createImagegenPetRequest({
     version: 1,
     spritesheet: 'spritesheet.webp',
     cell: { width: 192, height: 208 },
-    layout: { columns: 8 },
+    layout: { columns: 8, rows: 9 },
     states: {
       idle: { row: 0, frames: 8, duration: 140 },
       happy: { row: 1, frames: 8, duration: 120 },
@@ -130,7 +133,7 @@ function createImagegenPetRequest({
     'Style: compact chibi pixel art, chunky readable silhouette, thick dark 1-2 px outline, flat cel shading, vertical i-like glowing eyes, tiny ears/paws/tail where appropriate.',
     'Spritesheet: 8 columns x 9 rows, each cell 192x208 px, final file named spritesheet.webp.',
     `Rows in order: ${HATCH_STATES.map(([state]) => state).join(', ')}.`,
-    'Background workflow: generate on a perfectly flat solid #00ff00 chroma-key background for local removal, or true transparency if available.',
+    'Background workflow: prefer true transparency. If the image tool cannot output transparency, use a perfectly flat solid #00ff00 chroma-key background for local removal.',
     'Constraints: no text, no watermark, no scenery, no shadows, no gradients, no detached effects, keep each frame centered with consistent scale.',
   ].join('\n');
   const readme = [
@@ -162,7 +165,7 @@ function createHatchPetJobs({ petName, description, referenceImage } = {}) {
     `Create the canonical base reference for ${safeName}, a Codex digital pet.`,
     `Subject: ${subject}.`,
     'Style: small pixel-art-adjacent mascot, compact chibi proportions, chunky readable silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading, simple expressive face, tiny limbs.',
-    'Output: one centered full-body pet reference on perfectly flat #00ff00 chroma-key background for cleanup.',
+    'Output: one centered full-body pet reference on transparent background. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background for cleanup.',
     'Avoid: text, watermark, scenery, shadows, gradients, glow, realistic fur, painterly rendering, 3D, detached effects, floor marks.',
   ].join('\n');
 
@@ -188,7 +191,7 @@ function createHatchPetJobs({ petName, description, referenceImage } = {}) {
         `State guidance: ${guidance}.`,
         'Use the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.',
         'Each frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.',
-        'Use perfectly flat #00ff00 chroma-key background in every cell. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.',
+        'Use transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.',
         'The animation should read through pose and expression changes only.',
       ].join('\n'),
     });

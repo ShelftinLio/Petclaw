@@ -1628,10 +1628,25 @@ function petAssetUrl(relativePath) {
 
 function getAppearanceState() {
   const appearance = normalizeAppearanceConfig(petConfig.get('appearance'));
-  const activePet = appearance.customPets.find(pet => pet.id === appearance.activePetId) || null;
+  const cowCat = createBuiltInCowCatManifest();
+  const builtInCowCat = {
+    id: COW_CAT_ID,
+    name: cowCat.name,
+    source: cowCat.source,
+    renderer: cowCat.renderer,
+    assetDir: 'assets/pets/cow-cat',
+    manifestPath: 'assets/pets/cow-cat/pet.json',
+    createdAt: '',
+  };
+  const activePet = appearance.activePetId === COW_CAT_ID
+    ? builtInCowCat
+    : appearance.customPets.find(pet => pet.id === appearance.activePetId) || null;
   let activeManifest = null;
   let activeImageUrl = '';
-  if (activePet) {
+  if (activePet && activePet.id === COW_CAT_ID) {
+    activeManifest = cowCat;
+    activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, cowCat.spritesheet));
+  } else if (activePet) {
     try {
       const manifestPath = path.join(__dirname, activePet.manifestPath);
       activeManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
@@ -1639,7 +1654,7 @@ function getAppearanceState() {
       const image = idle && idle.image;
       if (image) activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, image));
       if (!activeImageUrl && activePet.renderer === 'spritesheet') {
-        activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, 'spritesheet.webp'));
+        activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, activeManifest.spritesheet || 'spritesheet.webp'));
       }
     } catch (err) {
       activeManifest = null;
@@ -1650,7 +1665,7 @@ function getAppearanceState() {
     activePet,
     activeManifest,
     activeImageUrl,
-    cowCat: createBuiltInCowCatManifest()
+    cowCat
   };
 }
 

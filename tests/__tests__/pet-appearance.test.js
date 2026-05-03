@@ -45,17 +45,20 @@ describe('Pet appearance helpers', () => {
     })
   })
 
-  test('createBuiltInCowCatManifest declares DOM cow-cat renderer', () => {
+  test('createBuiltInCowCatManifest declares animated cow-cat spritesheet renderer', () => {
     expect(createBuiltInCowCatManifest()).toMatchObject({
       id: COW_CAT_ID,
       name: 'Cow Cat',
       source: 'built-in',
-      renderer: 'dom-cow-cat',
+      renderer: 'spritesheet',
+      spritesheet: 'spritesheet.svg',
+      cell: { width: 192, height: 208 },
+      layout: { columns: 8, rows: 9 },
       states: expect.objectContaining({
-        idle: expect.any(Object),
-        happy: expect.any(Object),
-        talking: expect.any(Object),
-        thinking: expect.any(Object),
+        idle: { row: 0, frames: 8, duration: 140 },
+        happy: { row: 1, frames: 8, duration: 120 },
+        talking: { row: 2, frames: 8, duration: 100 },
+        thinking: { row: 3, frames: 8, duration: 160 },
       }),
     })
   })
