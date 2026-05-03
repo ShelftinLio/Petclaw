@@ -7,12 +7,13 @@
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     *::-webkit-scrollbar { display: none; }
     :root {
-        --hud-bg: rgba(8, 14, 26, 0.88);
-        --hud-line: #66f6ff;
-        --hud-pink: #ff6fd8;
-        --hud-yellow: #f7e26b;
-        --hud-text: #e8fcff;
-        --pixel-shadow: 0 0 0 1px rgba(102,246,255,0.75), 0 6px 0 rgba(0,0,0,0.42), 0 0 18px rgba(102,246,255,0.26);
+        --hud-bg: rgba(246, 246, 242, 0.94);
+        --hud-bg-dark: rgba(18, 18, 18, 0.92);
+        --hud-line: #111111;
+        --hud-muted: #6f6f6f;
+        --hud-text: #111111;
+        --hud-invert: #f7f7f2;
+        --pixel-shadow: 0 0 0 1px rgba(255,255,255,0.7), 0 5px 0 rgba(0,0,0,0.34);
     }
     html, body {
         width: 100%;
@@ -171,12 +172,12 @@
     .tool-icon {
         width: 30px; height: 30px;
         border-radius: 0;
-        border: 2px solid rgba(102,246,255,0.78);
-        background: linear-gradient(180deg, rgba(27,40,74,0.96), rgba(8,13,24,0.96));
+        border: 2px solid var(--hud-line);
+        background: #ffffff;
         display: flex; align-items: center; justify-content: center;
         cursor: pointer;
         transition: transform 0.12s steps(2), border-color 0.12s steps(2), background 0.12s steps(2);
-        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.38), inset 2px 2px 0 rgba(255,255,255,0.08);
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.18);
     }
     .tool-icon svg {
         width: 15px; height: 15px;
@@ -185,9 +186,10 @@
     }
     .tool-icon:hover {
         transform: translateY(-2px);
-        border-color: var(--hud-pink);
-        background: linear-gradient(180deg, rgba(54,37,83,0.96), rgba(13,17,31,0.96));
+        border-color: var(--hud-line);
+        background: #111111;
     }
+    .tool-icon:hover svg { stroke: var(--hud-invert); }
     .tool-icon:active { transform: translateY(1px); }
 
     /* 模型切换按钮 */
@@ -196,11 +198,11 @@
         padding: 0 4px;
     }
     .model-switch-btn:hover {
-        background: linear-gradient(180deg, rgba(54,37,83,0.96), rgba(13,17,31,0.96));
+        background: #111111;
     }
     .tool-icon.active {
-        border-color: var(--hud-yellow);
-        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.38), 0 0 12px rgba(247,226,107,0.34);
+        background: #e8e8e2;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.18), 0 0 0 2px rgba(255,255,255,0.7);
     }
 
     /* 输入条 */
@@ -227,9 +229,9 @@
     .input-bar input {
         width: 166px;
         padding: 6px 8px;
-        border: 2px solid rgba(102,246,255,0.52);
+        border: 2px solid var(--hud-line);
         border-radius: 0;
-        background: rgba(2,6,14,0.92);
+        background: #ffffff;
         color: var(--hud-text);
         font-size: 11px;
         outline: none;
@@ -237,10 +239,10 @@
     }
     .input-bar button {
         padding: 4px 9px;
-        border: 2px solid var(--hud-pink);
+        border: 2px solid var(--hud-line);
         border-radius: 0;
-        background: rgba(28,16,39,0.95);
-        color: var(--hud-text);
+        background: #111111;
+        color: var(--hud-invert);
         font-size: 12px;
         cursor: pointer;
     }
@@ -460,20 +462,20 @@
         font-size: 10px;
         color: var(--hud-text);
     }
-    .appearance-title { font-weight: 800; letter-spacing: 0; color: var(--hud-line); text-transform: uppercase; }
-    .appearance-current { color: #b9f9ff; }
-    .appearance-note { color: var(--hud-yellow); line-height: 1.25; }
+    .appearance-title { font-weight: 800; letter-spacing: 0; color: #000; text-transform: uppercase; }
+    .appearance-current { color: var(--hud-muted); }
+    .appearance-note { color: #3d3d3d; line-height: 1.25; }
     .appearance-panel button {
-        border: 2px solid rgba(102,246,255,0.58);
+        border: 2px solid var(--hud-line);
         border-radius: 0;
         padding: 6px 4px;
-        background: rgba(8,13,24,0.94);
+        background: #ffffff;
         color: var(--hud-text);
         font-size: 10px;
         cursor: pointer;
         box-shadow: inset -2px -2px 0 rgba(0,0,0,0.38);
     }
-    .appearance-panel button:hover { border-color: var(--hud-pink); color: #fff; }
+    .appearance-panel button:hover { background: #111111; color: var(--hud-invert); }
     @keyframes cow-tail {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
@@ -518,7 +520,7 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
         <div class="tool-icon model-switch-btn" id="btnModelSwitch" title="切换模型" onclick="cycleModel()">
-            <span id="modelBadge" style="font-size:9px;font-weight:700;color:#666;user-select:none;">OP</span>
+            <span id="modelBadge" style="font-size:9px;font-weight:800;color:#111;user-select:none;">OP</span>
         </div>
         <div class="tool-icon" id="btnAppearance" title="形象" onclick="toggleAppearancePanel()">
             <svg viewBox="0 0 24 24"><path d="M4 10l3-5 4 3h2l4-3 3 5-3 2v7H7v-7z"/><path d="M9 15h6"/></svg>
@@ -1794,7 +1796,7 @@ async function cycleModel() {
 function updateModelBadge(model) {
     if (!modelBadge || !model) return;
     modelBadge.textContent = model.icon;
-    modelBadge.style.color = model.color;
+    modelBadge.style.color = '#111';
     currentModelColor = model.color;
 }
 
