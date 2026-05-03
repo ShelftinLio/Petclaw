@@ -27,11 +27,15 @@ function px(x, y, w, h, fill) {
   return `<rect x="${x * CELL}" y="${y * CELL}" width="${w * CELL}" height="${h * CELL}" fill="${fill}"/>`;
 }
 
-function pixelRect(parts, x, y, w, h, fill) {
+function rect(parts, x, y, w, h, fill) {
   parts.push(px(x, y, w, h, fill));
 }
 
-function drawBody(parts, dx, dy, state, frame) {
+function line(parts, points, fill = '#111111') {
+  for (const [x, y, w = 1, h = 1] of points) rect(parts, x, y, w, h, fill);
+}
+
+function drawCat(parts, dx, dy, state, frame) {
   const step = loop[frame];
   const happy = state === 'happy';
   const talking = state === 'talking';
@@ -43,85 +47,102 @@ function drawBody(parts, dx, dy, state, frame) {
   const sad = state === 'sad';
   const walking = state === 'walking';
   const blink = state === 'idle' && frame === 4;
-  const bob = walking ? -Math.abs(step - 2) % 2 : happy ? -Math.abs(step - 2) : step === 4 ? -1 : 0;
-  const y = dy + bob + (sleepy ? 2 : 0) + (sad ? 1 : 0);
+  const gait = frame % 4;
+  const walkLift = walking ? (gait === 1 || gait === 3 ? -2 : 0) : 0;
+  const bounce = walking ? (gait === 0 || gait === 2 ? 1 : -1) : happy ? -Math.abs(step - 2) : step === 4 ? -1 : 0;
+  const y = dy + bounce + (sleepy ? 2 : 0) + (sad ? 1 : 0);
   const dim = offline ? ' opacity="0.55"' : '';
-  const eyeY = y + (surprised ? 15 : 16);
+  const eyeY = y + (surprised ? 15 : 17);
   const eyeH = blink || sleepy ? 1 : surprised ? 7 : 6;
-  const tailLift = walking ? (frame % 2) + 1 : happy ? Math.max(0, 3 - Math.abs(step - 2)) : Math.max(0, 2 - Math.abs(step - 2));
+  const tailWave = walking ? [0, -2, -4, -2, 0, 1, 2, 1][frame] : happy ? -Math.max(0, 4 - Math.abs(step - 2)) : -Math.max(0, 2 - Math.abs(step - 2));
   const mouthOpen = talking && frame % 2 === 1;
-  const leftFootX = walking && frame % 4 < 2 ? -1 : 0;
-  const rightFootX = walking && frame % 4 >= 2 ? 1 : 0;
+  const foreStep = walking ? (gait < 2 ? -3 : 2) : 0;
+  const rearStep = walking ? (gait < 2 ? 2 : -3) : 0;
 
   parts.push(`<g${dim}>`);
 
-  // Tail, behind body. It deliberately uses chunky blocks instead of curves.
-  pixelRect(parts, dx + 32, y + 23 - tailLift, 5, 4, '#111111');
-  pixelRect(parts, dx + 36, y + 22 - tailLift, 3, 3, '#111111');
-  pixelRect(parts, dx + 37, y + 19 - tailLift, 3, 3, '#111111');
-  pixelRect(parts, dx + 35, y + 20 - tailLift, 2, 2, '#ffffff');
+  // Long upright cat tail with a white tip.
+  rect(parts, dx + 35, y + 27 + tailWave, 3, 7, '#111111');
+  rect(parts, dx + 38, y + 21 + tailWave, 3, 8, '#111111');
+  rect(parts, dx + 37, y + 17 + tailWave, 3, 4, '#111111');
+  rect(parts, dx + 38, y + 16 + tailWave, 2, 2, '#ffffff');
 
-  // Feet.
-  pixelRect(parts, dx + 16 + leftFootX, y + 37, 5, 5, '#111111');
-  pixelRect(parts, dx + 27 + rightFootX, y + 37, 5, 5, '#111111');
+  // Four visibly alternating paws for walking.
+  rect(parts, dx + 11 + rearStep, y + 40 - walkLift, 5, 4, '#111111');
+  rect(parts, dx + 18 + foreStep, y + 39 + walkLift, 5, 5, '#111111');
+  rect(parts, dx + 26 - foreStep, y + 39 + walkLift, 5, 5, '#111111');
+  rect(parts, dx + 33 - rearStep, y + 40 - walkLift, 5, 4, '#111111');
 
-  // Body outline and fill.
-  pixelRect(parts, dx + 9, y + 16, 30, 21, '#111111');
-  pixelRect(parts, dx + 8, y + 20, 32, 14, '#111111');
-  pixelRect(parts, dx + 11, y + 17, 26, 18, '#ffffff');
-  pixelRect(parts, dx + 10, y + 21, 28, 12, '#ffffff');
-  pixelRect(parts, dx + 12, y + 30, 24, 5, '#fff2ee');
+  // Compact body, white belly, and cow patches.
+  rect(parts, dx + 8, y + 25, 31, 15, '#111111');
+  rect(parts, dx + 10, y + 23, 27, 18, '#111111');
+  rect(parts, dx + 11, y + 25, 25, 13, '#ffffff');
+  rect(parts, dx + 13, y + 34, 21, 5, '#fff2ee');
+  rect(parts, dx + 10, y + 26, 7, 6, '#111111');
+  rect(parts, dx + 29, y + 30, 8, 7, '#111111');
+  rect(parts, dx + 30, y + 31, 6, 5, '#111111');
 
-  // Ears and head.
-  pixelRect(parts, dx + 11, y + 8, 7, 9, '#111111');
-  pixelRect(parts, dx + 30, y + 8, 7, 9, '#111111');
-  pixelRect(parts, dx + 13, y + 9, 4, 7, '#ffffff');
-  pixelRect(parts, dx + 31, y + 9, 4, 7, '#ffffff');
-  pixelRect(parts, dx + 14, y + 15, 20, 13, '#111111');
-  pixelRect(parts, dx + 12, y + 18, 24, 15, '#111111');
-  pixelRect(parts, dx + 15, y + 16, 18, 12, '#ffffff');
-  pixelRect(parts, dx + 13, y + 19, 22, 12, '#ffffff');
+  // Big pointed cat ears.
+  line(parts, [
+    [9, y - dy + 11, 3, 2], [10, y - dy + 9, 3, 2], [11, y - dy + 7, 3, 2], [12, y - dy + 5, 3, 2],
+    [34, y - dy + 11, 3, 2], [33, y - dy + 9, 3, 2], [32, y - dy + 7, 3, 2], [31, y - dy + 5, 3, 2],
+  ].map(([x, yy, w, h]) => [dx + x, dy + yy, w, h]));
+  line(parts, [
+    [12, y - dy + 9, 2, 3], [33, y - dy + 9, 2, 3],
+  ].map(([x, yy, w, h]) => [dx + x, dy + yy, w, h]), '#ffffff');
 
-  // Cow-cat black patches.
-  pixelRect(parts, dx + 18, y + 8, 4, 8, '#111111');
-  pixelRect(parts, dx + 23, y + 9, 3, 7, '#111111');
-  pixelRect(parts, dx + 29, y + 24, 8, 8, '#111111');
-  pixelRect(parts, dx + 30, y + 25, 6, 6, '#111111');
+  // Large square cat head.
+  rect(parts, dx + 10, y + 14, 28, 20, '#111111');
+  rect(parts, dx + 8, y + 18, 32, 14, '#111111');
+  rect(parts, dx + 12, y + 15, 24, 17, '#ffffff');
+  rect(parts, dx + 10, y + 19, 28, 11, '#ffffff');
 
-  // Vertical i-like glowing eyes.
-  pixelRect(parts, dx + 18, eyeY, 4, eyeH, '#111111');
-  pixelRect(parts, dx + 27, eyeY, 4, eyeH, '#111111');
+  // Cow-cat mask and side patch.
+  rect(parts, dx + 16, y + 7, 5, 11, '#111111');
+  rect(parts, dx + 21, y + 8, 4, 9, '#111111');
+  rect(parts, dx + 27, y + 14, 8, 5, '#111111');
+  rect(parts, dx + 34, y + 20, 5, 9, '#111111');
+
+  // i-shaped eyes.
+  rect(parts, dx + 17, eyeY, 4, eyeH, '#111111');
+  rect(parts, dx + 28, eyeY, 4, eyeH, '#111111');
   if (!blink && !sleepy) {
-    pixelRect(parts, dx + 19, eyeY + 1, 2, Math.max(1, eyeH - 2), surprised ? '#ffffff' : '#dffaff');
-    pixelRect(parts, dx + 28, eyeY + 1, 2, Math.max(1, eyeH - 2), surprised ? '#ffffff' : '#dffaff');
+    rect(parts, dx + 18, eyeY + 1, 2, Math.max(1, eyeH - 2), surprised ? '#ffffff' : '#dffaff');
+    rect(parts, dx + 29, eyeY + 1, 2, Math.max(1, eyeH - 2), surprised ? '#ffffff' : '#dffaff');
   }
 
-  // Mouth and mood marks.
+  // Cat nose, mouth, and whiskers.
+  rect(parts, dx + 24, y + 25, 2, 1, '#111111');
   if (mouthOpen) {
-    pixelRect(parts, dx + 23, y + 25, 3, 3, '#111111');
+    rect(parts, dx + 23, y + 27, 4, 3, '#111111');
   } else if (sad) {
-    pixelRect(parts, dx + 23, y + 27, 4, 1, '#111111');
-    pixelRect(parts, dx + 22, y + 28, 1, 1, '#111111');
-    pixelRect(parts, dx + 27, y + 28, 1, 1, '#111111');
+    rect(parts, dx + 23, y + 28, 4, 1, '#111111');
+    rect(parts, dx + 22, y + 29, 1, 1, '#111111');
+    rect(parts, dx + 27, y + 29, 1, 1, '#111111');
   } else {
-    pixelRect(parts, dx + 23, y + 26, 4, 1, '#111111');
+    rect(parts, dx + 23, y + 27, 2, 1, '#111111');
+    rect(parts, dx + 26, y + 27, 2, 1, '#111111');
   }
+  rect(parts, dx + 9, y + 25, 5, 1, '#111111');
+  rect(parts, dx + 8, y + 28, 6, 1, '#111111');
+  rect(parts, dx + 36, y + 25, 5, 1, '#111111');
+  rect(parts, dx + 36, y + 28, 6, 1, '#111111');
 
   if (happy) {
-    pixelRect(parts, dx + 16, y + 25, 3, 2, '#f3aaa4');
-    pixelRect(parts, dx + 30, y + 25, 3, 2, '#f3aaa4');
+    rect(parts, dx + 14, y + 28, 3, 2, '#f3aaa4');
+    rect(parts, dx + 33, y + 28, 3, 2, '#f3aaa4');
   }
   if (thinking) {
-    pixelRect(parts, dx + 36, y + 8 + (frame % 2), 2, 2, '#111111');
-    pixelRect(parts, dx + 39, y + 5, 3, 3, '#111111');
+    rect(parts, dx + 38, y + 9 + (frame % 2), 2, 2, '#111111');
+    rect(parts, dx + 41, y + 5, 3, 3, '#111111');
   }
   if (focused) {
-    pixelRect(parts, dx + 17, y + 14, 6, 1, '#111111');
-    pixelRect(parts, dx + 27, y + 14, 6, 1, '#111111');
+    rect(parts, dx + 16, y + 15, 7, 1, '#111111');
+    rect(parts, dx + 27, y + 15, 7, 1, '#111111');
   }
   if (sleepy) {
-    pixelRect(parts, dx + 35, y + 7 + (frame % 3), 2, 2, '#111111');
-    pixelRect(parts, dx + 38, y + 4, 3, 2, '#111111');
+    rect(parts, dx + 37, y + 8 + (frame % 3), 2, 2, '#111111');
+    rect(parts, dx + 40, y + 5, 3, 2, '#111111');
   }
 
   parts.push('</g>');
@@ -129,7 +150,7 @@ function drawBody(parts, dx, dy, state, frame) {
 
 function catFrame(state, frame, row) {
   const parts = [];
-  drawBody(parts, 4, 5, state, frame);
+  drawCat(parts, 3, 4, state, frame);
   return `
   <g clip-path="url(#clip-${row}-${frame})">
     <g transform="translate(${frame * W} ${row * H})">
