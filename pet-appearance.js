@@ -3,6 +3,17 @@ const path = require('path');
 const COW_CAT_ID = 'cow-cat';
 const VALID_RENDERERS = ['dom-cow-cat', 'image', 'spritesheet', 'frames'];
 const VALID_SOURCES = ['built-in', 'local-image', 'imagegen', 'package'];
+const HATCH_STATES = [
+  ['idle', 'resting breathing loop, subtle blink, stable centered pose'],
+  ['happy', 'cheerful bounce, smiling eyes, upbeat body pose'],
+  ['talking', 'mouth or face movement suitable for speaking loop'],
+  ['thinking', 'focused head tilt or lean, contemplative eyes'],
+  ['sleepy', 'drowsy slow blink, relaxed low-energy pose'],
+  ['surprised', 'startled upright pose, wide eyes'],
+  ['focused', 'review-like concentrated pose, tiny lean forward'],
+  ['offline', 'quiet dim low-energy idle pose'],
+  ['sad', 'small disappointed pose, lowered expression'],
+];
 
 function normalizeAppearanceConfig(appearance = {}) {
   const customPets = Array.isArray(appearance.customPets)
@@ -103,6 +114,11 @@ function createImagegenPetRequest({
   const referenceLine = referenceImage
     ? `Reference image: ${referenceImage}. Use it as the character reference while simplifying the design.`
     : 'Reference image: none. Generate from the written description only.';
+  const jobs = createHatchPetJobs({
+    petName,
+    description: subject,
+    referenceImage,
+  });
   const prompt = [
     'Use $imagegen to create a Codex/Hatch-style desktop pet spritesheet.',
     '',
@@ -113,7 +129,7 @@ function createImagegenPetRequest({
     'Asset type: transparent pixel-art desktop pet spritesheet',
     'Style: compact chibi pixel art, chunky readable silhouette, thick dark 1-2 px outline, flat cel shading, vertical i-like glowing eyes, tiny ears/paws/tail where appropriate.',
     'Spritesheet: 8 columns x 9 rows, each cell 192x208 px, final file named spritesheet.webp.',
-    'Rows in order: idle, happy, talking, thinking, sleepy, surprised, focused, offline, sad.',
+    `Rows in order: ${HATCH_STATES.map(([state]) => state).join(', ')}.`,
     'Background workflow: generate on a perfectly flat solid #00ff00 chroma-key background for local removal, or true transparency if available.',
     'Constraints: no text, no watermark, no scenery, no shadows, no gradients, no detached effects, keep each frame centered with consistent scale.',
   ].join('\n');
@@ -122,10 +138,12 @@ function createImagegenPetRequest({
     '',
     'This folder is a Petclaw custom pet package scaffold.',
     '',
-    '1. Use the prompt in `imagegen-prompt.md` with Codex `$imagegen`.',
-    '2. Save the final generated atlas as `spritesheet.webp` in this folder.',
-    '3. Keep `pet.json` next to `spritesheet.webp`.',
-    '4. Import this folder from the Petclaw appearance panel.',
+    '1. Open `imagegen-jobs.json` and run each job through Codex `$imagegen`.',
+    '2. First generate `base-reference.png`; use it as the canonical reference for every row job.',
+    '3. Generate each 8-frame row strip into `rows/<state>.png`.',
+    '4. Assemble the rows into `spritesheet.webp` using the same 8x9, 192x208-cell layout.',
+    '5. Keep `pet.json` next to `spritesheet.webp`.',
+    '6. Import this folder from the Petclaw appearance panel.',
     '',
     'Expected output:',
     '- `pet.json`',
@@ -133,7 +151,50 @@ function createImagegenPetRequest({
     referenceImage ? `- \`${referenceImage}\` as the optional reference image` : '',
   ].filter(Boolean).join('\n');
 
-  return { record, manifest, prompt, readme };
+  return { record, manifest, prompt, readme, jobs };
+}
+
+function createHatchPetJobs({ petName, description, referenceImage } = {}) {
+  const safeName = petName || 'Generated Pet';
+  const subject = description || 'a friendly custom desktop pet';
+  const baseInputs = referenceImage ? [referenceImage] : [];
+  const basePrompt = [
+    `Create the canonical base reference for ${safeName}, a Codex digital pet.`,
+    `Subject: ${subject}.`,
+    'Style: small pixel-art-adjacent mascot, compact chibi proportions, chunky readable silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading, simple expressive face, tiny limbs.',
+    'Output: one centered full-body pet reference on perfectly flat #00ff00 chroma-key background for cleanup.',
+    'Avoid: text, watermark, scenery, shadows, gradients, glow, realistic fur, painterly rendering, 3D, detached effects, floor marks.',
+  ].join('\n');
+
+  const jobs = [{
+    id: 'base',
+    kind: 'base',
+    output: 'base-reference.png',
+    inputs: baseInputs,
+    prompt: basePrompt,
+  }];
+
+  for (let row = 0; row < HATCH_STATES.length; row++) {
+    const [state, guidance] = HATCH_STATES[row];
+    jobs.push({
+      id: `row-${state}`,
+      kind: 'row',
+      state,
+      row,
+      output: `rows/${state}.png`,
+      inputs: ['base-reference.png', ...baseInputs],
+      prompt: [
+        `Create an 8-frame horizontal strip for the "${state}" animation of ${safeName}.`,
+        `State guidance: ${guidance}.`,
+        'Use the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.',
+        'Each frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.',
+        'Use perfectly flat #00ff00 chroma-key background in every cell. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.',
+        'The animation should read through pose and expression changes only.',
+      ].join('\n'),
+    });
+  }
+
+  return jobs;
 }
 
 function validatePetManifest(manifest) {
@@ -222,6 +283,7 @@ module.exports = {
   createBuiltInCowCatManifest,
   createImagePetManifest,
   createImagegenPetRequest,
+  createHatchPetJobs,
   validatePetManifest,
   createCustomPetRecord,
   createPetId,

@@ -526,6 +526,9 @@ const appearanceNote = document.getElementById('appearanceNote');
 let voiceOn = true;
 let isConnected = false;
 let activeAppearance = { mode: 'cow-cat', activePetId: 'cow-cat', customPets: [] };
+let activePetManifest = null;
+let spriteFrameTimer = null;
+let spriteFrameIndex = 0;
 
 function setAppearanceNote(text) {
     if (appearanceNote) appearanceNote.textContent = text || '';
@@ -539,6 +542,7 @@ function toggleAppearancePanel() {
 function renderAppearance(state) {
     if (!state) return;
     activeAppearance = state.appearance || activeAppearance;
+    activePetManifest = state.activeManifest || null;
     const isCustomImage = state.activePet && ['image','spritesheet','frames'].includes(state.activePet.renderer) && state.activeImageUrl;
     pet.classList.toggle('custom-image', Boolean(isCustomImage));
     if (isCustomImage) {
@@ -561,6 +565,34 @@ function renderAppearance(state) {
         blob2.style.background = '';
     }
     setMood(currentMood || 'idle');
+    startSpriteAnimation();
+}
+
+function stopSpriteAnimation() {
+    if (spriteFrameTimer) clearInterval(spriteFrameTimer);
+    spriteFrameTimer = null;
+    spriteFrameIndex = 0;
+}
+
+function updateSpriteFrame() {
+    if (!activePetManifest || !pet.classList.contains('custom-image')) return;
+    const state = activePetManifest.states?.[currentMood] || activePetManifest.states?.idle;
+    if (!state || typeof state.row !== 'number') return;
+    const frames = state.frames || 8;
+    const columns = activePetManifest.layout?.columns || 8;
+    const x = columns <= 1 ? 0 : (spriteFrameIndex % frames) / (columns - 1) * 100;
+    const y = state.row / 8 * 100;
+    customPetImage.style.backgroundPosition = `${x}% ${y}%`;
+    spriteFrameIndex = (spriteFrameIndex + 1) % frames;
+}
+
+function startSpriteAnimation() {
+    stopSpriteAnimation();
+    if (!activePetManifest || activePetManifest.renderer !== 'spritesheet') return;
+    const state = activePetManifest.states?.[currentMood] || activePetManifest.states?.idle;
+    const duration = state?.duration || 140;
+    updateSpriteFrame();
+    spriteFrameTimer = setInterval(updateSpriteFrame, duration);
 }
 
 async function loadAppearance() {
@@ -616,19 +648,17 @@ function pixelizeImage(dataUrl) {
 
 async function uploadPetImage() {
     if (!window.electronAPI) return;
-    setAppearanceNote('Choosing image...');
-    const picked = await electronAPI.invoke('appearance-upload-image');
-    if (!picked || picked.canceled) { setAppearanceNote('Upload canceled.'); return; }
-    setAppearanceNote('Generating pixel pet...');
-    const dataUrl = await pixelizeImage(picked.sourceUrl);
-    const saved = await electronAPI.invoke('appearance-save-generated-image', {
-        id: picked.id,
-        name: picked.name,
-        source: 'local-image',
-        dataUrl
+    const name = prompt('Pet name for this reference image:', 'Custom Pet');
+    if (name === null) { setAppearanceNote('Upload canceled.'); return; }
+    const description = prompt('Describe the pet for the hatch workflow:', 'a custom Codex-style digital pet based on the uploaded reference image');
+    if (description === null) { setAppearanceNote('Upload canceled.'); return; }
+    setAppearanceNote('Choose the reference image...');
+    const result = await electronAPI.invoke('appearance-create-imagegen-request', {
+        name: name.trim() || 'Custom Pet',
+        description: description.trim() || 'a custom Codex-style digital pet based on the uploaded reference image',
+        includeReference: true
     });
-    renderAppearance(saved.state);
-    setAppearanceNote('Custom image pet saved.');
+    setAppearanceNote(result.message || 'Hatch run created. Generate rows with $imagegen, then import the package.');
 }
 
 async function importPetPackage() {
@@ -1190,6 +1220,7 @@ function setMood(mood) {
         let tog = false;
         talkInterval = setInterval(() => { tog=!tog; tog ? EXPR.talkBig() : EXPR.talking(); }, 250);
     } else { applyMoodEyes(); }
+    startSpriteAnimation();
 
     if (mood === 'happy' || mood === 'excited' || mood === 'love') {
         blushL.style.transition = 'background 0.8s ease, opacity 0.6s ease';

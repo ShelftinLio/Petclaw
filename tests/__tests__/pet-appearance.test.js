@@ -6,6 +6,7 @@ const {
   createCustomPetRecord,
   createImagePetManifest,
   createImagegenPetRequest,
+  createHatchPetJobs,
   upsertCustomPet,
   setActivePet,
   inferRendererFromFiles,
@@ -157,6 +158,40 @@ describe('Pet appearance helpers', () => {
     expect(request.prompt).toContain('reference.png')
     expect(request.readme).toContain('spritesheet.webp')
     expect(validatePetManifest(request.manifest)).toEqual({ ok: true })
+  })
+
+  test('createHatchPetJobs creates base plus nine grounded row jobs', () => {
+    const jobs = createHatchPetJobs({
+      petName: 'Moon Cat',
+      description: 'a sleepy black cat with a moon collar',
+      referenceImage: 'reference.png',
+    })
+
+    expect(jobs).toHaveLength(10)
+    expect(jobs[0]).toMatchObject({
+      id: 'base',
+      kind: 'base',
+      output: 'base-reference.png',
+    })
+    expect(jobs[0].prompt).toContain('a sleepy black cat with a moon collar')
+    expect(jobs[1]).toMatchObject({
+      id: 'row-idle',
+      kind: 'row',
+      state: 'idle',
+      row: 0,
+      output: 'rows/idle.png',
+      inputs: ['base-reference.png', 'reference.png'],
+    })
+    expect(jobs[9]).toMatchObject({
+      id: 'row-sad',
+      kind: 'row',
+      state: 'sad',
+      row: 8,
+      output: 'rows/sad.png',
+      inputs: ['base-reference.png', 'reference.png'],
+    })
+    expect(jobs[1].prompt).toContain('8-frame horizontal strip')
+    expect(jobs[1].prompt).toContain('idle')
   })
 
   test('upsertCustomPet replaces existing pet records by id', () => {

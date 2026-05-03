@@ -1822,6 +1822,7 @@ ipcMain.handle('appearance-create-imagegen-request', async (event, payload = {})
 
   await writeJson(path.join(petDir, 'pet.json'), request.manifest);
   await fsp.writeFile(path.join(petDir, 'imagegen-prompt.md'), request.prompt, 'utf-8');
+  await writeJson(path.join(petDir, 'imagegen-jobs.json'), request.jobs);
   await fsp.writeFile(path.join(petDir, 'README.md'), request.readme, 'utf-8');
   await shell.openPath(petDir);
 
