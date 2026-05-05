@@ -479,6 +479,118 @@
     }
     .settings-panel button:hover { background: #111111; color: var(--hud-invert); }
     .settings-panel .wide { grid-column: 1 / -1; }
+    .game-panel {
+        position: absolute;
+        bottom: 174px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 236px;
+        max-height: 318px;
+        padding: 8px;
+        display: none;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        overflow-y: auto;
+        border: 2px solid var(--hud-line);
+        background: var(--hud-bg);
+        box-shadow: var(--pixel-shadow);
+        color: var(--hud-text);
+        font-size: 10px;
+        z-index: 31;
+        clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+    }
+    .game-panel.show { display: grid; }
+    .game-input,
+    .game-panel textarea,
+    .game-panel select {
+        grid-column: 1 / -1;
+        width: 100%;
+        border: 2px solid var(--hud-line);
+        border-radius: 0;
+        background: #ffffff;
+        color: var(--hud-text);
+        padding: 6px;
+        font: inherit;
+        outline: none;
+    }
+    .game-panel textarea {
+        height: 58px;
+        resize: none;
+        line-height: 1.28;
+    }
+    .game-row {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+    }
+    .game-panel button {
+        border: 2px solid var(--hud-line);
+        border-radius: 0;
+        min-height: 28px;
+        padding: 5px 4px;
+        background: #ffffff;
+        color: var(--hud-text);
+        font-size: 10px;
+        cursor: pointer;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.34);
+    }
+    .game-panel button:hover:not(:disabled),
+    .game-panel button.active {
+        background: #111111;
+        color: var(--hud-invert);
+    }
+    .game-panel button:disabled {
+        opacity: 0.45;
+        cursor: default;
+    }
+    .game-panel .wide,
+    .game-current,
+    .ability-card,
+    .skill-card {
+        grid-column: 1 / -1;
+    }
+    #abilityList,
+    #skillCardList {
+        grid-column: 1 / -1;
+        display: grid;
+        gap: 6px;
+    }
+    .game-current {
+        border: 2px dashed rgba(0,0,0,0.45);
+        background: rgba(255,255,255,0.74);
+        padding: 6px;
+        min-height: 28px;
+        line-height: 1.28;
+        overflow-wrap: anywhere;
+    }
+    .ability-card,
+    .skill-card {
+        border: 2px solid var(--hud-line);
+        background: #ffffff;
+        padding: 6px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.12);
+    }
+    .ability-card.locked,
+    .skill-card.locked {
+        opacity: 0.6;
+    }
+    .ability-card strong,
+    .skill-card strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 11px;
+    }
+    .ability-meta,
+    .skill-meta {
+        color: var(--hud-muted);
+    }
+    .ability-card button {
+        width: 100%;
+        margin-top: 5px;
+    }
     @keyframes cow-tail {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
@@ -539,7 +651,49 @@
         <div class="settings-section">Tools</div>
         <button id="settingsVoiceButton" onclick="toggleVoice()">Voice On</button>
         <button onclick="screenshot()">Screenshot</button>
+        <div class="settings-section">Adventure</div>
+        <button onclick="openFocusAdventure()">Focus</button>
+        <button onclick="openAbilityTree()">Abilities</button>
+        <button class="wide" onclick="openSkillBook()">Skills</button>
         <div class="settings-note" id="settingsNote"></div>
+    </div>
+
+    <div class="game-panel" id="focusAdventurePanel">
+        <div class="settings-title">Focus Adventure</div>
+        <input class="game-input" id="focusTaskTitle" placeholder="Task title">
+        <div class="game-row" id="focusDurations">
+            <button data-minutes="15" onclick="selectFocusDuration(15)">15</button>
+            <button data-minutes="25" onclick="selectFocusDuration(25)">25</button>
+            <button data-minutes="45" onclick="selectFocusDuration(45)">45</button>
+            <button data-minutes="90" onclick="selectFocusDuration(90)">90</button>
+        </div>
+        <select class="game-input" id="focusIntentType">
+            <option>Code</option>
+            <option>Writing</option>
+            <option>Research</option>
+            <option>Learning</option>
+            <option>Planning</option>
+            <option>Admin</option>
+            <option>Rest</option>
+        </select>
+        <div class="game-current" id="focusTimerText">No active adventure</div>
+        <textarea class="game-input" id="focusSummary" placeholder="Outcome"></textarea>
+        <button class="wide" id="focusStartButton" onclick="startFocusAdventure()">Start</button>
+        <button id="focusFinishButton" onclick="finishFocusAdventure('completed')">Finish</button>
+        <button onclick="finishFocusAdventure('partial')">Partial</button>
+        <button class="wide" onclick="finishFocusAdventure('interrupted')">Interrupt</button>
+        <div class="settings-note" id="focusRewardText"></div>
+    </div>
+
+    <div class="game-panel" id="abilityTreePanel">
+        <div class="settings-title">Abilities</div>
+        <div class="game-current" id="petLevelText">Level 1 Companion</div>
+        <div id="abilityList"></div>
+    </div>
+
+    <div class="game-panel" id="skillBookPanel">
+        <div class="settings-title">Skill Book</div>
+        <div id="skillCardList"></div>
     </div>
 
     <!-- 输入条 -->
@@ -571,11 +725,28 @@ const customPetSheet = document.getElementById('customPetSheet');
 const settingsPanel = document.getElementById('settingsPanel');
 const appearanceCurrent = document.getElementById('appearanceCurrent');
 const settingsNote = document.getElementById('settingsNote');
+const focusAdventurePanel = document.getElementById('focusAdventurePanel');
+const abilityTreePanel = document.getElementById('abilityTreePanel');
+const skillBookPanel = document.getElementById('skillBookPanel');
+const focusTaskTitle = document.getElementById('focusTaskTitle');
+const focusIntentType = document.getElementById('focusIntentType');
+const focusSummary = document.getElementById('focusSummary');
+const focusTimerText = document.getElementById('focusTimerText');
+const focusRewardText = document.getElementById('focusRewardText');
+const focusStartButton = document.getElementById('focusStartButton');
+const focusFinishButton = document.getElementById('focusFinishButton');
+const petLevelText = document.getElementById('petLevelText');
+const abilityList = document.getElementById('abilityList');
+const skillCardList = document.getElementById('skillCardList');
 
 let voiceOn = true;
 let isConnected = false;
 let activeAppearance = { mode: 'cow-cat', activePetId: 'cow-cat', customPets: [] };
 let activePetManifest = null;
+let selectedFocusDuration = 25;
+let petProgressState = null;
+let activeFocusSession = null;
+let focusTimerInterval = null;
 let spriteFrameTimer = null;
 let spriteFrameIndex = 0;
 let spriteReactionTimer = null;
@@ -583,6 +754,18 @@ let petFacing = 1;
 let roamDirection = Math.random() < 0.5 ? -1 : 1;
 let roamPausedUntil = Date.now() + 4000;
 let roamInFlight = false;
+
+function hideGamePanels() {
+    [focusAdventurePanel, abilityTreePanel, skillBookPanel].forEach(panel => panel?.classList.remove('show'));
+}
+
+function showGamePanel(panel) {
+    hideGamePanels();
+    settingsPanel.classList.remove('show');
+    inputBar.classList.remove('show');
+    panel.classList.add('show');
+    pauseRoam(2500);
+}
 
 function setAppearanceNote(text) {
     if (settingsNote) settingsNote.textContent = text || '';
@@ -592,6 +775,7 @@ function toggleSettingsPanel() {
     settingsPanel.classList.toggle('show');
     setAppearanceNote('');
     inputBar.classList.remove('show');
+    hideGamePanels();
     pauseRoam(2500);
 }
 
@@ -600,6 +784,7 @@ function togglePetOptions() {
     if (!toolbar.classList.contains('show')) {
         settingsPanel.classList.remove('show');
         inputBar.classList.remove('show');
+        hideGamePanels();
     }
     pauseRoam(2500);
 }
@@ -610,9 +795,18 @@ pet.addEventListener('contextmenu', e => {
 });
 
 document.addEventListener('click', e => {
-    if (pet.contains(e.target) || toolbar.contains(e.target) || settingsPanel.contains(e.target) || inputBar.contains(e.target)) return;
+    if (
+        pet.contains(e.target) ||
+        toolbar.contains(e.target) ||
+        settingsPanel.contains(e.target) ||
+        inputBar.contains(e.target) ||
+        focusAdventurePanel.contains(e.target) ||
+        abilityTreePanel.contains(e.target) ||
+        skillBookPanel.contains(e.target)
+    ) return;
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
+    hideGamePanels();
 });
 
 function renderAppearance(state) {
@@ -736,6 +930,94 @@ async function loadAppearance() {
         renderAppearance(await electronAPI.invoke('appearance-get'));
     } catch (err) {
         setAppearanceNote(err.message || 'Appearance unavailable');
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
+}
+
+function updateFocusTimerText() {
+    if (!focusTimerText) return;
+    if (!activeFocusSession) {
+        focusTimerText.textContent = 'No active adventure';
+        return;
+    }
+    const started = new Date(activeFocusSession.startedAt).getTime();
+    const elapsed = Number.isFinite(started)
+        ? Math.max(0, Math.floor((Date.now() - started) / 60000))
+        : 0;
+    focusTimerText.textContent = `${activeFocusSession.taskTitle} | ${elapsed}/${activeFocusSession.plannedMinutes} min`;
+}
+
+function updateFocusButtons() {
+    const hasActive = Boolean(activeFocusSession);
+    if (focusStartButton) focusStartButton.disabled = hasActive;
+    if (focusFinishButton) focusFinishButton.disabled = !hasActive;
+    document.querySelectorAll('#focusAdventurePanel button[onclick^="finishFocusAdventure"]').forEach(button => {
+        button.disabled = !hasActive;
+    });
+}
+
+function renderPetProgress(state) {
+    if (!state) return;
+    petProgressState = state;
+    activeFocusSession = state.activeFocusSession || null;
+    const tree = state.abilityTree || { abilities: [], petLevel: state.petLevel || 1, tiers: [] };
+    const tier = (tree.tiers || []).find(item => item.level === tree.petLevel);
+    if (petLevelText) {
+        petLevelText.textContent = `Level ${tree.petLevel} ${tier?.tier || 'Companion'} | XP ${state.focusXp || 0} | Fragments ${state.abilityFragments || 0} | Stardust ${state.stardust || 0}`;
+    }
+    if (abilityList) {
+        abilityList.innerHTML = (tree.abilities || []).map(ability => {
+            const status = ability.unlocked ? 'Unlocked' : (ability.lockedReason || 'Locked');
+            const action = ability.unlocked
+                ? `<div>${status}</div>`
+                : ability.canUnlock
+                    ? `<button onclick="unlockPetAbility('${ability.id}')">Unlock</button>`
+                    : `<div>${escapeHtml(status)}</div>`;
+            return `
+                <div class="ability-card ${ability.unlocked ? '' : 'locked'}">
+                    <strong>${escapeHtml(ability.name)}</strong>
+                    <div class="ability-meta">${escapeHtml(ability.tier)} | Cost ${ability.cost}</div>
+                    <div>${escapeHtml(ability.description)}</div>
+                    ${action}
+                </div>
+            `;
+        }).join('');
+    }
+    const skillCards = state.skillCards || [];
+    if (skillCardList) {
+        skillCardList.innerHTML = skillCards.length ? skillCards.map(card => `
+            <div class="skill-card ${card.status === 'locked' ? 'locked' : ''}">
+                <strong>${escapeHtml(card.name)}</strong>
+                <div class="skill-meta">${escapeHtml(card.rarity || 'common')} | ${escapeHtml(card.status || 'candidate')} | Lv ${card.level || 1}</div>
+                <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
+            </div>
+        `).join('') : '<div class="game-current">No skills yet.</div>';
+    }
+    updateFocusTimerText();
+    updateFocusButtons();
+}
+
+function startFocusTimerLoop() {
+    if (focusTimerInterval) clearInterval(focusTimerInterval);
+    focusTimerInterval = setInterval(updateFocusTimerText, 15000);
+}
+
+async function loadPetProgress() {
+    if (!window.electronAPI) return;
+    try {
+        renderPetProgress(await electronAPI.invoke('pet-progress-get'));
+        startFocusTimerLoop();
+    } catch (err) {
+        if (focusRewardText) focusRewardText.textContent = err.message || 'Progress unavailable';
     }
 }
 
@@ -863,6 +1145,10 @@ function loop() {
 }
 loop();
 loadAppearance();
+loadPetProgress();
+if (window.electronAPI) {
+    electronAPI.on('pet-progress-changed', renderPetProgress);
+}
 
 // 深呼吸/叹气：每 20-40 秒触发一次
 setInterval(() => {
@@ -1763,6 +2049,7 @@ document.addEventListener('keydown', () => { lastInteraction = Date.now(); });
 function toggleInput() {
     pauseRoam(3500);
     settingsPanel.classList.remove('show');
+    hideGamePanels();
     inputBar.classList.toggle('show');
     if (inputBar.classList.contains('show')) inputEl.focus();
 }
@@ -1811,6 +2098,79 @@ async function openPetStudio() {
     if (!electronAPI) return;
     await electronAPI.invoke('pet-studio-open');
     setAppearanceNote('Pet Studio opened.');
+}
+
+function selectFocusDuration(minutes) {
+    selectedFocusDuration = minutes;
+    document.querySelectorAll('#focusDurations button').forEach(button => {
+        button.classList.toggle('active', Number(button.dataset.minutes) === minutes);
+    });
+}
+
+function openFocusAdventure() {
+    showGamePanel(focusAdventurePanel);
+    selectFocusDuration(selectedFocusDuration);
+    loadPetProgress();
+}
+
+function openAbilityTree() {
+    showGamePanel(abilityTreePanel);
+    loadPetProgress();
+}
+
+function openSkillBook() {
+    showGamePanel(skillBookPanel);
+    loadPetProgress();
+}
+
+async function startFocusAdventure() {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('focus-adventure-start', {
+        taskTitle: focusTaskTitle.value,
+        plannedMinutes: selectedFocusDuration,
+        intentType: focusIntentType.value
+    });
+    if (!result.success) {
+        focusRewardText.textContent = result.error || 'Could not start adventure';
+        renderPetProgress(result.progress);
+        return;
+    }
+    activeFocusSession = result.activeFocusSession;
+    renderPetProgress(result.progress);
+    setMood('focused');
+    focusRewardText.textContent = 'Adventure started.';
+}
+
+async function finishFocusAdventure(status) {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('focus-adventure-finish', {
+        status,
+        summary: focusSummary.value.trim()
+    });
+    if (!result.success) {
+        focusRewardText.textContent = result.error || 'Could not finish adventure';
+        renderPetProgress(result.progress);
+        return;
+    }
+    renderPetProgress(result.progress);
+    setMood(status === 'interrupted' ? 'sleepy' : 'happy');
+    setTimeout(() => setMood('idle'), 2500);
+    if (focusSummary) focusSummary.value = '';
+    const rewards = result.session.rewards;
+    focusRewardText.textContent = `+${rewards.focusXp} XP, +${rewards.abilityFragments} fragments, +${rewards.stardust} stardust${rewards.skillSeed ? ', Skill Seed found' : ''}`;
+}
+
+async function unlockPetAbility(abilityId) {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('pet-ability-unlock', abilityId);
+    renderPetProgress(result.progress);
+    if (!result.success) {
+        focusRewardText.textContent = result.error || 'Ability locked';
+        return;
+    }
+    focusRewardText.textContent = 'Ability unlocked.';
+    setMood('happy');
+    setTimeout(() => setMood('idle'), 2000);
 }
 
 function updateModelBadge(model) {

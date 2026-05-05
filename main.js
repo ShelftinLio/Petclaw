@@ -97,6 +97,22 @@ const {
   generatePetSpritesheet,
   getImageGenerationConfig
 } = require('./pet-image-generator');
+const { getAbilityTree } = require('./pet-abilities');
+const {
+  startFocusAdventure,
+  finishFocusAdventure
+} = require('./focus-adventure');
+const {
+  PetProgressStore,
+  normalizeProgress,
+  applyFinishedSession,
+  unlockAbility: unlockPetAbility,
+  listSkillCards
+} = require('./pet-progress');
+const {
+  isSkillSeedEligible,
+  createSkillSeed
+} = require('./pet-skills');
 
 // Windows透明窗口修复 — 禁用硬件加速彻底解决浅色背景矩形框
 // macOS 上禁用硬件加速反而会破坏透明度，仅在 Windows 上启用
@@ -251,6 +267,7 @@ let messageSync;
 let workLogger;
 let desktopNotifier;
 let petConfig;
+let petProgressStore;
 let screenshotSystem; // 🔥 新增
 let larkUploader; // 🔥 新增
 let serviceManager; // 🔧 服务管理
@@ -364,6 +381,8 @@ async function createWindow() {
   // 加载配置
   petConfig = new PetConfig();
   await petConfig.load();
+  petProgressStore = new PetProgressStore(path.join(__dirname, 'pet-progress.json'));
+  await petProgressStore.load();
   
   // 初始化所有系统
   gatewayClient = new GatewayClient();
@@ -2165,6 +2184,134 @@ ipcMain.handle('appearance-generation-status', async () => {
 });
 
 // 三击查看历史消息
+async function ensurePetProgress() {
+  if (!petProgressStore) {
+    petProgressStore = new PetProgressStore(path.join(__dirname, 'pet-progress.json'));
+    await petProgressStore.load();
+  }
+  return petProgressStore.get();
+}
+
+function decorateProgress(progress) {
+  const normalized = normalizeProgress(progress);
+  return {
+    ...normalized,
+    abilityTree: getAbilityTree(normalized),
+    skillCards: listSkillCards(normalized),
+  };
+}
+
+function broadcastPetProgressChanged(progress) {
+  const state = decorateProgress(progress);
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('pet-progress-changed', state);
+  }
+  return state;
+}
+
+ipcMain.handle('pet-progress-get', async () => {
+  const progress = await ensurePetProgress();
+  return decorateProgress(progress);
+});
+
+ipcMain.handle('focus-adventure-get', async () => {
+  const progress = await ensurePetProgress();
+  return {
+    activeFocusSession: progress.activeFocusSession,
+    progress: decorateProgress(progress),
+  };
+});
+
+ipcMain.handle('focus-adventure-start', async (event, payload = {}) => {
+  const progress = await ensurePetProgress();
+  if (progress.activeFocusSession) {
+    return {
+      success: false,
+      error: 'A focus adventure is already active',
+      activeFocusSession: progress.activeFocusSession,
+      progress: decorateProgress(progress),
+    };
+  }
+
+  const activeFocusSession = startFocusAdventure(payload);
+  const next = await petProgressStore.save({ ...progress, activeFocusSession });
+  return {
+    success: true,
+    activeFocusSession,
+    progress: broadcastPetProgressChanged(next),
+  };
+});
+
+ipcMain.handle('focus-adventure-finish', async (event, payload = {}) => {
+  const progress = await ensurePetProgress();
+  if (!progress.activeFocusSession) {
+    return {
+      success: false,
+      error: 'No focus adventure is active',
+      progress: decorateProgress(progress),
+    };
+  }
+
+  const seedCheck = isSkillSeedEligible({
+    ...progress.activeFocusSession,
+    status: payload.status,
+    summary: payload.summary,
+  }, progress);
+
+  const finishedSession = finishFocusAdventure(progress.activeFocusSession, {
+    status: payload.status,
+    summary: payload.summary,
+    skillSeedEligible: seedCheck.eligible,
+  });
+  const next = await petProgressStore.save(applyFinishedSession(progress, finishedSession));
+  return {
+    success: true,
+    session: finishedSession,
+    seedCheck,
+    progress: broadcastPetProgressChanged(next),
+  };
+});
+
+ipcMain.handle('pet-ability-unlock', async (event, abilityId) => {
+  try {
+    const progress = await ensurePetProgress();
+    const next = await petProgressStore.save(unlockPetAbility(progress, abilityId));
+    return { success: true, progress: broadcastPetProgressChanged(next) };
+  } catch (err) {
+    const progress = await ensurePetProgress();
+    return { success: false, error: err.message, progress: decorateProgress(progress) };
+  }
+});
+
+ipcMain.handle('pet-skill-seed-create', async (event, payload = {}) => {
+  const progress = await ensurePetProgress();
+  const session = progress.focusSessions.find(item => item.id === payload.sessionId);
+  if (!session) {
+    return { success: false, error: 'Focus session not found', progress: decorateProgress(progress) };
+  }
+
+  const seedCheck = isSkillSeedEligible(session, progress);
+  if (!seedCheck.eligible) {
+    return { success: false, error: seedCheck.reason, progress: decorateProgress(progress) };
+  }
+
+  if (progress.skillSeeds.some(seed => seed.sourceSessionId === session.id)) {
+    return { success: false, error: 'Skill seed already exists', progress: decorateProgress(progress) };
+  }
+
+  const seed = createSkillSeed(session);
+  const next = await petProgressStore.save({
+    ...progress,
+    skillSeeds: [...progress.skillSeeds, seed],
+  });
+  return { success: true, seed, progress: broadcastPetProgressChanged(next) };
+});
+
+ipcMain.handle('pet-skill-card-list', async () => {
+  const progress = await ensurePetProgress();
+  return { success: true, skillCards: listSkillCards(progress), progress: decorateProgress(progress) };
+});
+
 ipcMain.handle('show-history', async () => {
   try {
     const logs = workLogger.getRecentMessages ? workLogger.getRecentMessages(20) : [];
