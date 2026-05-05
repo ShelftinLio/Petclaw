@@ -11,6 +11,8 @@ temp/
 
 # 配置文件(本地)
 pet-config.json
+pet-progress.json
+pet-progress.json.corrupt-*
 .env
 
 # 日志

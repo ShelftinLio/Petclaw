@@ -16,6 +16,7 @@ const VALID_INVOKE_CHANNELS = [
   'model-current',
   'model-open-settings',
   'pet-studio-open',
+  'pet-game-open',
   'focus-adventure-start',
   'focus-adventure-get',
   'focus-adventure-finish',
@@ -84,6 +85,7 @@ const VALID_ON_CHANNELS = [
   'show-lyric',
   'appearance-changed',
   'pet-progress-changed',
+  'pet-game-tab',
   'switch-log-entry'
 ];
 

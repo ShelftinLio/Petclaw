@@ -634,7 +634,7 @@
         <div class="tool-icon" id="btnScreenshot" title="截图" onclick="screenshot()">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
-        <div class="tool-icon" id="btnAdventure" title="Adventure" onclick="openFocusAdventure()">
+        <div class="tool-icon" id="btnAdventure" title="Adventure" onclick="openPetGame('focus')">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-4 2 2-6 4-2z"/></svg>
         </div>
         <div class="tool-icon" id="btnSettings" title="设置" onclick="toggleSettingsPanel()">
@@ -655,9 +655,9 @@
         <button id="settingsVoiceButton" onclick="toggleVoice()">Voice On</button>
         <button onclick="screenshot()">Screenshot</button>
         <div class="settings-section">Adventure</div>
-        <button onclick="openFocusAdventure()">Focus</button>
-        <button onclick="openAbilityTree()">Abilities</button>
-        <button class="wide" onclick="openSkillBook()">Skills</button>
+        <button onclick="openPetGame('focus')">Focus</button>
+        <button onclick="openPetGame('abilities')">Abilities</button>
+        <button class="wide" onclick="openPetGame('skills')">Skills</button>
         <div class="settings-note" id="settingsNote"></div>
     </div>
 
@@ -2102,6 +2102,15 @@ async function openPetStudio() {
     if (!electronAPI) return;
     await electronAPI.invoke('pet-studio-open');
     setAppearanceNote('Pet Studio opened.');
+}
+
+async function openPetGame(tab = 'focus') {
+    if (!electronAPI) return;
+    hideGamePanels();
+    toolbar.classList.remove('show');
+    settingsPanel.classList.remove('show');
+    inputBar.classList.remove('show');
+    await electronAPI.invoke('pet-game-open', { tab });
 }
 
 function selectFocusDuration(minutes) {

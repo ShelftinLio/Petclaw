@@ -1585,6 +1585,46 @@ function openPetStudio() {
 /**
  * 打开诊断工具箱窗口
  */
+let petGameWindow = null;
+function normalizePetGameTab(tab) {
+  return ['focus', 'abilities', 'skills'].includes(tab) ? tab : 'focus';
+}
+
+function openPetGameWindow(tab = 'focus') {
+  const targetTab = normalizePetGameTab(tab);
+  if (petGameWindow && !petGameWindow.isDestroyed()) {
+    petGameWindow.show();
+    petGameWindow.focus();
+    petGameWindow.webContents.send('pet-game-tab', targetTab);
+    return;
+  }
+
+  petGameWindow = new BrowserWindow({
+    width: 520,
+    height: 640,
+    minWidth: 420,
+    minHeight: 520,
+    title: 'Petclaw Adventure',
+    frame: true,
+    resizable: true,
+    minimizable: true,
+    maximizable: false,
+    autoHideMenuBar: true,
+    backgroundColor: '#f6f6f2',
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  });
+
+  petGameWindow.setMenuBarVisibility(false);
+  petGameWindow.loadFile('pet-game-window.html', { query: { tab: targetTab } });
+  petGameWindow.on('closed', () => {
+    petGameWindow = null;
+  });
+}
+
 let diagnosticToolboxWindow = null;
 function openDiagnosticToolbox() {
   if (diagnosticToolboxWindow && !diagnosticToolboxWindow.isDestroyed()) {
@@ -2206,6 +2246,9 @@ function broadcastPetProgressChanged(progress) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('pet-progress-changed', state);
   }
+  if (petGameWindow && !petGameWindow.isDestroyed()) {
+    petGameWindow.webContents.send('pet-progress-changed', state);
+  }
   return state;
 }
 
@@ -2695,6 +2738,11 @@ ipcMain.handle('model-open-settings', async () => {
 
 ipcMain.handle('pet-studio-open', async () => {
   openPetStudio();
+  return { success: true };
+});
+
+ipcMain.handle('pet-game-open', async (event, payload = {}) => {
+  openPetGameWindow(payload.tab);
   return { success: true };
 });
 
