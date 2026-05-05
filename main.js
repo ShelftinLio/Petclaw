@@ -1516,6 +1516,47 @@ function openModelSettings() {
   });
 }
 
+let petStudioWindow = null;
+function openPetStudio() {
+  if (petStudioWindow && !petStudioWindow.isDestroyed()) {
+    petStudioWindow.focus();
+    return;
+  }
+
+  petStudioWindow = new BrowserWindow({
+    width: 920,
+    height: 620,
+    title: 'Pet Studio',
+    frame: false,
+    resizable: true,
+    minimizable: true,
+    maximizable: false,
+    backgroundColor: '#f8f8f4',
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
+
+  petStudioWindow.setMenuBarVisibility(false);
+  petStudioWindow.loadFile('pet-studio.html');
+
+  petStudioWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12' && input.type === 'keyDown') {
+      petStudioWindow.webContents.toggleDevTools();
+    }
+  });
+
+  if (process.argv.includes('--dev')) {
+    petStudioWindow.webContents.openDevTools({ mode: 'detach' });
+  }
+
+  petStudioWindow.on('closed', () => {
+    petStudioWindow = null;
+  });
+}
+
 /**
  * 打开诊断工具箱窗口
  */
@@ -1657,6 +1698,24 @@ function getAppearanceState() {
     manifestPath: 'assets/pets/cow-cat/pet.json',
     createdAt: '',
   };
+  const readPetManifest = (pet) => {
+    if (!pet) return null;
+    if (pet.id === COW_CAT_ID) return cowCat;
+    try {
+      return JSON.parse(fs.readFileSync(path.join(__dirname, pet.manifestPath), 'utf-8'));
+    } catch (err) {
+      return null;
+    }
+  };
+  const resolvePetImageUrl = (pet, manifest) => {
+    if (!pet || !manifest) return '';
+    if (manifest.renderer === 'spritesheet') {
+      return petAssetUrl(path.posix.join(pet.assetDir, manifest.spritesheet || 'spritesheet.webp'));
+    }
+    const idle = manifest.states && manifest.states.idle;
+    if (idle && idle.image) return petAssetUrl(path.posix.join(pet.assetDir, idle.image));
+    return '';
+  };
   const activePet = appearance.activePetId === COW_CAT_ID
     ? builtInCowCat
     : appearance.customPets.find(pet => pet.id === appearance.activePetId) || null;
@@ -1664,28 +1723,41 @@ function getAppearanceState() {
   let activeImageUrl = '';
   if (activePet && activePet.id === COW_CAT_ID) {
     activeManifest = cowCat;
-    activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, cowCat.spritesheet));
+    activeImageUrl = resolvePetImageUrl(activePet, activeManifest);
   } else if (activePet) {
-    try {
-      const manifestPath = path.join(__dirname, activePet.manifestPath);
-      activeManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-      const idle = activeManifest.states && activeManifest.states.idle;
-      const image = idle && idle.image;
-      if (image) activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, image));
-      if (!activeImageUrl && activePet.renderer === 'spritesheet') {
-        activeImageUrl = petAssetUrl(path.posix.join(activePet.assetDir, activeManifest.spritesheet || 'spritesheet.webp'));
-      }
-    } catch (err) {
-      activeManifest = null;
-    }
+    activeManifest = readPetManifest(activePet);
+    activeImageUrl = resolvePetImageUrl(activePet, activeManifest);
   }
+  const petCatalog = [builtInCowCat, ...appearance.customPets].map((pet) => {
+    const manifest = readPetManifest(pet);
+    return {
+      ...pet,
+      manifest,
+      imageUrl: resolvePetImageUrl(pet, manifest),
+      active: pet.id === appearance.activePetId,
+      static: manifest ? manifest.renderer !== 'spritesheet' : true,
+    };
+  });
   return {
     appearance,
     activePet,
     activeManifest,
     activeImageUrl,
-    cowCat
+    cowCat,
+    builtInPets: [builtInCowCat],
+    petCatalog
   };
+}
+
+function broadcastAppearanceChanged() {
+  const state = getAppearanceState();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('appearance-changed', state);
+  }
+  if (petStudioWindow && !petStudioWindow.isDestroyed()) {
+    petStudioWindow.webContents.send('appearance-changed', state);
+  }
+  return state;
 }
 
 async function writeJson(filePath, value) {
@@ -1713,13 +1785,13 @@ ipcMain.handle('appearance-get', async () => getAppearanceState());
 ipcMain.handle('appearance-set-active', async (event, petId) => {
   const next = setActivePet(petConfig.get('appearance'), petId || COW_CAT_ID);
   petConfig.set('appearance', next);
-  return getAppearanceState();
+  return broadcastAppearanceChanged();
 });
 
 ipcMain.handle('appearance-reset', async () => {
   const next = setActivePet(petConfig.get('appearance'), COW_CAT_ID);
   petConfig.set('appearance', next);
-  return getAppearanceState();
+  return broadcastAppearanceChanged();
 });
 
 ipcMain.handle('appearance-upload-image', async () => {
@@ -1782,7 +1854,7 @@ ipcMain.handle('appearance-save-generated-image', async (event, payload = {}) =>
     pet: record,
     manifest,
     imageUrl: petAssetUrl(path.posix.join(record.assetDir, generatedName)),
-    state: getAppearanceState()
+    state: broadcastAppearanceChanged()
   };
 });
 
@@ -1823,7 +1895,7 @@ ipcMain.handle('appearance-import-package', async () => {
   appearance = setActivePet(appearance, id);
   petConfig.set('appearance', appearance);
 
-  return { canceled: false, success: true, pet: record, manifest, state: getAppearanceState() };
+  return { canceled: false, success: true, pet: record, manifest, state: broadcastAppearanceChanged() };
 });
 
 ipcMain.handle('appearance-create-imagegen-request', async (event, payload = {}) => {
@@ -1858,6 +1930,8 @@ ipcMain.handle('appearance-create-imagegen-request', async (event, payload = {})
   await fsp.writeFile(path.join(petDir, 'imagegen-prompt.md'), request.prompt, 'utf-8');
   await writeJson(path.join(petDir, 'imagegen-jobs.json'), request.jobs);
   await fsp.writeFile(path.join(petDir, 'README.md'), request.readme, 'utf-8');
+  petConfig.set('appearance', upsertCustomPet(petConfig.get('appearance'), request.record));
+  broadcastAppearanceChanged();
   await shell.openPath(petDir);
 
   return {
@@ -2254,6 +2328,11 @@ ipcMain.handle('model-current', async () => {
 
 ipcMain.handle('model-open-settings', async () => {
   openModelSettings();
+  return { success: true };
+});
+
+ipcMain.handle('pet-studio-open', async () => {
+  openPetStudio();
   return { success: true };
 });
 

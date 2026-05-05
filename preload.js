@@ -15,6 +15,7 @@ const VALID_INVOKE_CHANNELS = [
   'openclaw-send',
   'model-current',
   'model-open-settings',
+  'pet-studio-open',
   'gateway-status',
   'openclaw-status',
   'model-full-status',
@@ -70,6 +71,7 @@ const VALID_ON_CHANNELS = [
   'agent-response',
   'status-update',
   'show-lyric',
+  'appearance-changed',
   'switch-log-entry'
 ];
 

@@ -534,10 +534,7 @@
         <button class="wide" onclick="openModelPanel()">Model Panel</button>
         <div class="settings-section">Pet</div>
         <div class="settings-current" id="appearanceCurrent">Cow Cat</div>
-        <button onclick="useCowCat()">Cow Cat</button>
-        <button onclick="uploadPetImage()">Upload</button>
-        <button onclick="importPetPackage()">Import</button>
-        <button onclick="showImagegenHelp()">AI Gen</button>
+        <button class="wide" onclick="openPetStudio()">Pet Studio</button>
         <button class="wide" onclick="resetAppearance()">Reset Pet</button>
         <div class="settings-section">Tools</div>
         <button id="settingsVoiceButton" onclick="toggleVoice()">Voice On</button>
@@ -1810,6 +1807,12 @@ async function openModelPanel() {
     setAppearanceNote('Model panel opened.');
 }
 
+async function openPetStudio() {
+    if (!electronAPI) return;
+    await electronAPI.invoke('pet-studio-open');
+    setAppearanceNote('Pet Studio opened.');
+}
+
 function updateModelBadge(model) {
     if (!modelBadge || !model) return;
     modelBadge.textContent = model.icon;
@@ -1863,6 +1866,9 @@ async function send() {
 
 // ===== IPC =====
 if (electronAPI) {
+    electronAPI.on('appearance-changed', (state) => {
+        renderAppearance(state);
+    });
     electronAPI.on('new-message', (msg) => {
         setMood('talking');
         setTimeout(() => setMood('idle'), 3000);

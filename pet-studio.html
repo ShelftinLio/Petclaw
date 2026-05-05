@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Studio</title>
+  <style>
+    :root {
+      --paper: #f8f8f4;
+      --ink: #171916;
+      --muted: #696c66;
+      --line: #171916;
+      --soft: #e8e8df;
+      --white: #ffffff;
+      --cyan: #79edf1;
+      --pink: #ffd2d1;
+      --shadow: rgba(23, 25, 22, 0.24);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "MS Gothic", "Courier New", monospace;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    .window {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 44px 1fr 28px;
+      border: 4px solid var(--line);
+      background:
+        linear-gradient(#ededdf 1px, transparent 1px),
+        linear-gradient(90deg, #ededdf 1px, transparent 1px),
+        var(--paper);
+      background-size: 18px 18px;
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px 0 14px;
+      border-bottom: 4px solid var(--line);
+      background: var(--white);
+      -webkit-app-region: drag;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .titlebar button,
+    .toolbar button,
+    .actions button,
+    .pet-row,
+    .field button {
+      border: 3px solid var(--line);
+      border-radius: 0;
+      background: var(--white);
+      color: var(--ink);
+      box-shadow: inset -3px -3px 0 var(--shadow);
+      cursor: pointer;
+    }
+
+    .titlebar button {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar button:hover,
+    .toolbar button:hover,
+    .actions button:hover,
+    .pet-row:hover,
+    .field button:hover {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 240px minmax(300px, 1fr) 260px;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 4px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 6px 6px 0 rgba(23, 25, 22, 0.2);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .panel-head {
+      padding: 10px 12px;
+      border-bottom: 3px solid var(--line);
+      background: var(--soft);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .library,
+    .tools-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .pet-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 7px;
+      text-align: left;
+    }
+
+    .pet-row.selected {
+      outline: 3px solid var(--cyan);
+      background: #f2ffff;
+    }
+
+    .pet-row.active .name::after {
+      content: " ACTIVE";
+      color: var(--ink);
+      background: var(--cyan);
+      padding: 1px 4px;
+      margin-left: 5px;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .thumb {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--line);
+      background: var(--white);
+      overflow: hidden;
+      image-rendering: pixelated;
+      position: relative;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .name {
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      margin-top: 3px;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .preview-panel {
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    .stage-wrap {
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .stage {
+      width: min(100%, 360px);
+      aspect-ratio: 1 / 1;
+      border: 4px solid var(--line);
+      background:
+        linear-gradient(45deg, #ffffff 25%, transparent 25%),
+        linear-gradient(-45deg, #ffffff 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ffffff 75%),
+        linear-gradient(-45deg, transparent 75%, #ffffff 75%),
+        #f0f0ea;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+      background-size: 20px 20px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow: inset 0 -8px 0 rgba(23, 25, 22, 0.12);
+    }
+
+    .sprite-viewport {
+      width: 192px;
+      height: 208px;
+      overflow: hidden;
+      image-rendering: pixelated;
+      transform: scale(1.25);
+    }
+
+    .sprite-viewport img {
+      display: block;
+      image-rendering: pixelated;
+      transform-origin: top left;
+    }
+
+    .empty-preview {
+      max-width: 220px;
+      padding: 12px;
+      border: 3px dashed var(--line);
+      background: var(--white);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      padding: 10px;
+      border-top: 3px solid var(--line);
+      background: var(--white);
+    }
+
+    .actions button {
+      min-width: 0;
+      min-height: 32px;
+      padding: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+
+    .actions button.active {
+      background: var(--ink);
+      color: var(--white);
+      box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .toolbar,
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .toolbar {
+      margin-bottom: 14px;
+    }
+
+    .toolbar button,
+    .field button {
+      min-height: 36px;
+      padding: 7px 8px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .field {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 3px solid rgba(23, 25, 22, 0.2);
+    }
+
+    .field label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 3px solid var(--line);
+      border-radius: 0;
+      background: var(--white);
+      color: var(--ink);
+      padding: 8px;
+      outline: none;
+      resize: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      box-shadow: 0 0 0 3px var(--cyan);
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .status {
+      min-width: 0;
+      border-top: 4px solid var(--line);
+      background: var(--ink);
+      color: var(--white);
+      padding: 5px 10px;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 2px solid var(--line);
+      background: var(--pink);
+      padding: 2px 5px;
+      margin-right: 4px;
+      margin-top: 5px;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 780px) {
+      .content {
+        grid-template-columns: 190px 1fr;
+      }
+
+      .tools {
+        grid-column: 1 / -1;
+        min-height: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="window">
+    <header class="titlebar">
+      <div class="title">Pet Studio</div>
+      <button type="button" title="Close" onclick="window.close()">X</button>
+    </header>
+
+    <section class="content">
+      <aside class="panel">
+        <div class="panel-head">Library</div>
+        <div class="library" id="library"></div>
+      </aside>
+
+      <section class="panel preview-panel">
+        <div class="panel-head" id="previewTitle">Preview</div>
+        <div class="stage-wrap">
+          <div class="stage">
+            <div class="sprite-viewport" id="spriteViewport">
+              <img id="spriteImage" alt="">
+            </div>
+            <div class="empty-preview" id="emptyPreview">Select a pet to inspect its animation states.</div>
+          </div>
+        </div>
+        <div class="actions" id="actions"></div>
+      </section>
+
+      <aside class="panel tools">
+        <div class="panel-head">Tools</div>
+        <div class="tools-body">
+          <div class="toolbar">
+            <button type="button" onclick="activateSelected()">Activate</button>
+            <button type="button" onclick="resetPet()">Reset Cow Cat</button>
+            <button type="button" onclick="importPackage()">Import Package</button>
+          </div>
+
+          <div class="field">
+            <label for="petName">Upload Reference</label>
+            <input id="petName" value="Generated Pet" maxlength="48">
+            <textarea id="petDescription" rows="5">a tiny friendly pixel pet with vertical i-like glowing eyes</textarea>
+            <button type="button" onclick="createImagegenRequest()">Create Hatch Package</button>
+            <div class="hint">This creates the same hatch workflow package used by Codex-style pet generation. Generate the spritesheet, then import the folder back here.</div>
+          </div>
+
+          <div class="field">
+            <div id="selectedMeta"></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <footer class="status" id="status">Loading Pet Studio...</footer>
+  </main>
+
+  <script>
+    const stateOrder = ['idle', 'walking', 'happy', 'talking', 'thinking', 'sleepy', 'surprised', 'focused', 'offline', 'sad'];
+    const library = document.getElementById('library');
+    const actions = document.getElementById('actions');
+    const statusEl = document.getElementById('status');
+    const selectedMeta = document.getElementById('selectedMeta');
+    const previewTitle = document.getElementById('previewTitle');
+    const spriteViewport = document.getElementById('spriteViewport');
+    const spriteImage = document.getElementById('spriteImage');
+    const emptyPreview = document.getElementById('emptyPreview');
+    const petName = document.getElementById('petName');
+    const petDescription = document.getElementById('petDescription');
+
+    let appState = null;
+    let pets = [];
+    let selectedPetId = 'cow-cat';
+    let selectedAction = 'idle';
+    let frameIndex = 0;
+    let frameTimer = null;
+
+    function setStatus(text) {
+      statusEl.textContent = text || '';
+    }
+
+    function getSelectedPet() {
+      return pets.find((pet) => pet.id === selectedPetId) || pets[0] || null;
+    }
+
+    function escapeText(value) {
+      return String(value || '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[char]));
+    }
+
+    function stopAnimation() {
+      if (frameTimer) clearInterval(frameTimer);
+      frameTimer = null;
+      frameIndex = 0;
+    }
+
+    function renderLibrary() {
+      if (!pets.length) {
+        library.innerHTML = '<div class="empty-preview">No pets found.</div>';
+        return;
+      }
+
+      library.innerHTML = pets.map((pet) => {
+        const classes = ['pet-row'];
+        if (pet.id === selectedPetId) classes.push('selected');
+        if (pet.active) classes.push('active');
+        const renderer = pet.manifest?.renderer || pet.renderer || 'unknown';
+        const source = pet.source || 'package';
+        const thumb = pet.imageUrl ? `<img src="${escapeText(pet.imageUrl)}" alt="">` : '';
+        return `
+          <button type="button" class="${classes.join(' ')}" data-id="${escapeText(pet.id)}">
+            <span class="thumb">${thumb}</span>
+            <span>
+              <span class="name">${escapeText(pet.name || pet.id)}</span>
+              <span class="meta">${escapeText(source)} / ${escapeText(renderer)}</span>
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      library.querySelectorAll('.pet-row').forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedPetId = button.dataset.id;
+          selectedAction = chooseAction(getSelectedPet(), selectedAction);
+          renderAll();
+        });
+      });
+    }
+
+    function chooseAction(pet, preferred) {
+      const states = pet?.manifest?.states || {};
+      if (states[preferred]) return preferred;
+      if (states.idle) return 'idle';
+      return Object.keys(states)[0] || 'idle';
+    }
+
+    function renderActions() {
+      const pet = getSelectedPet();
+      const states = pet?.manifest?.states || {};
+      actions.innerHTML = stateOrder.map((name) => {
+        const enabled = Boolean(states[name]);
+        const classes = name === selectedAction ? 'active' : '';
+        return `<button type="button" class="${classes}" data-action="${name}" ${enabled ? '' : 'disabled'}>${name}</button>`;
+      }).join('');
+
+      actions.querySelectorAll('button').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (button.disabled) return;
+          selectedAction = button.dataset.action;
+          renderAll();
+        });
+      });
+    }
+
+    function renderMeta() {
+      const pet = getSelectedPet();
+      if (!pet) {
+        selectedMeta.innerHTML = '';
+        return;
+      }
+
+      const manifest = pet.manifest || {};
+      const states = Object.keys(manifest.states || {});
+      const current = manifest.states?.[selectedAction] || manifest.states?.idle || {};
+      selectedMeta.innerHTML = `
+        <div class="badge">${escapeText(manifest.renderer || pet.renderer || 'unknown')}</div>
+        <div class="badge">${states.length} states</div>
+        <div class="hint">
+          <strong>${escapeText(pet.name || pet.id)}</strong><br>
+          Source: ${escapeText(pet.source || 'package')}<br>
+          Cell: ${escapeText(manifest.cell?.width || '-')} x ${escapeText(manifest.cell?.height || '-')}<br>
+          Action: ${escapeText(selectedAction)}, ${escapeText(current.frames || 1)} frame(s), ${escapeText(current.duration || '-')}ms
+        </div>
+      `;
+    }
+
+    function renderPreview() {
+      stopAnimation();
+      const pet = getSelectedPet();
+      const manifest = pet?.manifest || null;
+      const imageUrl = pet?.imageUrl || '';
+      previewTitle.textContent = pet ? `Preview / ${pet.name || pet.id}` : 'Preview';
+
+      if (!pet || !manifest || !imageUrl) {
+        spriteViewport.style.display = 'none';
+        emptyPreview.style.display = 'block';
+        emptyPreview.textContent = pet ? 'This package is waiting for its spritesheet asset.' : 'Select a pet to inspect its animation states.';
+        return;
+      }
+
+      spriteViewport.style.display = 'block';
+      emptyPreview.style.display = 'none';
+      spriteImage.src = imageUrl;
+      spriteImage.onerror = () => {
+        spriteViewport.style.display = 'none';
+        emptyPreview.style.display = 'block';
+        emptyPreview.textContent = 'Missing asset. Generate or copy the spritesheet into this package.';
+      };
+
+      if (manifest.renderer !== 'spritesheet') {
+        spriteImage.style.width = '100%';
+        spriteImage.style.height = '100%';
+        spriteImage.style.objectFit = 'contain';
+        spriteImage.style.transform = 'translate3d(0, 0, 0)';
+        return;
+      }
+
+      const columns = manifest.layout?.columns || 8;
+      const rows = manifest.layout?.rows || Object.keys(manifest.states || {}).length || 1;
+      const state = manifest.states?.[selectedAction] || manifest.states?.idle;
+      const frames = Math.min(state?.frames || 1, columns);
+      const duration = state?.duration || 140;
+      const row = typeof state?.row === 'number' ? state.row : 0;
+      spriteImage.style.width = `${columns * 100}%`;
+      spriteImage.style.height = `${rows * 100}%`;
+      spriteImage.style.objectFit = 'fill';
+
+      const tick = () => {
+        const frame = frameIndex % frames;
+        spriteImage.style.transform = `translate3d(${-frame * (100 / columns)}%, ${-row * (100 / rows)}%, 0)`;
+        frameIndex = (frameIndex + 1) % frames;
+      };
+      tick();
+      frameTimer = setInterval(tick, duration);
+    }
+
+    function renderAll() {
+      selectedAction = chooseAction(getSelectedPet(), selectedAction);
+      renderLibrary();
+      renderActions();
+      renderMeta();
+      renderPreview();
+    }
+
+    async function refreshState(message) {
+      if (!window.electronAPI) {
+        setStatus('Electron API unavailable.');
+        return;
+      }
+      appState = await window.electronAPI.invoke('appearance-get');
+      pets = appState.petCatalog || [];
+      selectedPetId = pets.some((pet) => pet.id === selectedPetId)
+        ? selectedPetId
+        : appState.appearance?.activePetId || 'cow-cat';
+      renderAll();
+      if (message) setStatus(message);
+    }
+
+    async function activateSelected() {
+      const pet = getSelectedPet();
+      if (!pet || !window.electronAPI) return;
+      if (!pet.imageUrl) {
+        setStatus('This package is missing its preview asset. Generate spritesheet.webp before activating it.');
+        return;
+      }
+      await window.electronAPI.invoke('appearance-set-active', pet.id);
+      await refreshState(`${pet.name || pet.id} activated.`);
+    }
+
+    async function resetPet() {
+      if (!window.electronAPI) return;
+      await window.electronAPI.invoke('appearance-reset');
+      selectedPetId = 'cow-cat';
+      selectedAction = 'idle';
+      await refreshState('Cow Cat restored.');
+    }
+
+    async function importPackage() {
+      if (!window.electronAPI) return;
+      setStatus('Choose a pet package folder...');
+      const result = await window.electronAPI.invoke('appearance-import-package');
+      if (!result || result.canceled) {
+        setStatus('Import canceled.');
+        return;
+      }
+      if (!result.success) {
+        setStatus(result.error || 'Import failed.');
+        return;
+      }
+      selectedPetId = result.pet?.id || selectedPetId;
+      await refreshState('Pet package imported.');
+    }
+
+    async function createImagegenRequest() {
+      if (!window.electronAPI) return;
+      const name = petName.value.trim() || 'Generated Pet';
+      const description = petDescription.value.trim() || 'a friendly custom desktop pet';
+      setStatus('Choose an optional reference image...');
+      const result = await window.electronAPI.invoke('appearance-create-imagegen-request', {
+        name,
+        description,
+        includeReference: true,
+      });
+      if (!result || !result.success) {
+        setStatus(result?.error || 'Could not create hatch package.');
+        return;
+      }
+      selectedPetId = result.pet?.id || selectedPetId;
+      await refreshState('Hatch package created. Generate spritesheet.webp, then import or activate after assets exist.');
+    }
+
+    if (window.electronAPI) {
+      window.electronAPI.on('appearance-changed', (state) => {
+        appState = state;
+        pets = state.petCatalog || [];
+        renderAll();
+      });
+    }
+
+    refreshState('Pet Studio ready.');
+  </script>
+</body>
+</html>

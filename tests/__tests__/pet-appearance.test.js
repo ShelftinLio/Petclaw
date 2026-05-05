@@ -157,6 +157,18 @@ describe('Pet appearance helpers', () => {
       cell: { width: 192, height: 208 },
       layout: { columns: 8, rows: 10 },
     })
+    expect(Object.keys(request.manifest.states)).toEqual([
+      'idle',
+      'happy',
+      'talking',
+      'thinking',
+      'sleepy',
+      'surprised',
+      'focused',
+      'offline',
+      'sad',
+      'walking',
+    ])
     expect(request.prompt).toContain('$imagegen')
     expect(request.prompt).toContain('a sleepy black cat with a moon collar')
     expect(request.prompt).toContain('reference.png')
