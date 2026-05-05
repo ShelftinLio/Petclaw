@@ -29,6 +29,26 @@ describe('pet image generator', () => {
     })
   })
 
+  test('derives image endpoints from an OpenAI-compatible base URL', () => {
+    const config = getImageGenerationConfig({
+      PETCLAW_IMAGE_API_KEY: 'sk-test',
+      PETCLAW_IMAGE_BASE_URL: 'https://example.test/api',
+    })
+
+    expect(config.endpoint).toBe('https://example.test/api/v1/images/edits')
+    expect(config.generationEndpoint).toBe('https://example.test/api/v1/images/generations')
+  })
+
+  test('does not duplicate v1 when base URL already includes it', () => {
+    const config = getImageGenerationConfig({
+      PETCLAW_IMAGE_API_KEY: 'sk-test',
+      PETCLAW_IMAGE_BASE_URL: 'https://example.test/api/v1',
+    })
+
+    expect(config.endpoint).toBe('https://example.test/api/v1/images/edits')
+    expect(config.generationEndpoint).toBe('https://example.test/api/v1/images/generations')
+  })
+
   test('reports unconfigured status when no API key is present', () => {
     expect(getImageGenerationConfig({}).configured).toBe(false)
   })

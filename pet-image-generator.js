@@ -7,14 +7,28 @@ const DEFAULT_MODEL = 'gpt-image-1.5';
 const DEFAULT_SIZE = '1024x1536';
 const DEFAULT_QUALITY = 'high';
 
+function joinUrl(base, suffix) {
+  const cleanBase = String(base || '').replace(/\/+$/, '');
+  const cleanSuffix = String(suffix || '').replace(/^\/+/, '');
+  return `${cleanBase}/${cleanSuffix}`;
+}
+
+function deriveImageEndpoint(baseUrl, kind) {
+  if (!baseUrl) return kind === 'edits' ? DEFAULT_ENDPOINT : DEFAULT_GENERATION_ENDPOINT;
+  const cleanBase = String(baseUrl).replace(/\/+$/, '');
+  const versionedBase = /\/v1$/i.test(cleanBase) ? cleanBase : joinUrl(cleanBase, 'v1');
+  return joinUrl(versionedBase, `images/${kind}`);
+}
+
 function getImageGenerationConfig(env = process.env) {
   const apiKey = env.PETCLAW_IMAGE_API_KEY || env.OPENAI_API_KEY || '';
+  const baseUrl = env.PETCLAW_IMAGE_BASE_URL || '';
   return {
     configured: Boolean(apiKey),
     provider: 'openai-compatible',
     apiKey,
-    endpoint: env.PETCLAW_IMAGE_API_URL || DEFAULT_ENDPOINT,
-    generationEndpoint: env.PETCLAW_IMAGE_GENERATION_API_URL || DEFAULT_GENERATION_ENDPOINT,
+    endpoint: env.PETCLAW_IMAGE_API_URL || deriveImageEndpoint(baseUrl, 'edits'),
+    generationEndpoint: env.PETCLAW_IMAGE_GENERATION_API_URL || deriveImageEndpoint(baseUrl, 'generations'),
     model: env.PETCLAW_IMAGE_MODEL || DEFAULT_MODEL,
     size: env.PETCLAW_IMAGE_SIZE || DEFAULT_SIZE,
     quality: env.PETCLAW_IMAGE_QUALITY || DEFAULT_QUALITY,
@@ -237,6 +251,7 @@ module.exports = {
   DEFAULT_SIZE,
   DEFAULT_QUALITY,
   getImageGenerationConfig,
+  deriveImageEndpoint,
   buildPetSpritesheetPrompt,
   parseImageApiResponse,
   imageMimeToExtension,
