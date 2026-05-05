@@ -5,179 +5,344 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Petclaw Adventure</title>
 <style>
+    :root {
+        --bg: #f7f7f2;
+        --paper: #ffffff;
+        --ink: #111111;
+        --muted: #666666;
+        --soft: #e9e9e2;
+        --accent: #dff8ff;
+        --reward: #fff1bd;
+        --danger: #fff1f1;
+    }
+
     * { box-sizing: border-box; }
+
+    html,
     body {
+        width: 100%;
+        height: 100%;
         margin: 0;
-        min-height: 100vh;
-        background: #f6f6f2;
-        color: #111;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        overflow: hidden;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+        font-size: 11px;
         letter-spacing: 0;
+        user-select: none;
     }
-    .app {
-        min-height: 100vh;
-        display: grid;
-        grid-template-rows: auto auto 1fr;
-    }
-    header {
-        padding: 14px 16px 10px;
-        border-bottom: 3px solid #111;
-        background: #fff;
-    }
-    h1 {
-        margin: 0 0 8px;
-        font-size: 18px;
-        line-height: 1.2;
-    }
-    .level-line {
-        padding: 8px;
-        border: 2px dashed #777;
-        background: #f6f6f2;
-        font-size: 12px;
-    }
-    .tabs {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        border-bottom: 3px solid #111;
-        background: #fff;
-    }
-    .tabs button,
-    .actions button,
-    .duration-row button,
-    .ability-card button {
-        border: 0;
-        border-right: 2px solid #111;
-        border-bottom: 2px solid #111;
-        background: #fff;
-        color: #111;
-        min-height: 36px;
-        font: inherit;
-        font-size: 13px;
-        cursor: pointer;
-    }
-    .tabs button:last-child { border-right: 0; }
-    .tabs button.active,
-    .actions button.primary,
-    .duration-row button.active {
-        background: #111;
-        color: #fff;
-    }
-    main {
-        min-height: 0;
-        overflow: auto;
-        padding: 14px;
-    }
-    .view { display: none; }
-    .view.active {
-        display: grid;
-        gap: 12px;
-    }
-    .panel {
-        border: 3px solid #111;
-        background: #fff;
-        padding: 12px;
-        display: grid;
-        gap: 10px;
-        box-shadow: 5px 5px 0 rgba(0,0,0,0.18);
-    }
-    .panel-title {
-        margin: 0;
-        font-size: 15px;
-        line-height: 1.25;
-    }
+
+    button,
     input,
     select,
     textarea {
-        width: 100%;
-        border: 2px solid #111;
-        background: #fff;
-        color: #111;
-        padding: 9px;
         font: inherit;
-        font-size: 13px;
-        outline: none;
+        letter-spacing: 0;
+    }
+
+    button {
+        min-width: 0;
+        border: 2px solid var(--ink);
         border-radius: 0;
+        background: var(--paper);
+        color: var(--ink);
+        cursor: pointer;
+        box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.22);
     }
-    textarea {
-        min-height: 86px;
-        resize: vertical;
-        line-height: 1.35;
+
+    button:hover:not(:disabled),
+    button.active {
+        background: var(--ink);
+        color: var(--paper);
     }
-    .duration-row,
-    .actions {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-    }
-    .actions {
-        grid-template-columns: 1.2fr 1fr 1fr;
-    }
-    .actions button,
-    .duration-row button {
-        border: 2px solid #111;
-        box-shadow: inset -3px -3px 0 rgba(0,0,0,0.2);
-    }
-    .status-box {
-        border: 2px dashed #777;
-        background: #f6f6f2;
-        padding: 10px;
-        min-height: 42px;
-        font-size: 13px;
-        line-height: 1.35;
-        overflow-wrap: anywhere;
-    }
-    .card-list {
-        display: grid;
-        gap: 10px;
-    }
-    .ability-card,
-    .skill-card {
-        border: 2px solid #111;
-        background: #fff;
-        padding: 10px;
-        display: grid;
-        gap: 6px;
-        box-shadow: inset -3px -3px 0 rgba(0,0,0,0.08);
-    }
-    .ability-card.locked,
-    .skill-card.locked {
-        opacity: 0.62;
-    }
-    .card-title {
-        font-weight: 800;
-        font-size: 14px;
-    }
-    .meta {
-        color: #666;
-        font-size: 12px;
-    }
-    .empty {
-        border: 2px dashed #777;
-        padding: 14px;
-        background: #fff;
-        font-size: 13px;
-    }
+
     button:disabled {
         opacity: 0.42;
         cursor: default;
     }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        border: 2px solid var(--ink);
+        border-radius: 0;
+        background: var(--paper);
+        color: var(--ink);
+        outline: none;
+    }
+
+    input,
+    select {
+        height: 28px;
+        padding: 4px 6px;
+    }
+
+    textarea {
+        height: 56px;
+        min-height: 56px;
+        max-height: 88px;
+        padding: 5px 6px;
+        resize: vertical;
+        line-height: 1.25;
+    }
+
+    .compact-shell {
+        width: 100%;
+        height: 100vh;
+        display: grid;
+        grid-template-rows: auto 32px 1fr;
+        background: var(--bg);
+    }
+
+    .topbar {
+        display: grid;
+        gap: 5px;
+        padding: 7px 8px 6px;
+        border-bottom: 2px solid var(--ink);
+        background: var(--paper);
+    }
+
+    .title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    .tier-badge {
+        max-width: 126px;
+        padding: 2px 5px;
+        border: 2px solid var(--ink);
+        background: var(--accent);
+        font-size: 10px;
+        font-weight: 800;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .stat {
+        min-width: 0;
+        border: 2px solid var(--ink);
+        background: var(--soft);
+        padding: 3px 4px;
+        line-height: 1.1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-bottom: 2px solid var(--ink);
+    }
+
+    .tabs button {
+        border-width: 0 2px 0 0;
+        box-shadow: none;
+        font-weight: 800;
+    }
+
+    .tabs button:last-child { border-right: 0; }
+
+    main {
+        min-height: 0;
+        overflow: auto;
+        padding: 7px;
+    }
+
+    main::-webkit-scrollbar { width: 0; height: 0; }
+
+    .view { display: none; }
+
+    .view.active {
+        display: grid;
+        gap: 7px;
+    }
+
+    .block {
+        display: grid;
+        gap: 6px;
+        padding: 7px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .compact-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        min-width: 0;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .hint {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .duration-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+    }
+
+    .duration-row button,
+    .action-row button,
+    .mini-action {
+        min-height: 26px;
+        padding: 3px 4px;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .action-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+    }
+
+    .primary {
+        background: var(--ink);
+        color: var(--paper);
+    }
+
+    .danger-action {
+        background: var(--danger);
+    }
+
+    .status-box {
+        min-height: 34px;
+        padding: 6px;
+        border: 2px dashed rgba(0, 0, 0, 0.45);
+        background: var(--bg);
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .reward-box {
+        min-height: 28px;
+        padding: 6px;
+        border: 2px solid var(--ink);
+        background: var(--reward);
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .card-list {
+        display: grid;
+        gap: 6px;
+    }
+
+    .ability-card,
+    .skill-card,
+    .run-card {
+        display: grid;
+        gap: 4px;
+        padding: 6px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        line-height: 1.22;
+        overflow-wrap: anywhere;
+    }
+
+    .ability-card.locked,
+    .skill-card.locked {
+        opacity: 0.64;
+    }
+
+    .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .card-title {
+        min-width: 0;
+        font-size: 11px;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+    }
+
+    .meta {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .pill {
+        flex: 0 0 auto;
+        max-width: 96px;
+        padding: 1px 4px;
+        border: 2px solid var(--ink);
+        background: var(--soft);
+        font-size: 9px;
+        font-weight: 800;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .empty {
+        padding: 9px;
+        border: 2px dashed rgba(0, 0, 0, 0.4);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+        line-height: 1.25;
+    }
 </style>
 </head>
 <body>
-<div class="app">
-    <header>
-        <h1>Petclaw Adventure</h1>
-        <div class="level-line" id="levelLine">Loading progress...</div>
+<div class="compact-shell">
+    <header class="topbar">
+        <div class="title-row">
+            <h1>Adventure</h1>
+            <div class="tier-badge" id="tierBadge">Loading</div>
+        </div>
+        <div class="stats" id="levelLine">
+            <div class="stat">Lv --</div>
+            <div class="stat">XP --</div>
+            <div class="stat">Fx --</div>
+        </div>
     </header>
-    <nav class="tabs">
+
+    <nav class="tabs" aria-label="Pet adventure tabs">
         <button id="focusTab" onclick="setTab('focus')">Focus</button>
         <button id="abilitiesTab" onclick="setTab('abilities')">Abilities</button>
         <button id="skillsTab" onclick="setTab('skills')">Skills</button>
     </nav>
+
     <main>
         <section class="view" id="focusView">
-            <div class="panel">
-                <h2 class="panel-title">Focus Adventure</h2>
+            <div class="block">
+                <div class="compact-title">Focus Run <span class="hint" id="activeLabel">idle</span></div>
                 <input id="taskTitle" placeholder="Task title">
                 <div class="duration-row" id="durationRow">
                     <button data-minutes="15" onclick="selectDuration(15)">15</button>
@@ -195,28 +360,32 @@
                     <option>Rest</option>
                 </select>
                 <div class="status-box" id="focusStatus">No active adventure</div>
-                <textarea id="focusSummary" placeholder="Outcome or reusable workflow summary"></textarea>
-                <div class="actions">
+                <textarea id="focusSummary" placeholder="Outcome. Add 'make this reusable' to create a skill seed."></textarea>
+                <div class="action-row">
                     <button class="primary" id="startButton" onclick="startFocusAdventure()">Start</button>
-                    <button id="finishButton" onclick="finishFocusAdventure('completed')">Finish</button>
-                    <button id="partialButton" onclick="finishFocusAdventure('partial')">Partial</button>
+                    <button id="finishButton" onclick="finishFocusAdventure('completed')">Done</button>
+                    <button id="partialButton" onclick="finishFocusAdventure('partial')">Part</button>
+                    <button class="danger-action" id="interruptButton" onclick="finishFocusAdventure('interrupted')">Stop</button>
                 </div>
-                <button id="interruptButton" onclick="finishFocusAdventure('interrupted')">Interrupt</button>
-                <div class="status-box" id="rewardLine">Rewards will appear here.</div>
+                <div class="reward-box" id="rewardLine">Rewards appear after a run.</div>
             </div>
         </section>
 
         <section class="view" id="abilitiesView">
-            <div class="panel">
-                <h2 class="panel-title">Ability Tree</h2>
+            <div class="block">
+                <div class="compact-title">Ability Tree <span class="hint">AI growth</span></div>
                 <div class="card-list" id="abilityList"></div>
             </div>
         </section>
 
         <section class="view" id="skillsView">
-            <div class="panel">
-                <h2 class="panel-title">Skill Book</h2>
+            <div class="block">
+                <div class="compact-title">Skill Cards <span class="hint">pet abilities</span></div>
                 <div class="card-list" id="skillCardList"></div>
+            </div>
+            <div class="block">
+                <div class="compact-title">Recent Runs <span class="hint">forge seeds</span></div>
+                <div class="card-list" id="recentRuns"></div>
             </div>
         </section>
     </main>
@@ -225,6 +394,8 @@
 <script>
 const electronAPI = window.electronAPI;
 const levelLine = document.getElementById('levelLine');
+const tierBadge = document.getElementById('tierBadge');
+const activeLabel = document.getElementById('activeLabel');
 const taskTitle = document.getElementById('taskTitle');
 const intentType = document.getElementById('intentType');
 const focusStatus = document.getElementById('focusStatus');
@@ -236,6 +407,7 @@ const partialButton = document.getElementById('partialButton');
 const interruptButton = document.getElementById('interruptButton');
 const abilityList = document.getElementById('abilityList');
 const skillCardList = document.getElementById('skillCardList');
+const recentRuns = document.getElementById('recentRuns');
 
 let selectedDuration = 25;
 let activeFocusSession = null;
@@ -270,17 +442,25 @@ function selectDuration(minutes) {
     });
 }
 
+function formatShortDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
 function updateFocusButtons() {
     const hasActive = Boolean(activeFocusSession);
     startButton.disabled = hasActive;
     finishButton.disabled = !hasActive;
     partialButton.disabled = !hasActive;
     interruptButton.disabled = !hasActive;
+    activeLabel.textContent = hasActive ? 'running' : 'idle';
 }
 
 function updateFocusStatus() {
     if (!activeFocusSession) {
         focusStatus.textContent = 'No active adventure';
+        updateFocusButtons();
         return;
     }
     const started = new Date(activeFocusSession.startedAt).getTime();
@@ -288,6 +468,66 @@ function updateFocusStatus() {
         ? Math.max(0, Math.floor((Date.now() - started) / 60000))
         : 0;
     focusStatus.textContent = `${activeFocusSession.taskTitle} | ${elapsed}/${activeFocusSession.plannedMinutes} min | ${activeFocusSession.intentType}`;
+    updateFocusButtons();
+}
+
+function renderAbilityCards(tree = {}) {
+    const abilities = tree.abilities || [];
+    abilityList.innerHTML = abilities.length ? abilities.map(ability => {
+        const status = ability.unlocked ? 'Unlocked' : (ability.lockedReason || 'Locked');
+        const action = ability.unlocked
+            ? `<span class="pill">Ready</span>`
+            : ability.canUnlock
+                ? `<button class="mini-action" onclick="unlockPetAbility('${ability.id}')">Unlock</button>`
+                : `<span class="pill">${escapeHtml(status)}</span>`;
+        return `
+            <article class="ability-card ${ability.unlocked ? '' : 'locked'}">
+                <div class="card-top">
+                    <div class="card-title">${escapeHtml(ability.name)}</div>
+                    ${action}
+                </div>
+                <div class="meta">${escapeHtml(ability.tier)} | Lv ${ability.levelRequired} | Cost ${ability.cost}</div>
+                <div>${escapeHtml(ability.description)}</div>
+            </article>
+        `;
+    }).join('') : '<div class="empty">No ability data yet.</div>';
+}
+
+function renderSkillCards(state = {}) {
+    const skillCards = state.skillCards || [];
+    skillCardList.innerHTML = skillCards.length ? skillCards.map(card => `
+        <article class="skill-card ${card.status === 'locked' ? 'locked' : ''}">
+            <div class="card-top">
+                <div class="card-title">${escapeHtml(card.name)}</div>
+                <span class="pill">${escapeHtml(card.rarity || 'common')}</span>
+            </div>
+            <div class="meta">${escapeHtml(card.status || 'candidate')} | Lv ${card.level || 1}</div>
+            <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
+        </article>
+    `).join('') : '<div class="empty">Finish reusable focus runs to discover Skill Seeds.</div>';
+}
+
+function renderRecentRuns(state = {}) {
+    const sessions = (state.focusSessions || []).slice(-4).reverse();
+    recentRuns.innerHTML = sessions.length ? sessions.map(session => {
+        const hasSeed = (state.skillSeeds || []).some(seed => seed.sourceSessionId === session.id);
+        const canTrySeed = session.summary && !hasSeed;
+        const button = hasSeed
+            ? '<span class="pill">Seeded</span>'
+            : canTrySeed
+                ? `<button class="mini-action" onclick="createSkillSeedFromSession('${session.id}')">Seed</button>`
+                : '<span class="pill">No summary</span>';
+        return `
+            <article class="run-card">
+                <div class="card-top">
+                    <div class="card-title">${escapeHtml(session.taskTitle || 'Focus Run')}</div>
+                    ${button}
+                </div>
+                <div class="meta">${escapeHtml(session.status || 'done')} | ${session.actualMinutes || 0} min | ${formatShortDate(session.endedAt)}</div>
+                <div>${escapeHtml(session.summary || 'No outcome saved.')}</div>
+            </article>
+        `;
+    }).join('') : '<div class="empty">No completed focus runs yet.</div>';
 }
 
 function renderPetProgress(state) {
@@ -296,36 +536,16 @@ function renderPetProgress(state) {
     activeFocusSession = state.activeFocusSession || null;
     const tree = state.abilityTree || { petLevel: state.petLevel || 1, tiers: [], abilities: [] };
     const tier = (tree.tiers || []).find(item => item.level === tree.petLevel);
-    levelLine.textContent = `Level ${tree.petLevel} ${tier?.tier || 'Companion'} | XP ${state.focusXp || 0} | Fragments ${state.abilityFragments || 0} | Stardust ${state.stardust || 0}`;
-
-    abilityList.innerHTML = (tree.abilities || []).map(ability => {
-        const status = ability.unlocked ? 'Unlocked' : (ability.lockedReason || 'Locked');
-        const action = ability.unlocked
-            ? `<div class="meta">${status}</div>`
-            : ability.canUnlock
-                ? `<button onclick="unlockPetAbility('${ability.id}')">Unlock</button>`
-                : `<div class="meta">${escapeHtml(status)}</div>`;
-        return `
-            <article class="ability-card ${ability.unlocked ? '' : 'locked'}">
-                <div class="card-title">${escapeHtml(ability.name)}</div>
-                <div class="meta">${escapeHtml(ability.tier)} | Cost ${ability.cost}</div>
-                <div>${escapeHtml(ability.description)}</div>
-                ${action}
-            </article>
-        `;
-    }).join('');
-
-    const skillCards = state.skillCards || [];
-    skillCardList.innerHTML = skillCards.length ? skillCards.map(card => `
-        <article class="skill-card ${card.status === 'locked' ? 'locked' : ''}">
-            <div class="card-title">${escapeHtml(card.name)}</div>
-            <div class="meta">${escapeHtml(card.rarity || 'common')} | ${escapeHtml(card.status || 'candidate')} | Lv ${card.level || 1}</div>
-            <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
-        </article>
-    `).join('') : '<div class="empty">No skills yet. Finish reusable focus adventures to discover Skill Seeds.</div>';
-
+    tierBadge.textContent = tier?.tier || 'Companion';
+    levelLine.innerHTML = `
+        <div class="stat">Lv ${tree.petLevel || 1}</div>
+        <div class="stat">XP ${state.focusXp || 0}</div>
+        <div class="stat">Fx ${state.abilityFragments || 0} / Sd ${state.stardust || 0}</div>
+    `;
+    renderAbilityCards(tree);
+    renderSkillCards(state);
+    renderRecentRuns(state);
     updateFocusStatus();
-    updateFocusButtons();
 }
 
 async function loadPetProgress() {
@@ -345,7 +565,7 @@ async function startFocusAdventure() {
         renderPetProgress(result.progress);
         return;
     }
-    rewardLine.textContent = 'Adventure started. The pet will turn this focus into growth.';
+    rewardLine.textContent = 'Run started. Finish it to earn XP, fragments, and stardust.';
     renderPetProgress(result.progress);
 }
 
@@ -360,8 +580,8 @@ async function finishFocusAdventure(status) {
         renderPetProgress(result.progress);
         return;
     }
-    const rewards = result.session.rewards;
-    rewardLine.textContent = `+${rewards.focusXp} XP, +${rewards.abilityFragments} fragments, +${rewards.stardust} stardust${rewards.skillSeed ? ', Skill Seed found' : ''}`;
+    const rewards = result.session.rewards || {};
+    rewardLine.textContent = `+${rewards.focusXp || 0} XP, +${rewards.abilityFragments || 0} Fx, +${rewards.stardust || 0} Sd${rewards.skillSeed ? ', Skill Seed' : ''}`;
     focusSummary.value = '';
     renderPetProgress(result.progress);
 }
@@ -373,6 +593,18 @@ async function unlockPetAbility(abilityId) {
         rewardLine.textContent = result.error || 'Ability locked';
     } else {
         rewardLine.textContent = 'Ability unlocked.';
+    }
+    renderPetProgress(result.progress);
+}
+
+async function createSkillSeedFromSession(sessionId) {
+    if (!electronAPI) return;
+    const result = await electronAPI.invoke('pet-skill-seed-create', { sessionId });
+    if (!result.success) {
+        rewardLine.textContent = result.error || 'Could not create Skill Seed';
+    } else {
+        rewardLine.textContent = 'Skill Seed created.';
+        setTab('skills');
     }
     renderPetProgress(result.progress);
 }

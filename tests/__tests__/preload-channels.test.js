@@ -48,16 +48,25 @@ describe('preload channel whitelist', () => {
     expect(source).toContain('openSkillBook')
   })
 
-  test('dedicated pet game window is wired for larger gamified panels', () => {
+  test('dedicated pet game window is wired for compact gamified panels', () => {
     const mainSource = fs.readFileSync(path.join(__dirname, '..', '..', 'main.js'), 'utf8')
     const windowSource = fs.readFileSync(path.join(__dirname, '..', '..', 'pet-game-window.html'), 'utf8')
 
     expect(mainSource).toContain("ipcMain.handle('pet-game-open'")
     expect(mainSource).toContain('petGameWindow')
+    expect(mainSource).toContain('width: 300')
+    expect(mainSource).toContain('height: 420')
+    expect(windowSource).toContain('class="compact-shell"')
     expect(windowSource).toContain('id="focusView"')
     expect(windowSource).toContain('id="abilitiesView"')
     expect(windowSource).toContain('id="skillsView"')
     expect(windowSource).toContain("electronAPI.invoke('pet-progress-get'")
     expect(windowSource).toContain("electronAPI.on('pet-game-tab'")
+    expect(windowSource).toContain('startFocusAdventure')
+    expect(windowSource).toContain('finishFocusAdventure')
+    expect(windowSource).toContain('unlockPetAbility')
+    expect(windowSource).toContain('id="recentRuns"')
+    expect(windowSource).toContain('createSkillSeedFromSession')
+    expect(windowSource).toContain("electronAPI.invoke('pet-skill-seed-create'")
   })
 })

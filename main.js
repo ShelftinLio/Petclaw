@@ -1600,10 +1600,10 @@ function openPetGameWindow(tab = 'focus') {
   }
 
   petGameWindow = new BrowserWindow({
-    width: 520,
-    height: 640,
-    minWidth: 420,
-    minHeight: 520,
+    width: 300,
+    height: 420,
+    minWidth: 280,
+    minHeight: 360,
     title: 'Petclaw Adventure',
     frame: true,
     resizable: true,
