@@ -440,7 +440,7 @@
         display: none;
         grid-template-columns: 1fr 1fr;
         gap: 6px;
-        overflow-y: auto;
+        overflow-y: auto !important;
         border-radius: 0;
         border: 2px solid var(--hud-line);
         background: var(--hud-bg);
@@ -490,7 +490,7 @@
         display: none;
         grid-template-columns: 1fr 1fr;
         gap: 6px;
-        overflow-y: auto;
+        overflow-y: auto !important;
         border: 2px solid var(--hud-line);
         background: var(--hud-bg);
         box-shadow: var(--pixel-shadow);
@@ -900,6 +900,7 @@ function pauseRoam(ms = 2500) {
 
 function shouldRoam() {
     if (!window.electronAPI || !hasSpritePet()) return false;
+    if (activePetManifest?.motion?.roam !== true) return false;
     if (Date.now() < roamPausedUntil || isDrag) return false;
     if (toolbar.classList.contains('show') || settingsPanel.classList.contains('show') || inputBar.classList.contains('show')) return false;
     return currentMood === 'idle' || currentMood === 'walking';

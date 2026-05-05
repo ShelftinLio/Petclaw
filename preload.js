@@ -84,6 +84,7 @@ const VALID_ON_CHANNELS = [
   'status-update',
   'show-lyric',
   'appearance-changed',
+  'appearance-generation-progress',
   'pet-progress-changed',
   'pet-game-tab',
   'switch-log-entry'

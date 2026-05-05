@@ -15,6 +15,7 @@ describe('preload channel whitelist', () => {
     expect(source).toContain("'appearance-generate-pet-description'")
     expect(source).toContain("'appearance-delete-pet'")
     expect(source).toContain("'appearance-generation-status'")
+    expect(source).toContain("'appearance-generation-progress'")
   })
 
   test('exposes gamified focus and skill channels to renderers', () => {
@@ -46,6 +47,26 @@ describe('preload channel whitelist', () => {
     expect(source).toContain('startFocusAdventure')
     expect(source).toContain('renderPetProgress')
     expect(source).toContain('openSkillBook')
+  })
+
+  test('pet appearance UI keeps deletion inside the pet studio library', () => {
+    const mainSource = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8')
+    const studioSource = fs.readFileSync(path.join(__dirname, '..', '..', 'pet-studio.html'), 'utf8')
+
+    expect(mainSource).not.toContain('deleteActivePet')
+    expect(mainSource).not.toContain('appearance-delete-pet')
+    expect(mainSource).toContain('overflow-y: auto !important')
+    expect(studioSource).toContain('deletePetById')
+    expect(studioSource).toContain('data-delete-id')
+    expect(studioSource).toContain('Delete Pet')
+    expect(studioSource).toContain('appearance-delete-pet')
+  })
+
+  test('pet appearance UI exposes generation progress affordances', () => {
+    const studioSource = fs.readFileSync(path.join(__dirname, '..', '..', 'pet-studio.html'), 'utf8')
+
+    expect(studioSource).toContain('id="generationProgress"')
+    expect(studioSource).toContain("electronAPI.on('appearance-generation-progress'")
   })
 
   test('dedicated pet game window is wired for compact gamified panels', () => {

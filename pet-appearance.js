@@ -39,6 +39,7 @@ function createBuiltInCowCatManifest() {
     spritesheet: 'spritesheet.svg',
     cell: { width: 192, height: 208 },
     layout: { columns: 8, rows: 10 },
+    motion: { roam: true },
     states: {
       idle: { row: 0, frames: 8, duration: 140 },
       happy: { row: 1, frames: 8, duration: 120 },
@@ -104,6 +105,7 @@ function createImagegenPetRequest({
     spritesheet: 'spritesheet.webp',
     cell: { width: 192, height: 208 },
     layout: { columns: 8, rows: 10 },
+    motion: { roam: false },
     states: {
       idle: { row: 0, frames: 8, duration: 140 },
       happy: { row: 1, frames: 8, duration: 120 },
@@ -134,6 +136,7 @@ function createImagegenPetRequest({
     '',
     'Asset type: transparent pixel-art desktop pet spritesheet',
     'Style: compact chibi pixel art, chunky readable silhouette, thick dark 1-2 px outline, flat cel shading, vertical i-like glowing eyes, tiny ears/paws/tail where appropriate.',
+    'Character framing: create a full-body virtual pet in every frame. If the reference is a headshot, avatar, or face-only image, infer the full body, outfit, arms, hands, legs, and feet from the identity and description.',
     'Spritesheet: 8 columns x 10 rows, each cell 192x208 px, final file named spritesheet.webp.',
     `Rows in order: ${HATCH_STATES.map(([state]) => state).join(', ')}.`,
     'Background workflow: prefer true transparency. If the image tool cannot output transparency, use a perfectly flat solid #00ff00 chroma-key background for local removal.',
@@ -168,7 +171,7 @@ function createHatchPetJobs({ petName, description, referenceImage } = {}) {
     `Create the canonical base reference for ${safeName}, a Codex digital pet.`,
     `Subject: ${subject}.`,
     'Style: small pixel-art-adjacent mascot, compact chibi proportions, chunky readable silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading, simple expressive face, tiny limbs.',
-    'Output: one centered full-body pet reference on transparent background. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background for cleanup.',
+    'Output: one centered full-body character reference on transparent background. If the source is a headshot, avatar, or face-only image, infer a complete body with outfit, arms, hands, legs, and feet. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background for cleanup.',
     'Avoid: text, watermark, scenery, shadows, gradients, glow, realistic fur, painterly rendering, 3D, detached effects, floor marks.',
   ].join('\n');
 
@@ -193,7 +196,7 @@ function createHatchPetJobs({ petName, description, referenceImage } = {}) {
         `Create an 8-frame horizontal strip for the "${state}" animation of ${safeName}.`,
         `State guidance: ${guidance}.`,
         'Use the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.',
-        'Each frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.',
+        'Each frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell with the full body visible from head to feet.',
         'Use transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.',
         'The animation should read through pose and expression changes only.',
       ].join('\n'),

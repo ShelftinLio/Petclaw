@@ -1746,6 +1746,15 @@ ipcMain.handle('roam-pet', async (event, { dx = 0, dy = 0 } = {}) => {
 
 const customPetsRoot = path.join(__dirname, 'assets', 'pets', 'custom');
 
+function sendAppearanceGenerationProgress(event, payload = {}) {
+  const sender = event?.sender;
+  if (!sender || sender.isDestroyed?.()) return;
+  sender.send('appearance-generation-progress', {
+    time: new Date().toISOString(),
+    ...payload,
+  });
+}
+
 function petAssetUrl(relativePath) {
   if (!relativePath) return '';
   return `file://${path.join(__dirname, relativePath).replace(/\\/g, '/')}`;
@@ -2053,6 +2062,12 @@ ipcMain.handle('appearance-generate-pet', async (event, payload = {}) => {
   if (!selectedPath) return { canceled: true };
 
   const id = createPetId();
+  sendAppearanceGenerationProgress(event, {
+    petId: id,
+    step: 'reference',
+    title: 'Reference Selected',
+    message: 'Using the image as identity. If it is a headshot or avatar, a full body will be inferred.',
+  });
   const petDir = path.join(customPetsRoot, id);
   await fsp.mkdir(petDir, { recursive: true });
 
@@ -2076,12 +2091,19 @@ ipcMain.handle('appearance-generate-pet', async (event, payload = {}) => {
     referenceImagePath: referencePath,
     name: payload.name || 'Generated Pet',
     description: payload.description || 'a friendly custom desktop pet',
+    onProgress: (progress) => sendAppearanceGenerationProgress(event, { petId: id, ...progress }),
   });
 
   if (!generated.success) {
     await writeJson(path.join(petDir, 'pet.json'), request.manifest);
     petConfig.set('appearance', upsertCustomPet(petConfig.get('appearance'), request.record));
     broadcastAppearanceChanged();
+    sendAppearanceGenerationProgress(event, {
+      petId: id,
+      step: 'fallback',
+      title: 'Manual Package Created',
+      message: generated.error || 'Automatic generation failed, so a manual package was created.',
+    });
     return {
       canceled: false,
       success: false,
@@ -2113,6 +2135,13 @@ ipcMain.handle('appearance-generate-pet', async (event, payload = {}) => {
   appearance = setActivePet(appearance, id);
   petConfig.set('appearance', appearance);
 
+  sendAppearanceGenerationProgress(event, {
+    petId: id,
+    step: 'complete',
+    title: 'Pet Ready',
+    message: 'The full-body virtual pet has been generated, cleaned, centered, and activated.',
+  });
+
   return {
     canceled: false,
     success: true,
@@ -2123,13 +2152,20 @@ ipcMain.handle('appearance-generate-pet', async (event, payload = {}) => {
     prompt: generated.prompt,
     model: generated.model,
     size: generated.size,
+    postprocess: generated.postprocess,
     state: broadcastAppearanceChanged(),
     message: 'Pet generated and activated.'
   };
 });
 
-async function saveGeneratedPetFromDescription(payload = {}) {
+async function saveGeneratedPetFromDescription(payload = {}, event) {
   const id = createPetId();
+  sendAppearanceGenerationProgress(event, {
+    petId: id,
+    step: 'start',
+    title: 'Starting Full-Body Pet',
+    message: 'Building a full-body virtual character from the description.',
+  });
   const petDir = path.join(customPetsRoot, id);
   await fsp.mkdir(petDir, { recursive: true });
 
@@ -2146,12 +2182,19 @@ async function saveGeneratedPetFromDescription(payload = {}) {
   const generated = await generatePetSpritesheet({
     name: payload.name || 'Generated Pet',
     description: payload.description || 'a friendly custom desktop pet',
+    onProgress: (progress) => sendAppearanceGenerationProgress(event, { petId: id, ...progress }),
   });
 
   if (!generated.success) {
     await writeJson(path.join(petDir, 'pet.json'), request.manifest);
     petConfig.set('appearance', upsertCustomPet(petConfig.get('appearance'), request.record));
     broadcastAppearanceChanged();
+    sendAppearanceGenerationProgress(event, {
+      petId: id,
+      step: 'fallback',
+      title: 'Manual Package Created',
+      message: generated.error || 'Automatic generation failed, so a manual package was created.',
+    });
     return {
       canceled: false,
       success: false,
@@ -2183,6 +2226,13 @@ async function saveGeneratedPetFromDescription(payload = {}) {
   appearance = setActivePet(appearance, id);
   petConfig.set('appearance', appearance);
 
+  sendAppearanceGenerationProgress(event, {
+    petId: id,
+    step: 'complete',
+    title: 'Pet Ready',
+    message: 'The full-body virtual pet has been generated, cleaned, centered, and activated.',
+  });
+
   return {
     canceled: false,
     success: true,
@@ -2193,13 +2243,14 @@ async function saveGeneratedPetFromDescription(payload = {}) {
     prompt: generated.prompt,
     model: generated.model,
     size: generated.size,
+    postprocess: generated.postprocess,
     state: broadcastAppearanceChanged(),
     message: 'Pet generated from description and activated.'
   };
 }
 
 ipcMain.handle('appearance-generate-pet-description', async (event, payload = {}) => {
-  return saveGeneratedPetFromDescription(payload);
+  return saveGeneratedPetFromDescription(payload, event);
 });
 
 ipcMain.handle('appearance-imagegen-status', async () => ({

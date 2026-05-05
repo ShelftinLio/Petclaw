@@ -69,6 +69,7 @@
     .titlebar button,
     .toolbar button,
     .actions button,
+    .pet-delete,
     .pet-row,
     .field button {
       border: 3px solid var(--line);
@@ -89,7 +90,7 @@
     .titlebar button:hover,
     .toolbar button:hover,
     .actions button:hover,
-    .pet-row:hover,
+    .pet-delete:hover:not(:disabled),
     .field button:hover {
       background: var(--ink);
       color: var(--white);
@@ -131,12 +132,16 @@
     .pet-row {
       width: 100%;
       display: grid;
-      grid-template-columns: 44px 1fr;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
       gap: 8px;
       align-items: center;
       margin-bottom: 8px;
       padding: 7px;
       text-align: left;
+    }
+
+    .pet-row:hover {
+      background: #fbfbf6;
     }
 
     .pet-row.selected {
@@ -193,6 +198,21 @@
       font-size: 10px;
       color: var(--muted);
       text-transform: uppercase;
+    }
+
+    .pet-delete {
+      align-self: stretch;
+      min-width: 58px;
+      padding: 0 7px;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .pet-delete:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: inset -3px -3px 0 rgba(23, 25, 22, 0.12);
     }
 
     .preview-panel {
@@ -327,6 +347,39 @@
       line-height: 1.35;
     }
 
+    .generation-progress {
+      display: none;
+      margin-top: 10px;
+      border: 3px solid var(--line);
+      background: var(--white);
+      padding: 8px;
+      box-shadow: inset -3px -3px 0 rgba(23, 25, 22, 0.12);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .generation-progress.show {
+      display: block;
+    }
+
+    .generation-progress.busy {
+      background:
+        linear-gradient(90deg, rgba(121, 237, 241, 0.3), transparent 45%),
+        var(--white);
+    }
+
+    .generation-progress strong {
+      display: block;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .generation-progress button {
+      margin-top: 8px;
+      width: 100%;
+      min-height: 30px;
+    }
+
     .status {
       min-width: 0;
       border-top: 4px solid var(--line);
@@ -402,14 +455,18 @@
             <label for="petName">1. Description</label>
             <input id="petName" value="Generated Pet" maxlength="48">
             <textarea id="petDescription" rows="5">a tiny friendly pixel pet with vertical i-like glowing eyes</textarea>
-            <button type="button" onclick="generatePetFromDescription()">Generate From Text</button>
+            <button type="button" id="generateTextButton" onclick="generatePetFromDescription()">Generate From Text</button>
           </div>
 
           <div class="field">
             <label>2. Image</label>
-            <button type="button" onclick="generatePetFromImage()">Generate From Image</button>
-            <button type="button" onclick="createImagegenRequest()">Create Manual Image Package</button>
+            <button type="button" id="generateImageButton" onclick="generatePetFromImage()">Generate From Image</button>
+            <button type="button" id="manualPackageButton" onclick="createImagegenRequest()">Create Manual Image Package</button>
             <div class="hint" id="generationHint">Checking image generation provider...</div>
+            <div class="generation-progress" id="generationProgress" aria-live="polite">
+              <strong id="generationProgressTitle">Ready</strong>
+              <div id="generationProgressDetail">Generated pets are full-body virtual characters, even when the reference starts as a face or avatar.</div>
+            </div>
           </div>
 
           <div class="field">
@@ -441,6 +498,12 @@
     const petName = document.getElementById('petName');
     const petDescription = document.getElementById('petDescription');
     const generationHint = document.getElementById('generationHint');
+    const generationProgress = document.getElementById('generationProgress');
+    const generationProgressTitle = document.getElementById('generationProgressTitle');
+    const generationProgressDetail = document.getElementById('generationProgressDetail');
+    const generateTextButton = document.getElementById('generateTextButton');
+    const generateImageButton = document.getElementById('generateImageButton');
+    const manualPackageButton = document.getElementById('manualPackageButton');
 
     let appState = null;
     let pets = [];
@@ -454,8 +517,51 @@
       statusEl.textContent = text || '';
     }
 
+    function setGenerationControlsDisabled(disabled) {
+      [generateTextButton, generateImageButton, manualPackageButton].forEach((button) => {
+        if (button) button.disabled = Boolean(disabled);
+      });
+    }
+
+    function setGenerationProgress(title, detail, busy = false) {
+      generationProgress.classList.add('show');
+      generationProgress.classList.toggle('busy', Boolean(busy));
+      generationProgressTitle.textContent = title || 'Generating Pet';
+      generationProgressDetail.textContent = detail || 'Preparing a full-body virtual character.';
+      setStatus(generationProgressDetail.textContent);
+    }
+
+    function beginGeneration(title, detail) {
+      setGenerationControlsDisabled(true);
+      setGenerationProgress(title, detail, true);
+    }
+
+    function endGeneration(message) {
+      setGenerationControlsDisabled(false);
+      generationProgress.classList.remove('busy');
+      if (message) {
+        generationProgress.classList.add('show');
+        generationProgressTitle.textContent = 'Ready';
+        generationProgressDetail.textContent = message;
+        setStatus(message);
+      }
+    }
+
+    function summarizeGenerationResult(result, fallback) {
+      const postprocess = result?.postprocess;
+      if (!postprocess) return fallback;
+      const parts = [];
+      if (postprocess.cleanedBackground) parts.push('transparent background cleaned');
+      if (postprocess.recenteredFrames) parts.push(`${postprocess.recenteredFrames} frames centered`);
+      return parts.length ? `${fallback} ${parts.join(', ')}.` : fallback;
+    }
+
     function getSelectedPet() {
       return pets.find((pet) => pet.id === selectedPetId) || pets[0] || null;
+    }
+
+    function getPetById(petId) {
+      return pets.find((pet) => pet.id === petId) || null;
     }
 
     function escapeText(value) {
@@ -488,22 +594,34 @@
         const renderer = pet.manifest?.renderer || pet.renderer || 'unknown';
         const source = pet.source || 'package';
         const thumb = pet.imageUrl ? `<img src="${escapeText(pet.imageUrl)}" alt="">` : '';
+        const deleteControl = pet.id === 'cow-cat'
+          ? '<button type="button" class="pet-delete" disabled title="Default pet is locked">Locked</button>'
+          : `<button type="button" class="pet-delete" data-delete-id="${escapeText(pet.id)}" title="Delete Pet">Delete Pet</button>`;
         return `
-          <button type="button" class="${classes.join(' ')}" data-id="${escapeText(pet.id)}">
+          <div class="${classes.join(' ')}" data-id="${escapeText(pet.id)}">
             <span class="thumb">${thumb}</span>
             <span>
               <span class="name">${escapeText(pet.name || pet.id)}</span>
               <span class="meta">${escapeText(source)} / ${escapeText(renderer)}</span>
             </span>
-          </button>
+            ${deleteControl}
+          </div>
         `;
       }).join('');
 
-      library.querySelectorAll('.pet-row').forEach((button) => {
-        button.addEventListener('click', () => {
-          selectedPetId = button.dataset.id;
+      library.querySelectorAll('.pet-row').forEach((row) => {
+        row.addEventListener('click', (event) => {
+          if (event.target.closest('.pet-delete')) return;
+          selectedPetId = row.dataset.id;
           selectedAction = chooseAction(getSelectedPet(), selectedAction);
           renderAll();
+        });
+      });
+
+      library.querySelectorAll('.pet-delete[data-delete-id]').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          deletePetById(button.dataset.deleteId);
         });
       });
     }
@@ -651,6 +769,12 @@
 
     async function deleteSelectedPet() {
       const pet = getSelectedPet();
+      if (!pet) return;
+      await deletePetById(pet.id);
+    }
+
+    async function deletePetById(petId) {
+      const pet = getPetById(petId);
       if (!pet || !window.electronAPI) return;
       if (pet.id === 'cow-cat') {
         setStatus('The built-in Cow Cat is locked and cannot be deleted.');
@@ -703,23 +827,28 @@
       const name = petName.value.trim() || 'Generated Pet';
       const description = petDescription.value.trim() || 'a friendly custom desktop pet';
       try {
-        setStatus('Choose a reference image. Generation can take a while...');
+        beginGeneration(
+          'Waiting For Reference',
+          'Choose an image. If it is only a headshot or avatar, Petclaw will expand it into a full-body virtual pet.'
+        );
         const result = await window.electronAPI.invoke('appearance-generate-pet', {
           name,
           description,
         });
         if (!result || result.canceled) {
-          setStatus('Generation canceled.');
+          endGeneration('Generation canceled.');
           return;
         }
         selectedPetId = result.pet?.id || selectedPetId;
         if (!result.success) {
           await refreshState(result.message || result.error || 'Automatic generation failed.');
+          endGeneration(result.message || result.error || 'Automatic generation failed.');
           return;
         }
-        await refreshState(result.message || 'Pet generated and activated.');
+        await refreshState(summarizeGenerationResult(result, result.message || 'Pet generated and activated.'));
+        endGeneration(summarizeGenerationResult(result, result.message || 'Pet generated and activated.'));
       } catch (err) {
-        setStatus(err.message || 'Generation failed.');
+        endGeneration(err.message || 'Generation failed.');
       }
     }
 
@@ -733,23 +862,28 @@
         return;
       }
       try {
-        setStatus('Generating from description. This can take a while...');
+        beginGeneration(
+          'Generating Full-Body Pet',
+          'Petclaw is designing a complete head-to-feet character, then building the animation sheet.'
+        );
         const result = await window.electronAPI.invoke('appearance-generate-pet-description', {
           name,
           description,
         });
         if (!result || result.canceled) {
-          setStatus('Generation canceled.');
+          endGeneration('Generation canceled.');
           return;
         }
         selectedPetId = result.pet?.id || selectedPetId;
         if (!result.success) {
           await refreshState(result.message || result.error || 'Automatic generation failed.');
+          endGeneration(result.message || result.error || 'Automatic generation failed.');
           return;
         }
-        await refreshState(result.message || 'Pet generated from description and activated.');
+        await refreshState(summarizeGenerationResult(result, result.message || 'Pet generated from description and activated.'));
+        endGeneration(summarizeGenerationResult(result, result.message || 'Pet generated from description and activated.'));
       } catch (err) {
-        setStatus(err.message || 'Generation failed.');
+        endGeneration(err.message || 'Generation failed.');
       }
     }
 
@@ -780,6 +914,10 @@
         appState = state;
         pets = state.petCatalog || [];
         renderAll();
+      });
+      window.electronAPI.on('appearance-generation-progress', (progress) => {
+        if (!progress) return;
+        setGenerationProgress(progress.title || 'Generating Pet', progress.message || 'Working on the pet package...', true);
       });
     }
 

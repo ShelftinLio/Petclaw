@@ -55,6 +55,7 @@ describe('Pet appearance helpers', () => {
       spritesheet: 'spritesheet.svg',
       cell: { width: 192, height: 208 },
       layout: { columns: 8, rows: 10 },
+      motion: { roam: true },
       states: expect.objectContaining({
         idle: { row: 0, frames: 8, duration: 140 },
         happy: { row: 1, frames: 8, duration: 120 },
@@ -157,6 +158,7 @@ describe('Pet appearance helpers', () => {
       spritesheet: 'spritesheet.webp',
       cell: { width: 192, height: 208 },
       layout: { columns: 8, rows: 10 },
+      motion: { roam: false },
     })
     expect(Object.keys(request.manifest.states)).toEqual([
       'idle',
@@ -173,6 +175,8 @@ describe('Pet appearance helpers', () => {
     expect(request.prompt).toContain('$imagegen')
     expect(request.prompt).toContain('a sleepy black cat with a moon collar')
     expect(request.prompt).toContain('reference.png')
+    expect(request.prompt).toContain('full-body virtual pet')
+    expect(request.prompt).toContain('headshot, avatar, or face-only')
     expect(request.readme).toContain('spritesheet.webp')
     expect(validatePetManifest(request.manifest)).toEqual({ ok: true })
   })
@@ -209,6 +213,8 @@ describe('Pet appearance helpers', () => {
     })
     expect(jobs[1].prompt).toContain('8-frame horizontal strip')
     expect(jobs[1].prompt).toContain('idle')
+    expect(jobs[0].prompt).toContain('full-body character reference')
+    expect(jobs[1].prompt).toContain('full body visible')
   })
 
   test('upsertCustomPet replaces existing pet records by id', () => {
