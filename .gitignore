@@ -1,5 +1,6 @@
 # 依赖
 node_modules/
+.worktrees/
 npm-debug.log*
 
 # 临时文件
@@ -72,4 +73,3 @@ ENGAGEMENT-*.md
 
 # 📦 打包文件
 clawhub-package/
-
