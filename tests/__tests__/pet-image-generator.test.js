@@ -112,4 +112,28 @@ describe('pet image generator', () => {
       prompt: expect.stringContaining('a tiny text-only pet'),
     })
   })
+
+  test('generatePetSpritesheet returns API errors instead of throwing', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      text: async () => JSON.stringify({
+        error: { message: 'Unsupported image size' },
+      }),
+    })
+    const { generatePetSpritesheet } = require('../../pet-image-generator')
+
+    const result = await generatePetSpritesheet({
+      name: 'Bad Pet',
+      description: 'a tiny pet',
+      fetchImpl,
+      env: { OPENAI_API_KEY: 'sk-test' },
+    })
+
+    expect(result).toMatchObject({
+      success: false,
+      configured: true,
+      error: 'Image API generation failed: Unsupported image size',
+    })
+  })
 })

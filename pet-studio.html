@@ -394,6 +394,7 @@
         <div class="tools-body">
           <div class="toolbar">
             <button type="button" onclick="activateSelected()">Activate</button>
+            <button type="button" onclick="deleteSelectedPet()">Delete Custom</button>
             <button type="button" onclick="resetPet()">Reset Cow Cat</button>
           </div>
 
@@ -648,6 +649,27 @@
       await refreshState(`${pet.name || pet.id} activated.`);
     }
 
+    async function deleteSelectedPet() {
+      const pet = getSelectedPet();
+      if (!pet || !window.electronAPI) return;
+      if (pet.id === 'cow-cat') {
+        setStatus('The built-in Cow Cat is locked and cannot be deleted.');
+        return;
+      }
+      if (!confirm(`Delete ${pet.name || pet.id}? This removes the local pet package.`)) return;
+      try {
+        const result = await window.electronAPI.invoke('appearance-delete-pet', pet.id);
+        if (!result?.success) {
+          setStatus(result?.error || 'Delete failed.');
+          return;
+        }
+        selectedPetId = result.state?.appearance?.activePetId || 'cow-cat';
+        await refreshState('Custom pet deleted.');
+      } catch (err) {
+        setStatus(err.message || 'Delete failed.');
+      }
+    }
+
     async function resetPet() {
       if (!window.electronAPI) return;
       await window.electronAPI.invoke('appearance-reset');
@@ -658,39 +680,47 @@
 
     async function importPackage() {
       if (!window.electronAPI) return;
-      setStatus('Choose a pet package folder...');
-      const result = await window.electronAPI.invoke('appearance-import-package');
-      if (!result || result.canceled) {
-        setStatus('Import canceled.');
-        return;
+      try {
+        setStatus('Choose a pet package file or folder...');
+        const result = await window.electronAPI.invoke('appearance-import-package');
+        if (!result || result.canceled) {
+          setStatus('Import canceled.');
+          return;
+        }
+        if (!result.success) {
+          setStatus(result.error || 'Import failed.');
+          return;
+        }
+        selectedPetId = result.pet?.id || selectedPetId;
+        await refreshState('Pet package imported.');
+      } catch (err) {
+        setStatus(err.message || 'Import failed.');
       }
-      if (!result.success) {
-        setStatus(result.error || 'Import failed.');
-        return;
-      }
-      selectedPetId = result.pet?.id || selectedPetId;
-      await refreshState('Pet package imported.');
     }
 
     async function generatePetFromImage() {
       if (!window.electronAPI) return;
       const name = petName.value.trim() || 'Generated Pet';
       const description = petDescription.value.trim() || 'a friendly custom desktop pet';
-      setStatus('Choose a reference image. Generation can take a while...');
-      const result = await window.electronAPI.invoke('appearance-generate-pet', {
-        name,
-        description,
-      });
-      if (!result || result.canceled) {
-        setStatus('Generation canceled.');
-        return;
+      try {
+        setStatus('Choose a reference image. Generation can take a while...');
+        const result = await window.electronAPI.invoke('appearance-generate-pet', {
+          name,
+          description,
+        });
+        if (!result || result.canceled) {
+          setStatus('Generation canceled.');
+          return;
+        }
+        selectedPetId = result.pet?.id || selectedPetId;
+        if (!result.success) {
+          await refreshState(result.message || result.error || 'Automatic generation failed.');
+          return;
+        }
+        await refreshState(result.message || 'Pet generated and activated.');
+      } catch (err) {
+        setStatus(err.message || 'Generation failed.');
       }
-      selectedPetId = result.pet?.id || selectedPetId;
-      if (!result.success) {
-        await refreshState(result.message || 'Automatic generation is not configured. Manual package created.');
-        return;
-      }
-      await refreshState(result.message || 'Pet generated and activated.');
     }
 
     async function generatePetFromDescription() {
@@ -702,21 +732,25 @@
         petDescription.focus();
         return;
       }
-      setStatus('Generating from description. This can take a while...');
-      const result = await window.electronAPI.invoke('appearance-generate-pet-description', {
-        name,
-        description,
-      });
-      if (!result || result.canceled) {
-        setStatus('Generation canceled.');
-        return;
+      try {
+        setStatus('Generating from description. This can take a while...');
+        const result = await window.electronAPI.invoke('appearance-generate-pet-description', {
+          name,
+          description,
+        });
+        if (!result || result.canceled) {
+          setStatus('Generation canceled.');
+          return;
+        }
+        selectedPetId = result.pet?.id || selectedPetId;
+        if (!result.success) {
+          await refreshState(result.message || result.error || 'Automatic generation failed.');
+          return;
+        }
+        await refreshState(result.message || 'Pet generated from description and activated.');
+      } catch (err) {
+        setStatus(err.message || 'Generation failed.');
       }
-      selectedPetId = result.pet?.id || selectedPetId;
-      if (!result.success) {
-        await refreshState(result.message || 'Automatic generation is not configured. Manual package created.');
-        return;
-      }
-      await refreshState(result.message || 'Pet generated from description and activated.');
     }
 
     async function createImagegenRequest() {
@@ -724,17 +758,21 @@
       const name = petName.value.trim() || 'Generated Pet';
       const description = petDescription.value.trim() || 'a friendly custom desktop pet';
       setStatus('Choose an optional reference image...');
-      const result = await window.electronAPI.invoke('appearance-create-imagegen-request', {
-        name,
-        description,
-        includeReference: true,
-      });
-      if (!result || !result.success) {
-        setStatus(result?.error || 'Could not create hatch package.');
-        return;
+      try {
+        const result = await window.electronAPI.invoke('appearance-create-imagegen-request', {
+          name,
+          description,
+          includeReference: true,
+        });
+        if (!result || !result.success) {
+          setStatus(result?.error || 'Could not create hatch package.');
+          return;
+        }
+        selectedPetId = result.pet?.id || selectedPetId;
+        await refreshState('Hatch package created. Generate spritesheet.webp, then import or activate after assets exist.');
+      } catch (err) {
+        setStatus(err.message || 'Could not create hatch package.');
       }
-      selectedPetId = result.pet?.id || selectedPetId;
-      await refreshState('Hatch package created. Generate spritesheet.webp, then import or activate after assets exist.');
     }
 
     if (window.electronAPI) {

@@ -13,6 +13,7 @@ describe('preload channel whitelist', () => {
 
     expect(source).toContain("'appearance-generate-pet'")
     expect(source).toContain("'appearance-generate-pet-description'")
+    expect(source).toContain("'appearance-delete-pet'")
     expect(source).toContain("'appearance-generation-status'")
   })
 })

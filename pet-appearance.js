@@ -263,6 +263,21 @@ function upsertCustomPet(appearance, record) {
   return { ...normalized, customPets };
 }
 
+function removeCustomPet(appearance, petId) {
+  const normalized = normalizeAppearanceConfig(appearance);
+  if (!petId || petId === COW_CAT_ID) return normalized;
+  const customPets = normalized.customPets.filter(pet => pet.id !== petId);
+  if (normalized.activePetId === petId) {
+    return {
+      ...normalized,
+      mode: 'cow-cat',
+      activePetId: COW_CAT_ID,
+      customPets,
+    };
+  }
+  return { ...normalized, customPets };
+}
+
 function setActivePet(appearance, petId) {
   const normalized = normalizeAppearanceConfig(appearance);
   if (petId === COW_CAT_ID) {
@@ -294,6 +309,7 @@ module.exports = {
   createCustomPetRecord,
   createPetId,
   upsertCustomPet,
+  removeCustomPet,
   setActivePet,
   inferRendererFromFiles,
 };

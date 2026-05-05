@@ -8,6 +8,7 @@ const {
   createImagegenPetRequest,
   createHatchPetJobs,
   upsertCustomPet,
+  removeCustomPet,
   setActivePet,
   inferRendererFromFiles,
 } = require('../../pet-appearance')
@@ -219,6 +220,24 @@ describe('Pet appearance helpers', () => {
     const nextRecord = createCustomPetRecord({ id: 'custom-1', name: 'New', source: 'package', renderer: 'spritesheet' })
 
     expect(upsertCustomPet(appearance, nextRecord).customPets).toEqual([nextRecord])
+  })
+
+  test('removeCustomPet removes custom pets and falls back to cow-cat when active', () => {
+    const custom = createCustomPetRecord({ id: 'custom-1', name: 'New', source: 'package', renderer: 'spritesheet' })
+    const appearance = setActivePet(normalizeAppearanceConfig({ customPets: [custom] }), 'custom-1')
+
+    expect(removeCustomPet(appearance, 'custom-1')).toEqual({
+      mode: 'cow-cat',
+      activePetId: COW_CAT_ID,
+      customPets: [],
+    })
+  })
+
+  test('removeCustomPet never removes the built-in cow-cat', () => {
+    const custom = createCustomPetRecord({ id: 'custom-1', name: 'New', source: 'package', renderer: 'spritesheet' })
+    const appearance = normalizeAppearanceConfig({ customPets: [custom] })
+
+    expect(removeCustomPet(appearance, COW_CAT_ID)).toEqual(appearance)
   })
 
   test('setActivePet switches built-in and custom modes', () => {

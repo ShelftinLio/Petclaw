@@ -87,6 +87,7 @@ const {
   createCustomPetRecord,
   createPetId,
   inferRendererFromFiles,
+  removeCustomPet,
   setActivePet,
   upsertCustomPet,
   validatePetManifest
@@ -1809,6 +1810,31 @@ ipcMain.handle('appearance-reset', async () => {
   const next = setActivePet(petConfig.get('appearance'), COW_CAT_ID);
   petConfig.set('appearance', next);
   return broadcastAppearanceChanged();
+});
+
+ipcMain.handle('appearance-delete-pet', async (event, petId) => {
+  if (!petId || petId === COW_CAT_ID) {
+    return { success: false, error: 'The built-in cow-cat cannot be deleted.' };
+  }
+  const appearance = normalizeAppearanceConfig(petConfig.get('appearance'));
+  const target = appearance.customPets.find(pet => pet.id === petId);
+  if (!target) {
+    return { success: false, error: 'Custom pet not found.' };
+  }
+
+  const next = removeCustomPet(appearance, petId);
+  petConfig.set('appearance', next);
+  try {
+    const petDir = path.resolve(__dirname, target.assetDir || '');
+    const customRoot = path.resolve(customPetsRoot);
+    if (petDir === customRoot || petDir.startsWith(`${customRoot}${path.sep}`)) {
+      await fsp.rm(petDir, { recursive: true, force: true });
+    }
+  } catch (err) {
+    console.warn('Failed to delete custom pet assets:', err.message);
+  }
+
+  return { success: true, petId, state: broadcastAppearanceChanged() };
 });
 
 ipcMain.handle('appearance-upload-image', async () => {

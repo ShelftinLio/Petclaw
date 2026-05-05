@@ -149,66 +149,85 @@ async function generatePetSpritesheet({
   }
 
   const prompt = buildPetSpritesheetPrompt({ name, description, hasReference });
-  let response;
-  if (hasReference) {
-    const form = new FormData();
-    form.set('model', config.model);
-    form.set('prompt', prompt);
-    form.set('size', config.size);
-    form.set('quality', config.quality);
-    form.append('image[]', fileToBlob(referenceImagePath), path.basename(referenceImagePath));
-
-    response = await fetchImpl(config.endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-      },
-      body: form,
-    });
-  } else {
-    response = await fetchImpl(config.generationEndpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: config.model,
-        prompt,
-        size: config.size,
-        quality: config.quality,
-      }),
-    });
-  }
-
-  const text = await response.text();
-  let json = {};
   try {
-    json = text ? JSON.parse(text) : {};
+    let response;
+    if (hasReference) {
+      const form = new FormData();
+      form.set('model', config.model);
+      form.set('prompt', prompt);
+      form.set('size', config.size);
+      form.set('quality', config.quality);
+      form.append('image[]', fileToBlob(referenceImagePath), path.basename(referenceImagePath));
+
+      response = await fetchImpl(config.endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: form,
+      });
+    } else {
+      response = await fetchImpl(config.generationEndpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: config.model,
+          prompt,
+          size: config.size,
+          quality: config.quality,
+        }),
+      });
+    }
+
+    const text = await response.text();
+    let json = {};
+    try {
+      json = text ? JSON.parse(text) : {};
+    } catch (err) {
+      return {
+        success: false,
+        configured: true,
+        error: `Image API returned non-JSON response: ${text.slice(0, 160)}`,
+        prompt,
+      };
+    }
+
+    if (!response.ok) {
+      const message = json.error?.message || json.message || `HTTP ${response.status}`;
+      return {
+        success: false,
+        configured: true,
+        error: `Image API generation failed: ${message}`,
+        prompt,
+      };
+    }
+
+    let image = parseImageApiResponse(json);
+    if (image.url) {
+      image = await fetchImageUrl(image.url, fetchImpl);
+    }
+
+    return {
+      success: true,
+      configured: true,
+      model: config.model,
+      size: config.size,
+      prompt,
+      mime: image.mime,
+      extension: imageMimeToExtension(image.mime),
+      buffer: image.buffer,
+    };
   } catch (err) {
-    throw new Error(`Image API returned non-JSON response: ${text.slice(0, 160)}`);
+    return {
+      success: false,
+      configured: true,
+      error: err.message || 'Image API generation failed',
+      prompt,
+    };
   }
-
-  if (!response.ok) {
-    const message = json.error?.message || json.message || `HTTP ${response.status}`;
-    throw new Error(`Image API generation failed: ${message}`);
-  }
-
-  let image = parseImageApiResponse(json);
-  if (image.url) {
-    image = await fetchImageUrl(image.url, fetchImpl);
-  }
-
-  return {
-    success: true,
-    configured: true,
-    model: config.model,
-    size: config.size,
-    prompt,
-    mime: image.mime,
-    extension: imageMimeToExtension(image.mime),
-    buffer: image.buffer,
-  };
 }
 
 module.exports = {

@@ -61,6 +61,7 @@ const VALID_INVOKE_CHANNELS = [
   'appearance-upload-image',
   'appearance-save-generated-image',
   'appearance-import-package',
+  'appearance-delete-pet',
   'appearance-generate-pet',
   'appearance-generate-pet-description',
   'appearance-create-imagegen-request',
