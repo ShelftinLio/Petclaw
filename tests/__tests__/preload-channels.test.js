@@ -25,4 +25,13 @@ describe('preload channel whitelist', () => {
     }
     expect(source).toContain("'pet-progress-changed'")
   })
+
+  test('renderer includes gamified focus panel hooks', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8')
+
+    expect(source).toContain('id="focusAdventurePanel"')
+    expect(source).toContain('startFocusAdventure')
+    expect(source).toContain('renderPetProgress')
+    expect(source).toContain('openSkillBook')
+  })
 })
