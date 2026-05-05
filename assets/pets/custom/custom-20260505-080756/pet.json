@@ -1,0 +1,69 @@
+{
+  "id": "custom-20260505-080756",
+  "name": "Generated Pet",
+  "description": "Generated with Codex $imagegen from: 海泽王里的香克斯",
+  "source": "imagegen",
+  "renderer": "spritesheet",
+  "version": 1,
+  "spritesheet": "spritesheet.webp",
+  "cell": {
+    "width": 192,
+    "height": 208
+  },
+  "layout": {
+    "columns": 8,
+    "rows": 10
+  },
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 8,
+      "duration": 140
+    },
+    "happy": {
+      "row": 1,
+      "frames": 8,
+      "duration": 120
+    },
+    "talking": {
+      "row": 2,
+      "frames": 8,
+      "duration": 100
+    },
+    "thinking": {
+      "row": 3,
+      "frames": 8,
+      "duration": 160
+    },
+    "sleepy": {
+      "row": 4,
+      "frames": 8,
+      "duration": 180
+    },
+    "surprised": {
+      "row": 5,
+      "frames": 8,
+      "duration": 110
+    },
+    "focused": {
+      "row": 6,
+      "frames": 8,
+      "duration": 140
+    },
+    "offline": {
+      "row": 7,
+      "frames": 8,
+      "duration": 180
+    },
+    "sad": {
+      "row": 8,
+      "frames": 8,
+      "duration": 160
+    },
+    "walking": {
+      "row": 9,
+      "frames": 8,
+      "duration": 90
+    }
+  }
+}

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "base",
+    "kind": "base",
+    "output": "base-reference.png",
+    "inputs": [
+      "reference.png"
+    ],
+    "prompt": "Create the canonical base reference for Generated Pet, a Codex digital pet.\nSubject: a tiny friendly pixel pet with vertical i-like glowing eyes.\nStyle: small pixel-art-adjacent mascot, compact chibi proportions, chunky readable silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading, simple expressive face, tiny limbs.\nOutput: one centered full-body pet reference on transparent background. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background for cleanup.\nAvoid: text, watermark, scenery, shadows, gradients, glow, realistic fur, painterly rendering, 3D, detached effects, floor marks."
+  },
+  {
+    "id": "row-idle",
+    "kind": "row",
+    "state": "idle",
+    "row": 0,
+    "output": "rows/idle.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"idle\" animation of Generated Pet.\nState guidance: resting breathing loop, subtle blink, stable centered pose.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-happy",
+    "kind": "row",
+    "state": "happy",
+    "row": 1,
+    "output": "rows/happy.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"happy\" animation of Generated Pet.\nState guidance: cheerful bounce, smiling eyes, upbeat body pose.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-talking",
+    "kind": "row",
+    "state": "talking",
+    "row": 2,
+    "output": "rows/talking.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"talking\" animation of Generated Pet.\nState guidance: mouth or face movement suitable for speaking loop.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-thinking",
+    "kind": "row",
+    "state": "thinking",
+    "row": 3,
+    "output": "rows/thinking.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"thinking\" animation of Generated Pet.\nState guidance: focused head tilt or lean, contemplative eyes.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-sleepy",
+    "kind": "row",
+    "state": "sleepy",
+    "row": 4,
+    "output": "rows/sleepy.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"sleepy\" animation of Generated Pet.\nState guidance: drowsy slow blink, relaxed low-energy pose.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-surprised",
+    "kind": "row",
+    "state": "surprised",
+    "row": 5,
+    "output": "rows/surprised.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"surprised\" animation of Generated Pet.\nState guidance: startled upright pose, wide eyes.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-focused",
+    "kind": "row",
+    "state": "focused",
+    "row": 6,
+    "output": "rows/focused.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"focused\" animation of Generated Pet.\nState guidance: review-like concentrated pose, tiny lean forward.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-offline",
+    "kind": "row",
+    "state": "offline",
+    "row": 7,
+    "output": "rows/offline.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"offline\" animation of Generated Pet.\nState guidance: quiet dim low-energy idle pose.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-sad",
+    "kind": "row",
+    "state": "sad",
+    "row": 8,
+    "output": "rows/sad.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"sad\" animation of Generated Pet.\nState guidance: small disappointed pose, lowered expression.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  },
+  {
+    "id": "row-walking",
+    "kind": "row",
+    "state": "walking",
+    "row": 9,
+    "output": "rows/walking.png",
+    "inputs": [
+      "base-reference.png",
+      "reference.png"
+    ],
+    "prompt": "Create an 8-frame horizontal strip for the \"walking\" animation of Generated Pet.\nState guidance: sideways walking loop, alternating paws, body moving with a gentle step rhythm.\nUse the attached base-reference.png as the canonical identity. Preserve shape, palette, outline thickness, face design, and scale.\nEach frame is one 192x208 cell; total strip is 1536x208. Keep each pet centered inside its cell.\nUse transparent background in every cell. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background in every cell for cleanup. No grid, frame numbers, text, shadows, floor, motion arcs, detached sparkles, or loose effects.\nThe animation should read through pose and expression changes only."
+  }
+]

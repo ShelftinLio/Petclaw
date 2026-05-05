@@ -1,0 +1,46 @@
+{
+  "id": "custom-20260503-102912",
+  "name": "xiangkesi",
+  "description": "A custom pixel-style desktop pet.",
+  "source": "local-image",
+  "renderer": "image",
+  "version": 1,
+  "states": {
+    "idle": {
+      "image": "generated.png",
+      "duration": 180
+    },
+    "happy": {
+      "image": "generated.png",
+      "duration": 150
+    },
+    "talking": {
+      "image": "generated.png",
+      "duration": 120
+    },
+    "thinking": {
+      "image": "generated.png",
+      "duration": 220
+    },
+    "sleepy": {
+      "image": "generated.png",
+      "duration": 260
+    },
+    "sad": {
+      "image": "generated.png",
+      "duration": 220
+    },
+    "surprised": {
+      "image": "generated.png",
+      "duration": 140
+    },
+    "focused": {
+      "image": "generated.png",
+      "duration": 180
+    },
+    "offline": {
+      "image": "generated.png",
+      "duration": 260
+    }
+  }
+}
