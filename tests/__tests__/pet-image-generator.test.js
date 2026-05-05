@@ -12,6 +12,7 @@ describe('pet image generator', () => {
       OPENAI_API_KEY: 'sk-test',
       PETCLAW_IMAGE_MODEL: 'gpt-image-2',
       PETCLAW_IMAGE_API_URL: 'https://example.test/v1/images/edits',
+      PETCLAW_IMAGE_GENERATION_API_URL: 'https://example.test/v1/images/generations',
       PETCLAW_IMAGE_SIZE: '1536x2080',
       PETCLAW_IMAGE_QUALITY: 'high',
     })
@@ -21,6 +22,7 @@ describe('pet image generator', () => {
       provider: 'openai-compatible',
       apiKey: 'sk-test',
       endpoint: 'https://example.test/v1/images/edits',
+      generationEndpoint: 'https://example.test/v1/images/generations',
       model: 'gpt-image-2',
       size: '1536x2080',
       quality: 'high',
@@ -35,6 +37,7 @@ describe('pet image generator', () => {
     const prompt = buildPetSpritesheetPrompt({
       name: 'Moo Pixel',
       description: 'a cute cow cat with black ears',
+      hasReference: true,
     })
 
     expect(prompt).toContain('Moo Pixel')
@@ -42,6 +45,17 @@ describe('pet image generator', () => {
     expect(prompt).toContain('8 columns x 10 rows')
     expect(prompt).toContain('idle, happy, talking, thinking, sleepy, surprised, focused, offline, sad, walking')
     expect(prompt).toContain('transparent background')
+  })
+
+  test('buildPetSpritesheetPrompt supports text-only generation', () => {
+    const prompt = buildPetSpritesheetPrompt({
+      name: 'Space Pet',
+      description: 'a tiny astronaut cat',
+      hasReference: false,
+    })
+
+    expect(prompt).toContain('Character request: a tiny astronaut cat')
+    expect(prompt).not.toContain('uploaded reference image')
   })
 
   test('parseImageApiResponse accepts base64 image output', () => {
@@ -62,5 +76,40 @@ describe('pet image generator', () => {
   test('cellFromImageSize derives manifest cells from generated image size', () => {
     expect(cellFromImageSize('1024x1536')).toEqual({ width: 128, height: 154 })
     expect(cellFromImageSize('auto')).toEqual({ width: 192, height: 208 })
+  })
+
+  test('generatePetSpritesheet uses text generation endpoint without a reference image', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({
+        data: [{ b64_json: Buffer.from('image').toString('base64') }],
+      }),
+    })
+    const { generatePetSpritesheet } = require('../../pet-image-generator')
+
+    const result = await generatePetSpritesheet({
+      name: 'Text Pet',
+      description: 'a tiny text-only pet',
+      fetchImpl,
+      env: {
+        OPENAI_API_KEY: 'sk-test',
+        PETCLAW_IMAGE_GENERATION_API_URL: 'https://example.test/v1/images/generations',
+      },
+    })
+
+    expect(result.success).toBe(true)
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'https://example.test/v1/images/generations',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer sk-test',
+          'Content-Type': 'application/json',
+        }),
+      }),
+    )
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toMatchObject({
+      prompt: expect.stringContaining('a tiny text-only pet'),
+    })
   })
 })

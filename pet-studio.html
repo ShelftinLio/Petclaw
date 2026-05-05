@@ -154,6 +154,16 @@
       font-weight: 900;
     }
 
+    .pet-row.locked .name::before {
+      content: "LOCKED ";
+      color: var(--white);
+      background: var(--ink);
+      padding: 1px 4px;
+      margin-right: 5px;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
     .thumb {
       width: 40px;
       height: 40px;
@@ -385,16 +395,26 @@
           <div class="toolbar">
             <button type="button" onclick="activateSelected()">Activate</button>
             <button type="button" onclick="resetPet()">Reset Cow Cat</button>
-            <button type="button" onclick="importPackage()">Import Package</button>
           </div>
 
           <div class="field">
-            <label for="petName">Upload Reference</label>
+            <label for="petName">1. Description</label>
             <input id="petName" value="Generated Pet" maxlength="48">
             <textarea id="petDescription" rows="5">a tiny friendly pixel pet with vertical i-like glowing eyes</textarea>
-            <button type="button" onclick="generatePetNow()">Generate Now</button>
-            <button type="button" onclick="createImagegenRequest()">Create Manual Package</button>
+            <button type="button" onclick="generatePetFromDescription()">Generate From Text</button>
+          </div>
+
+          <div class="field">
+            <label>2. Image</label>
+            <button type="button" onclick="generatePetFromImage()">Generate From Image</button>
+            <button type="button" onclick="createImagegenRequest()">Create Manual Image Package</button>
             <div class="hint" id="generationHint">Checking image generation provider...</div>
+          </div>
+
+          <div class="field">
+            <label>3. File</label>
+            <button type="button" onclick="importPackage()">Import Pet File</button>
+            <div class="hint">Import a complete generated pet package. The built-in Cow Cat is locked and cannot be modified.</div>
           </div>
 
           <div class="field">
@@ -463,6 +483,7 @@
         const classes = ['pet-row'];
         if (pet.id === selectedPetId) classes.push('selected');
         if (pet.active) classes.push('active');
+        if (pet.id === 'cow-cat') classes.push('locked');
         const renderer = pet.manifest?.renderer || pet.renderer || 'unknown';
         const source = pet.source || 'package';
         const thumb = pet.imageUrl ? `<img src="${escapeText(pet.imageUrl)}" alt="">` : '';
@@ -522,7 +543,8 @@
       const states = Object.keys(manifest.states || {});
       const current = manifest.states?.[selectedAction] || manifest.states?.idle || {};
       selectedMeta.innerHTML = `
-        <div class="badge">${escapeText(manifest.renderer || pet.renderer || 'unknown')}</div>
+          <div class="badge">${escapeText(manifest.renderer || pet.renderer || 'unknown')}</div>
+        ${pet.id === 'cow-cat' ? '<div class="badge">locked default</div>' : ''}
         <div class="badge">${states.length} states</div>
         <div class="hint">
           <strong>${escapeText(pet.name || pet.id)}</strong><br>
@@ -650,7 +672,7 @@
       await refreshState('Pet package imported.');
     }
 
-    async function generatePetNow() {
+    async function generatePetFromImage() {
       if (!window.electronAPI) return;
       const name = petName.value.trim() || 'Generated Pet';
       const description = petDescription.value.trim() || 'a friendly custom desktop pet';
@@ -669,6 +691,32 @@
         return;
       }
       await refreshState(result.message || 'Pet generated and activated.');
+    }
+
+    async function generatePetFromDescription() {
+      if (!window.electronAPI) return;
+      const name = petName.value.trim() || 'Generated Pet';
+      const description = petDescription.value.trim();
+      if (!description) {
+        setStatus('Describe the pet before generating.');
+        petDescription.focus();
+        return;
+      }
+      setStatus('Generating from description. This can take a while...');
+      const result = await window.electronAPI.invoke('appearance-generate-pet-description', {
+        name,
+        description,
+      });
+      if (!result || result.canceled) {
+        setStatus('Generation canceled.');
+        return;
+      }
+      selectedPetId = result.pet?.id || selectedPetId;
+      if (!result.success) {
+        await refreshState(result.message || 'Automatic generation is not configured. Manual package created.');
+        return;
+      }
+      await refreshState(result.message || 'Pet generated from description and activated.');
     }
 
     async function createImagegenRequest() {

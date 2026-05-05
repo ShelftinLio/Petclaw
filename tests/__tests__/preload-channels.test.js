@@ -12,6 +12,7 @@ describe('preload channel whitelist', () => {
     const source = fs.readFileSync(path.join(__dirname, '..', '..', 'preload.js'), 'utf8')
 
     expect(source).toContain("'appearance-generate-pet'")
+    expect(source).toContain("'appearance-generate-pet-description'")
     expect(source).toContain("'appearance-generation-status'")
   })
 })

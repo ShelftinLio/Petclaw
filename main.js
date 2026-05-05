@@ -1876,13 +1876,21 @@ ipcMain.handle('appearance-save-generated-image', async (event, payload = {}) =>
 });
 
 ipcMain.handle('appearance-import-package', async () => {
-  const result = await dialog.showOpenDialog(mainWindow, {
-    title: 'Import pet package',
-    properties: ['openDirectory']
+  const result = await dialog.showOpenDialog(petStudioWindow || mainWindow, {
+    title: 'Import pet package file or folder',
+    properties: ['openFile', 'openDirectory'],
+    filters: [
+      { name: 'Pet Package', extensions: ['json'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
   });
   if (result.canceled || !result.filePaths[0]) return { canceled: true };
 
-  const sourceDir = result.filePaths[0];
+  let sourceDir = result.filePaths[0];
+  const selectedStat = await fsp.stat(sourceDir);
+  if (selectedStat.isFile()) {
+    sourceDir = path.dirname(sourceDir);
+  }
   const files = await fsp.readdir(sourceDir);
   if (!files.includes('pet.json')) {
     return { canceled: false, success: false, error: 'Package must contain pet.json' };
@@ -2035,6 +2043,80 @@ ipcMain.handle('appearance-generate-pet', async (event, payload = {}) => {
   };
 });
 
+async function saveGeneratedPetFromDescription(payload = {}) {
+  const id = createPetId();
+  const petDir = path.join(customPetsRoot, id);
+  await fsp.mkdir(petDir, { recursive: true });
+
+  const request = createImagegenPetRequest({
+    id,
+    name: payload.name || 'Generated Pet',
+    description: payload.description || 'a friendly custom desktop pet',
+  });
+
+  await fsp.writeFile(path.join(petDir, 'imagegen-prompt.md'), request.prompt, 'utf-8');
+  await writeJson(path.join(petDir, 'imagegen-jobs.json'), request.jobs);
+  await fsp.writeFile(path.join(petDir, 'README.md'), request.readme, 'utf-8');
+
+  const generated = await generatePetSpritesheet({
+    name: payload.name || 'Generated Pet',
+    description: payload.description || 'a friendly custom desktop pet',
+  });
+
+  if (!generated.success) {
+    await writeJson(path.join(petDir, 'pet.json'), request.manifest);
+    petConfig.set('appearance', upsertCustomPet(petConfig.get('appearance'), request.record));
+    broadcastAppearanceChanged();
+    return {
+      canceled: false,
+      success: false,
+      configured: false,
+      pet: request.record,
+      manifest: request.manifest,
+      folderPath: petDir,
+      message: generated.error || 'Image generation is not configured. A manual hatch package was created instead.'
+    };
+  }
+
+  const spritesheetName = `spritesheet.${generated.extension || 'png'}`;
+  await fsp.writeFile(path.join(petDir, spritesheetName), generated.buffer);
+  const manifest = {
+    ...request.manifest,
+    description: `Generated automatically from: ${payload.description || 'a friendly custom desktop pet'}`,
+    spritesheet: spritesheetName,
+    cell: cellFromImageSize(generated.size, request.manifest.layout.columns, request.manifest.layout.rows),
+  };
+  await writeJson(path.join(petDir, 'pet.json'), manifest);
+
+  const record = createCustomPetRecord({
+    id,
+    name: manifest.name,
+    source: 'imagegen',
+    renderer: 'spritesheet'
+  });
+  let appearance = upsertCustomPet(petConfig.get('appearance'), record);
+  appearance = setActivePet(appearance, id);
+  petConfig.set('appearance', appearance);
+
+  return {
+    canceled: false,
+    success: true,
+    configured: true,
+    pet: record,
+    manifest,
+    folderPath: petDir,
+    prompt: generated.prompt,
+    model: generated.model,
+    size: generated.size,
+    state: broadcastAppearanceChanged(),
+    message: 'Pet generated from description and activated.'
+  };
+}
+
+ipcMain.handle('appearance-generate-pet-description', async (event, payload = {}) => {
+  return saveGeneratedPetFromDescription(payload);
+});
+
 ipcMain.handle('appearance-imagegen-status', async () => ({
   available: true,
   message: 'Create a $imagegen request package, generate spritesheet.webp with Codex, then import that package.'
@@ -2047,6 +2129,7 @@ ipcMain.handle('appearance-generation-status', async () => {
     provider: config.provider,
     model: config.model,
     endpoint: config.endpoint,
+    generationEndpoint: config.generationEndpoint,
     size: config.size,
     quality: config.quality,
     message: config.configured

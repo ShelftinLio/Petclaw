@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_ENDPOINT = 'https://api.openai.com/v1/images/edits';
+const DEFAULT_GENERATION_ENDPOINT = 'https://api.openai.com/v1/images/generations';
 const DEFAULT_MODEL = 'gpt-image-1.5';
 const DEFAULT_SIZE = '1024x1536';
 const DEFAULT_QUALITY = 'high';
@@ -13,22 +14,26 @@ function getImageGenerationConfig(env = process.env) {
     provider: 'openai-compatible',
     apiKey,
     endpoint: env.PETCLAW_IMAGE_API_URL || DEFAULT_ENDPOINT,
+    generationEndpoint: env.PETCLAW_IMAGE_GENERATION_API_URL || DEFAULT_GENERATION_ENDPOINT,
     model: env.PETCLAW_IMAGE_MODEL || DEFAULT_MODEL,
     size: env.PETCLAW_IMAGE_SIZE || DEFAULT_SIZE,
     quality: env.PETCLAW_IMAGE_QUALITY || DEFAULT_QUALITY,
   };
 }
 
-function buildPetSpritesheetPrompt({ name, description } = {}) {
+function buildPetSpritesheetPrompt({ name, description, hasReference = false } = {}) {
   const petName = name || 'Generated Pet';
   const subject = description || 'a friendly custom desktop pet';
+  const referenceLine = hasReference
+    ? 'Use the uploaded reference image as the identity reference. Simplify it into a cute pixel-art mascot.'
+    : 'Create the character directly from the written description as a cute pixel-art mascot.';
   return [
     'Create a production-ready animated desktop pet spritesheet.',
     '',
     `Pet name: ${petName}`,
     `Character request: ${subject}`,
     '',
-    'Use the uploaded reference image as the identity reference. Simplify it into a cute pixel-art mascot.',
+    referenceLine,
     'Style: compact chibi pixel art, black 1-2 px outline, strong readable silhouette, flat cel shading, limited black/white/accent palette, vertical i-like glowing eyes.',
     'Canvas: one complete portrait spritesheet, transparent background.',
     'Layout: 8 columns x 10 rows, equal-sized cells, no visible grid lines.',
@@ -138,24 +143,43 @@ async function generatePetSpritesheet({
     };
   }
 
-  if (!referenceImagePath || !fs.existsSync(referenceImagePath)) {
-    throw new Error('A reference image is required for automatic pet generation');
+  const hasReference = Boolean(referenceImagePath);
+  if (referenceImagePath && !fs.existsSync(referenceImagePath)) {
+    throw new Error('Reference image does not exist');
   }
 
-  const form = new FormData();
-  form.set('model', config.model);
-  form.set('prompt', buildPetSpritesheetPrompt({ name, description }));
-  form.set('size', config.size);
-  form.set('quality', config.quality);
-  form.append('image[]', fileToBlob(referenceImagePath), path.basename(referenceImagePath));
+  const prompt = buildPetSpritesheetPrompt({ name, description, hasReference });
+  let response;
+  if (hasReference) {
+    const form = new FormData();
+    form.set('model', config.model);
+    form.set('prompt', prompt);
+    form.set('size', config.size);
+    form.set('quality', config.quality);
+    form.append('image[]', fileToBlob(referenceImagePath), path.basename(referenceImagePath));
 
-  const response = await fetchImpl(config.endpoint, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: form,
-  });
+    response = await fetchImpl(config.endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: form,
+    });
+  } else {
+    response = await fetchImpl(config.generationEndpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: config.model,
+        prompt,
+        size: config.size,
+        quality: config.quality,
+      }),
+    });
+  }
 
   const text = await response.text();
   let json = {};
@@ -180,7 +204,7 @@ async function generatePetSpritesheet({
     configured: true,
     model: config.model,
     size: config.size,
-    prompt: buildPetSpritesheetPrompt({ name, description }),
+    prompt,
     mime: image.mime,
     extension: imageMimeToExtension(image.mime),
     buffer: image.buffer,
@@ -189,6 +213,7 @@ async function generatePetSpritesheet({
 
 module.exports = {
   DEFAULT_ENDPOINT,
+  DEFAULT_GENERATION_ENDPOINT,
   DEFAULT_MODEL,
   DEFAULT_SIZE,
   DEFAULT_QUALITY,
