@@ -91,6 +91,11 @@ const {
   upsertCustomPet,
   validatePetManifest
 } = require('./pet-appearance');
+const {
+  cellFromImageSize,
+  generatePetSpritesheet,
+  getImageGenerationConfig
+} = require('./pet-image-generator');
 
 // Windows透明窗口修复 — 禁用硬件加速彻底解决浅色背景矩形框
 // macOS 上禁用硬件加速反而会破坏透明度，仅在 Windows 上启用
@@ -1780,6 +1785,18 @@ async function copyFileToPetDir(sourcePath, targetDir, preferredName) {
   return targetPath;
 }
 
+async function chooseReferenceImage(title = 'Choose reference image') {
+  const result = await dialog.showOpenDialog(petStudioWindow || mainWindow, {
+    title,
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }
+    ]
+  });
+  if (result.canceled || !result.filePaths[0]) return null;
+  return result.filePaths[0];
+}
+
 ipcMain.handle('appearance-get', async () => getAppearanceState());
 
 ipcMain.handle('appearance-set-active', async (event, petId) => {
@@ -1905,17 +1922,11 @@ ipcMain.handle('appearance-create-imagegen-request', async (event, payload = {})
 
   let referenceImage = '';
   if (payload.includeReference) {
-    const result = await dialog.showOpenDialog(mainWindow, {
-      title: 'Choose reference image for $imagegen',
-      properties: ['openFile'],
-      filters: [
-        { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }
-      ]
-    });
-    if (!result.canceled && result.filePaths[0]) {
-      const ext = path.extname(result.filePaths[0]).toLowerCase() || '.png';
+    const selectedPath = await chooseReferenceImage('Choose reference image for $imagegen');
+    if (selectedPath) {
+      const ext = path.extname(selectedPath).toLowerCase() || '.png';
       referenceImage = `reference${ext}`;
-      await fsp.copyFile(result.filePaths[0], path.join(petDir, referenceImage));
+      await fsp.copyFile(selectedPath, path.join(petDir, referenceImage));
     }
   }
 
@@ -1944,10 +1955,105 @@ ipcMain.handle('appearance-create-imagegen-request', async (event, payload = {})
   };
 });
 
+ipcMain.handle('appearance-generate-pet', async (event, payload = {}) => {
+  const selectedPath = await chooseReferenceImage('Choose reference image for automatic pet generation');
+  if (!selectedPath) return { canceled: true };
+
+  const id = createPetId();
+  const petDir = path.join(customPetsRoot, id);
+  await fsp.mkdir(petDir, { recursive: true });
+
+  const ext = path.extname(selectedPath).toLowerCase() || '.png';
+  const referenceImage = `reference${ext}`;
+  const referencePath = path.join(petDir, referenceImage);
+  await fsp.copyFile(selectedPath, referencePath);
+
+  const request = createImagegenPetRequest({
+    id,
+    name: payload.name || 'Generated Pet',
+    description: payload.description || 'a friendly custom desktop pet',
+    referenceImage,
+  });
+
+  await fsp.writeFile(path.join(petDir, 'imagegen-prompt.md'), request.prompt, 'utf-8');
+  await writeJson(path.join(petDir, 'imagegen-jobs.json'), request.jobs);
+  await fsp.writeFile(path.join(petDir, 'README.md'), request.readme, 'utf-8');
+
+  const generated = await generatePetSpritesheet({
+    referenceImagePath: referencePath,
+    name: payload.name || 'Generated Pet',
+    description: payload.description || 'a friendly custom desktop pet',
+  });
+
+  if (!generated.success) {
+    await writeJson(path.join(petDir, 'pet.json'), request.manifest);
+    petConfig.set('appearance', upsertCustomPet(petConfig.get('appearance'), request.record));
+    broadcastAppearanceChanged();
+    return {
+      canceled: false,
+      success: false,
+      configured: false,
+      pet: request.record,
+      manifest: request.manifest,
+      folderPath: petDir,
+      message: generated.error || 'Image generation is not configured. A manual hatch package was created instead.'
+    };
+  }
+
+  const spritesheetName = `spritesheet.${generated.extension || 'png'}`;
+  await fsp.writeFile(path.join(petDir, spritesheetName), generated.buffer);
+  const manifest = {
+    ...request.manifest,
+    description: `Generated automatically from: ${payload.description || 'a friendly custom desktop pet'}`,
+    spritesheet: spritesheetName,
+    cell: cellFromImageSize(generated.size, request.manifest.layout.columns, request.manifest.layout.rows),
+  };
+  await writeJson(path.join(petDir, 'pet.json'), manifest);
+
+  const record = createCustomPetRecord({
+    id,
+    name: manifest.name,
+    source: 'imagegen',
+    renderer: 'spritesheet'
+  });
+  let appearance = upsertCustomPet(petConfig.get('appearance'), record);
+  appearance = setActivePet(appearance, id);
+  petConfig.set('appearance', appearance);
+
+  return {
+    canceled: false,
+    success: true,
+    configured: true,
+    pet: record,
+    manifest,
+    folderPath: petDir,
+    prompt: generated.prompt,
+    model: generated.model,
+    size: generated.size,
+    state: broadcastAppearanceChanged(),
+    message: 'Pet generated and activated.'
+  };
+});
+
 ipcMain.handle('appearance-imagegen-status', async () => ({
   available: true,
   message: 'Create a $imagegen request package, generate spritesheet.webp with Codex, then import that package.'
 }));
+
+ipcMain.handle('appearance-generation-status', async () => {
+  const config = getImageGenerationConfig();
+  return {
+    available: config.configured,
+    provider: config.provider,
+    model: config.model,
+    endpoint: config.endpoint,
+    size: config.size,
+    quality: config.quality,
+    message: config.configured
+      ? `Automatic generation ready with ${config.model}.`
+      : 'Set OPENAI_API_KEY or PETCLAW_IMAGE_API_KEY to enable automatic pet generation.'
+  };
+});
 
 // 三击查看历史消息
 ipcMain.handle('show-history', async () => {

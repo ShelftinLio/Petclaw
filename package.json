@@ -134,10 +134,12 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/dist/"
+      "/dist/",
+      "/.worktrees/"
     ],
     "modulePathIgnorePatterns": [
-      "/dist/"
+      "/dist/",
+      "/.worktrees/"
     ],
     "collectCoverageFrom": [
       "*.js",
