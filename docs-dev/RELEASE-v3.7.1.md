@@ -1,4 +1,4 @@
-# KKClaw v3.7.1 — Hermes Readiness Patch
+# Petclaw v3.7.1 — Hermes Readiness Patch
 
 > Release date: 2026-04-14
 

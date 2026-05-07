@@ -12,38 +12,38 @@ const pathResolver = require('../utils/path-resolver');
 
 function formatHelp() {
   return [
-    `KKClaw ${pkg.version}`,
+    `Petclaw ${pkg.version}`,
     '',
     'Usage:',
-    '  kkclaw gateway',
-    '  kkclaw gateway start',
-    '  kkclaw gateway open',
-    '  kkclaw gateway status [--json]',
-    '  kkclaw gateway logs [--tail <n>] [--err]',
-    '  kkclaw gateway stop',
-    '  kkclaw gateway restart',
-    '  kkclaw doctor [--json]',
-    '  kkclaw status',
-    '  kkclaw dashboard [backend-dashboard-args]',
-    '  kkclaw console',
-    '  kkclaw --version',
+    '  petclaw gateway',
+    '  petclaw gateway start',
+    '  petclaw gateway open',
+    '  petclaw gateway status [--json]',
+    '  petclaw gateway logs [--tail <n>] [--err]',
+    '  petclaw gateway stop',
+    '  petclaw gateway restart',
+    '  petclaw doctor [--json]',
+    '  petclaw status',
+    '  petclaw dashboard [backend-dashboard-args]',
+    '  petclaw console',
+    '  petclaw --version',
     '',
     'Commands:',
-    '  gateway        Launch the animated KKClaw terminal and choose a compatible backend (OpenClaw/Hermes/Auto)',
-    '  doctor         Run a KKClaw-oriented health check',
-    '  status         Alias for kkclaw gateway status',
+    '  gateway        Launch the animated Petclaw terminal and choose a compatible backend (OpenClaw/Hermes/Auto)',
+    '  doctor         Run a Petclaw-oriented health check',
+    '  status         Alias for petclaw gateway status',
     '  dashboard      Open the active backend dashboard or API endpoint',
-    '  console        Alias for kkclaw gateway',
+    '  console        Alias for petclaw gateway',
     '',
     'Examples:',
-    '  kkclaw gateway',
-    '  kkclaw gateway status',
-    '  kkclaw gateway logs --tail 80',
-    '  kkclaw doctor --json',
-    '  kkclaw dashboard --no-open',
+    '  petclaw gateway',
+    '  petclaw gateway status',
+    '  petclaw gateway logs --tail 80',
+    '  petclaw doctor --json',
+    '  petclaw dashboard --no-open',
     '',
     'Compatibility:',
-    '  Set KKCLAW_COMPAT_MODE=hermes to drive Hermes as the active compatible backend.',
+    '  Set PETCLAW_COMPAT_MODE=hermes to drive Hermes as the active compatible backend.',
     '  You can set {"compatMode":"openclaw|hermes|auto"} in pet-config.json.',
     '  The terminal launcher also remembers your last selected backend.',
   ].join('\n');
@@ -198,16 +198,16 @@ function dedupeListeners(listeners) {
   return [...new Map(listeners.map((entry) => [`${entry.command}:${entry.pid}`, entry])).values()];
 }
 
-function isKkclawProcessCommand(command) {
+function isPetclawProcessCommand(command) {
   return (
     command.includes('/node_modules/.bin/electron .') ||
     command.includes('/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron .') ||
-    command.includes('KKClaw Desktop Pet') ||
-    (command.includes('Electron Helper') && command.includes('openclaw-kkclaw'))
+    command.includes('Petclaw Desktop Pet') ||
+    (command.includes('Electron Helper') && command.includes('openclaw-petclaw'))
   );
 }
 
-function listKkclawProcesses() {
+function listPetclawProcesses() {
   if (process.platform === 'win32') {
     return [];
   }
@@ -237,7 +237,7 @@ function listKkclawProcesses() {
         if (entry.pid === process.pid) {
           return false;
         }
-        return isKkclawProcessCommand(entry.command);
+        return isPetclawProcessCommand(entry.command);
       });
   } catch {
     return [];
@@ -253,17 +253,17 @@ async function gatherStatus() {
   ]);
 
   const listeners = listPortListeners(gateway.port);
-  const kkclawProcesses = listKkclawProcesses();
-  const primaryKkclawPid = kkclawProcesses[0]?.pid ?? null;
-  const managedByKkclaw =
+  const petclawProcesses = listPetclawProcesses();
+  const primaryPetclawPid = petclawProcesses[0]?.pid ?? null;
+  const managedByPetclaw =
     listeners.length === 0
       ? null
-      : listeners.some((listener) => kkclawProcesses.some((entry) => entry.pid === listener.pid));
+      : listeners.some((listener) => petclawProcesses.some((entry) => entry.pid === listener.pid));
   const externalHermesService =
     compat.active.mode === 'hermes'
       && Boolean(gatewayHttp.ok)
       && listeners.length > 0
-      && managedByKkclaw === false;
+      && managedByPetclaw === false;
 
   return {
     ok: Boolean(compat.active.installed),
@@ -286,13 +286,13 @@ async function gatherStatus() {
       ...gateway,
       http: gatewayHttp,
       listeners,
-      managedByKkclaw,
+      managedByPetclaw,
       externalHermesService,
     },
-    kkclaw: {
-      running: kkclawProcesses.length > 0,
-      processes: kkclawProcesses,
-      primaryPid: primaryKkclawPid,
+    petclaw: {
+      running: petclawProcesses.length > 0,
+      processes: petclawProcesses,
+      primaryPid: primaryPetclawPid,
     },
   };
 }
@@ -310,12 +310,12 @@ function printStatus(status) {
   const listenerLine = status.gateway.listeners.length > 0
     ? status.gateway.listeners.map((entry) => `${entry.command || 'pid'}:${entry.pid}`).join(', ')
     : 'none';
-  const processLine = status.kkclaw.running
-    ? summarizeProcessList(status.kkclaw.processes)
+  const processLine = status.petclaw.running
+    ? summarizeProcessList(status.petclaw.processes)
     : 'none';
 
-  console.log('KKClaw Gateway Status');
-  console.log(`- KKClaw: ${status.version}`);
+  console.log('Petclaw Gateway Status');
+  console.log(`- Petclaw: ${status.version}`);
   console.log(`- Project: ${status.projectRoot}`);
   console.log(`- Compat backend: ${backendLine}`);
   console.log(`- Active CLI: ${status.backend.cliPath || 'missing'}`);
@@ -325,15 +325,15 @@ function printStatus(status) {
   console.log(`- Listeners: ${listenerLine}`);
   console.log(`- Dashboard: ${status.gateway.dashboardUrl}`);
   console.log(`- Logs: ${status.gateway.logs.out}`);
-  console.log(`- KKClaw processes: ${processLine}`);
+  console.log(`- Petclaw processes: ${processLine}`);
   if (status.backend.mode === 'hermes' && !status.backend.apiServerEnabled) {
-    console.log('- Warning: Hermes gateway is available, but the chat API server is disabled. Enable `API_SERVER_ENABLED=true` for full KKClaw chat compatibility.');
+    console.log('- Warning: Hermes gateway is available, but the chat API server is disabled. Enable `API_SERVER_ENABLED=true` for full Petclaw chat compatibility.');
   }
   if (status.gateway.externalHermesService) {
-    console.log('- Info: Hermes gateway is already running as an external service and KKClaw will reuse it.');
-  } else if (status.gateway.managedByKkclaw === false) {
-    console.log('- Warning: the gateway port is active, but the listener does not look like a KKClaw-managed process.');
-  } else if (status.gateway.managedByKkclaw === null) {
+    console.log('- Info: Hermes gateway is already running as an external service and Petclaw will reuse it.');
+  } else if (status.gateway.managedByPetclaw === false) {
+    console.log('- Warning: the gateway port is active, but the listener does not look like a Petclaw-managed process.');
+  } else if (status.gateway.managedByPetclaw === null) {
     console.log('- Warning: no gateway listener is active on the configured port.');
   }
 }
@@ -347,7 +347,7 @@ function summarizeProcessList(processes) {
     return (
       entry.command.includes('/Electron.app/Contents/MacOS/Electron .') ||
       entry.command.includes('/node_modules/.bin/electron .') ||
-      entry.command.includes('KKClaw Desktop Pet')
+      entry.command.includes('Petclaw Desktop Pet')
     );
   });
 
@@ -392,20 +392,20 @@ function printDoctor(status) {
       ok: !status.backend.apiServerRequired || Boolean(status.backend.apiServerEnabled),
       detail: status.backend.apiServerRequired
         ? status.backend.apiServerEnabled
-          ? 'enabled for KKClaw chat requests'
+          ? 'enabled for Petclaw chat requests'
           : 'disabled; set API_SERVER_ENABLED=true to expose /v1/chat/completions'
         : 'not required for OpenClaw mode',
     },
     {
       name: 'Gateway ownership',
-      ok: status.gateway.externalHermesService || status.gateway.managedByKkclaw !== false,
+      ok: status.gateway.externalHermesService || status.gateway.managedByPetclaw !== false,
       detail: status.gateway.externalHermesService
         ? 'Hermes gateway is already running as an external service and can be reused'
-        : status.gateway.managedByKkclaw === null
+        : status.gateway.managedByPetclaw === null
         ? 'no active listener on the configured gateway port'
-        : status.gateway.managedByKkclaw
-        ? 'listener matches the running KKClaw app'
-        : 'port is occupied by a process outside the current KKClaw runtime',
+        : status.gateway.managedByPetclaw
+        ? 'listener matches the running Petclaw app'
+        : 'port is occupied by a process outside the current Petclaw runtime',
     },
     {
       name: 'Dashboard URL',
@@ -413,30 +413,30 @@ function printDoctor(status) {
       detail: status.gateway.dashboardUrl,
     },
     {
-      name: 'KKClaw runtime',
-      ok: Boolean(status.kkclaw.running),
-      detail: status.kkclaw.running
-        ? `running (${summarizeProcessList(status.kkclaw.processes)})`
+      name: 'Petclaw runtime',
+      ok: Boolean(status.petclaw.running),
+      detail: status.petclaw.running
+        ? `running (${summarizeProcessList(status.petclaw.processes)})`
         : 'not running',
     },
   ];
 
-  console.log('KKClaw Doctor');
+  console.log('Petclaw Doctor');
   for (const check of checks) {
     console.log(`- ${check.ok ? 'OK' : 'FAIL'} ${check.name}: ${check.detail}`);
   }
 
   if (!status.gateway.http.ok) {
-    console.log('- Hint: run `kkclaw gateway` to launch the animated KKClaw console.');
+    console.log('- Hint: run `petclaw gateway` to launch the animated Petclaw console.');
   }
   if (status.backend.mode === 'hermes' && !status.backend.apiServerEnabled) {
-    console.log('- Hint: Hermes compat mode needs `API_SERVER_ENABLED=true` before KKClaw can send chat requests through `/v1/chat/completions`.');
+    console.log('- Hint: Hermes compat mode needs `API_SERVER_ENABLED=true` before Petclaw can send chat requests through `/v1/chat/completions`.');
   }
   if (status.gateway.externalHermesService) {
-    console.log('- Hint: Hermes service reuse is active; KKClaw does not need to relaunch the gateway.');
-  } else if (status.gateway.managedByKkclaw === false) {
-    console.log('- Hint: another process owns the gateway port. Use `kkclaw gateway stop` before relaunching KKClaw.');
-  } else if (status.gateway.managedByKkclaw === null) {
+    console.log('- Hint: Hermes service reuse is active; Petclaw does not need to relaunch the gateway.');
+  } else if (status.gateway.managedByPetclaw === false) {
+    console.log('- Hint: another process owns the gateway port. Use `petclaw gateway stop` before relaunching Petclaw.');
+  } else if (status.gateway.managedByPetclaw === null) {
     console.log(`- Hint: no gateway listener is active yet. Launch the animated console or start ${status.backend.label} separately.`);
   }
 }
@@ -527,7 +527,7 @@ async function stopGatewayProcesses() {
   const initialStatus = await gatherStatus();
   const shouldPreserveExternalHermes =
     initialStatus.backend.mode === 'hermes'
-    && initialStatus.gateway.managedByKkclaw === false;
+    && initialStatus.gateway.managedByPetclaw === false;
 
   if (!shouldPreserveExternalHermes && (initialStatus.gateway.http.ok || initialStatus.gateway.listeners.length > 0 || initialStatus.backend.mode === 'hermes')) {
     try {
@@ -544,14 +544,14 @@ async function stopGatewayProcesses() {
   const status = await gatherStatus();
   const pids = new Set();
 
-  for (const processInfo of status.kkclaw.processes) {
-    if (isKkclawProcessCommand(processInfo.command)) {
+  for (const processInfo of status.petclaw.processes) {
+    if (isPetclawProcessCommand(processInfo.command)) {
       pids.add(processInfo.pid);
     }
   }
   const preserveExternalHermesAfterStop =
     status.backend.mode === 'hermes'
-    && status.gateway.managedByKkclaw === false;
+    && status.gateway.managedByPetclaw === false;
 
   if (!preserveExternalHermesAfterStop) {
     for (const listener of status.gateway.listeners) {
@@ -560,12 +560,12 @@ async function stopGatewayProcesses() {
   }
 
   if (pids.size === 0 && preserveExternalHermesAfterStop) {
-    console.log('Hermes gateway is running separately; KKClaw left the external service untouched.');
+    console.log('Hermes gateway is running separately; Petclaw left the external service untouched.');
     return 0;
   }
 
   if (pids.size === 0 && !status.gateway.http.ok) {
-    console.log('KKClaw gateway is not running.');
+    console.log('Petclaw gateway is not running.');
     return 0;
   }
 
@@ -578,9 +578,9 @@ async function stopGatewayProcesses() {
   const remaining = await gatherStatus();
   const preserveRemainingExternalHermes =
     remaining.backend.mode === 'hermes'
-    && remaining.gateway.managedByKkclaw === false;
-  if (remaining.kkclaw.running || (!preserveRemainingExternalHermes && remaining.gateway.listeners.length > 0)) {
-    for (const processInfo of remaining.kkclaw.processes) {
+    && remaining.gateway.managedByPetclaw === false;
+  if (remaining.petclaw.running || (!preserveRemainingExternalHermes && remaining.gateway.listeners.length > 0)) {
+    for (const processInfo of remaining.petclaw.processes) {
       try {
         process.kill(processInfo.pid, 'SIGKILL');
       } catch (_) {}
@@ -598,9 +598,9 @@ async function stopGatewayProcesses() {
   const finalStatus = await gatherStatus();
   const preserveFinalExternalHermes =
     finalStatus.backend.mode === 'hermes'
-    && finalStatus.gateway.managedByKkclaw === false;
-  if (preserveFinalExternalHermes && !finalStatus.kkclaw.running) {
-    console.log('Stopped KKClaw processes and left the external Hermes gateway running.');
+    && finalStatus.gateway.managedByPetclaw === false;
+  if (preserveFinalExternalHermes && !finalStatus.petclaw.running) {
+    console.log('Stopped Petclaw processes and left the external Hermes gateway running.');
     return 0;
   }
   if (finalStatus.gateway.http.ok || finalStatus.gateway.listeners.length > 0) {
@@ -608,7 +608,7 @@ async function stopGatewayProcesses() {
     return 1;
   }
 
-  console.log('Stopped KKClaw gateway processes.');
+  console.log('Stopped Petclaw gateway processes.');
   return 0;
 }
 
@@ -623,10 +623,10 @@ async function run(command) {
       console.log(formatHelp());
       return command.error ? 1 : 0;
     case 'version':
-      console.log(`KKClaw ${pkg.version}`);
+      console.log(`Petclaw ${pkg.version}`);
       return 0;
     case 'gateway-start':
-      console.log('Launching KKClaw animated console...');
+      console.log('Launching Petclaw animated console...');
       await openTerminal();
       return 0;
     case 'gateway-open': {
@@ -675,7 +675,7 @@ async function run(command) {
       if (stopCode !== 0) {
         return stopCode;
       }
-      console.log('Restarting KKClaw animated console...');
+      console.log('Restarting Petclaw animated console...');
       await openTerminal();
       return 0;
     }

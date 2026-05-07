@@ -48,7 +48,7 @@
 
 大家好！分享一个新项目：企业级7×24桌面智能助手
 
-**GitHub:** https://github.com/kk43994/KKClaw-Desktop-Pet
+**GitHub:** https://github.com/kk43994/Petclaw-Desktop-Pet
 
 ## 核心功能
 🛡️ 企业级稳定性 - 全局错误处理+自动重启
@@ -58,13 +58,13 @@
 
 ## 快速开始
 \`\`\`bash
-git clone https://github.com/kk43994/KKClaw-Desktop-Pet.git
-cd KKClaw-Desktop-Pet
+git clone https://github.com/kk43994/Petclaw-Desktop-Pet.git
+cd Petclaw-Desktop-Pet
 npm install && pip install edge-tts
 npm start
 \`\`\`
 
-完整文档和截图: https://github.com/kk43994/KKClaw-Desktop-Pet#readme
+完整文档和截图: https://github.com/kk43994/Petclaw-Desktop-Pet#readme
 
 欢迎试用！⭐
 ```

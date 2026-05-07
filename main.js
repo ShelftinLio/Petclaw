@@ -81,12 +81,14 @@ const { printHero, printReady } = require('./startup-banner'); // 🦞 启动动
 const {
   COW_CAT_ID,
   normalizeAppearanceConfig,
-  createBuiltInCowCatManifest,
+  createBuiltInPetManifests,
+  createBuiltInPetRecord,
   createImagePetManifest,
   createImagegenPetRequest,
   createCustomPetRecord,
   createPetId,
   inferRendererFromFiles,
+  isBuiltInPetId,
   removeCustomPet,
   setActivePet,
   upsertCustomPet,
@@ -106,9 +108,16 @@ const {
   PetProgressStore,
   normalizeProgress,
   applyFinishedSession,
+  settleFinishedSession,
   unlockAbility: unlockPetAbility,
+  learnSkillFromSeed,
   listSkillCards
 } = require('./pet-progress');
+const {
+  BOND_ITEMS,
+  applyAffinityEvent,
+  getAffinityTier
+} = require('./pet-affinity');
 const {
   isSkillSeedEligible,
   createSkillSeed
@@ -272,6 +281,14 @@ let screenshotSystem; // 🔥 新增
 let larkUploader; // 🔥 新增
 let serviceManager; // 🔧 服务管理
 let cacheManager; // 🧹 缓存管理
+const LYRICS_OFFSET_X = -70;
+const LYRICS_OFFSET_Y = 188;
+const BASIC_CHAT_SYSTEM_PROMPT = [
+  'You are a small desktop pet companion.',
+  'Talk warmly and briefly with the user.',
+  'Answer directly from the conversation context only.',
+  'Do not execute OpenClaw tools, inspect files, run commands, or claim to perform workspace actions.'
+].join(' ');
 
 // 安全发送歌词到歌词窗口
 function sendLyric(data) {
@@ -281,6 +298,39 @@ function sendLyric(data) {
     } catch (err) {
       console.warn('⚠️ 歌词发送失败:', err.message);
     }
+  }
+}
+
+function setLyricsWindowPosition(petX, petY) {
+  if (!lyricsWindow || lyricsWindow.isDestroyed()) return;
+  lyricsWindow.setPosition(petX + LYRICS_OFFSET_X, petY + LYRICS_OFFSET_Y);
+}
+
+function publishAgentResponse(content, options = {}) {
+  const rawContent = String(content || '');
+  const displayContent = rawContent.replace(/<#[\d.]+#>/g, '');
+  if (!displayContent) return;
+
+  const emotion = options.emotion || 'happy';
+  const voiceEmotion = options.voiceEmotion || options.emotion || 'calm';
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('agent-response', {
+      content: displayContent,
+      emotion,
+      sender: options.sender || '小K',
+      mode: options.mode || 'openclaw'
+    });
+  }
+
+  if (voiceSystem) {
+    const maxLength = 800;
+    const voiceText = rawContent.substring(0, maxLength);
+    voiceSystem.speak(voiceText, { emotion: voiceEmotion });
+  }
+
+  if (workLogger) {
+    workLogger.log('message', `我回复: ${displayContent}`);
   }
 }
 let restartHandler; // 🔄 自动重启处理器
@@ -374,7 +424,7 @@ if (process.env.RESTARTED_BY === 'auto-restart') {
 async function createWindow() {
   const pkg = require('./package.json');
   const { colorLog } = require('./utils/color-log');
-  colorLog(`🦞 KKClaw v${pkg.version} | PID ${process.pid} | ${__dirname}`);
+  colorLog(`🦞 Petclaw v${pkg.version} | PID ${process.pid} | ${__dirname}`);
 
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   
@@ -658,31 +708,10 @@ async function createWindow() {
   
   desktopNotifier.on('agent-response', (payload) => {
     console.log('🤖 AI回复:', payload);
-    if (mainWindow) {
-      // 🧹 清理 TTS 停顿标记（<#0.3#> 等），只给 MiniMax 用，不显示
-      const displayContent = (payload.content || '').replace(/<#[\d.]+#>/g, '');
-      
-      mainWindow.webContents.send('agent-response', {
-        content: displayContent,
-        emotion: payload.emotion || 'happy'
-      });
-      // 歌词窗口显示（等语音播完后消失）
-      const estimatedDuration = Math.max(6000, displayContent.length * 180 + 2000);
-      sendLyric({
-        text: displayContent,
-        type: 'agent',
-        sender: '小K',
-        duration: estimatedDuration
-      });
-      // 直接在这里触发语音,完整播放
-      // ⚠️ 语音用原始内容（保留 <#0.3#> 停顿标记给 MiniMax）
-      if (payload.content && voiceSystem) {
-        const maxLength = 800;
-        const voiceText = payload.content.substring(0, maxLength);
-        voiceSystem.speak(voiceText, { emotion: payload.emotion || 'calm' });
-      }
-      workLogger.log('message', `我回复: ${displayContent}`);
-    }
+    publishAgentResponse(payload.content, {
+      emotion: payload.emotion || 'happy',
+      voiceEmotion: payload.emotion || 'calm'
+    });
   });
   
   // 监听外部命令：打开模型管理面板
@@ -741,6 +770,8 @@ async function createWindow() {
     mainWindow.webContents.insertCSS(`
       html, body, * { overflow: hidden !important; scrollbar-width: none !important; }
       ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+      .reply-bubble.expanded .reply-bubble-text,
+      .conversation-panel { overflow-y: auto !important; }
     `);
   });
 
@@ -749,8 +780,8 @@ async function createWindow() {
   lyricsWindow = new BrowserWindow({
     width: 400,
     height: 100,
-    x: petPos[0] - 100,
-    y: petPos[1] - 110,
+    x: petPos[0] + LYRICS_OFFSET_X,
+    y: petPos[1] + LYRICS_OFFSET_Y,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -1105,7 +1136,7 @@ async function createWindow() {
       }
     },
     {
-      label: '🧙 KKClaw 新手引导',
+      label: '🧙 Petclaw 新手引导',
       click: () => { reopenSetupWizard(); }
     },
     { type: 'separator' },
@@ -1452,7 +1483,7 @@ function rebuildTrayMenu() {
       click: () => {}
     },
     {
-      label: '🧙 KKClaw 新手引导',
+      label: '🧙 Petclaw 新手引导',
       click: () => { reopenSetupWizard(); }
     },
     { type: 'separator' },
@@ -1490,7 +1521,7 @@ function openModelSettings() {
   modelSettingsWindow = new BrowserWindow({
     width: 520,
     height: 640,
-    title: 'KKClaw Switch',
+    title: 'Petclaw Switch',
     frame: false,
     resizable: true,
     minimizable: true,
@@ -1590,12 +1621,28 @@ function normalizePetGameTab(tab) {
   return ['focus', 'abilities', 'skills'].includes(tab) ? tab : 'focus';
 }
 
+function loadPetGameWindowTab(targetTab) {
+  if (!petGameWindow || petGameWindow.isDestroyed()) return;
+
+  petGameWindow.webContents.once('did-finish-load', () => {
+    if (petGameWindow && !petGameWindow.isDestroyed()) {
+      petGameWindow.webContents.send('pet-game-tab', targetTab);
+    }
+  });
+  petGameWindow.webContents.loadFile(path.join(__dirname, 'pet-game-window.html'), {
+    query: {
+      tab: targetTab,
+      t: String(Date.now())
+    }
+  });
+}
+
 function openPetGameWindow(tab = 'focus') {
   const targetTab = normalizePetGameTab(tab);
   if (petGameWindow && !petGameWindow.isDestroyed()) {
     petGameWindow.show();
     petGameWindow.focus();
-    petGameWindow.webContents.send('pet-game-tab', targetTab);
+    loadPetGameWindowTab(targetTab);
     return;
   }
 
@@ -1614,12 +1661,13 @@ function openPetGameWindow(tab = 'focus') {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      backgroundThrottling: false,
       preload: path.join(__dirname, 'preload.js')
     }
   });
 
   petGameWindow.setMenuBarVisibility(false);
-  petGameWindow.loadFile('pet-game-window.html', { query: { tab: targetTab } });
+  loadPetGameWindowTab(targetTab);
   petGameWindow.on('closed', () => {
     petGameWindow = null;
   });
@@ -1665,7 +1713,7 @@ function reopenSetupWizard() {
   setupWizardWindow = new BrowserWindow({
     width: 700,
     height: 550,
-    title: 'KKClaw 新手引导',
+    title: 'Petclaw 新手引导',
     resizable: false,
     minimizable: true,
     maximizable: false,
@@ -1718,9 +1766,7 @@ ipcMain.on('drag-pet', (event, { x, y, offsetX, offsetY }) => {
   const { x: newX, y: newY } = clampToScreen(rawX, rawY, bounds.width, bounds.height);
   mainWindow.setPosition(newX, newY);
   // 歌词窗口跟随（在球体上方）
-  if (lyricsWindow) {
-    lyricsWindow.setPosition(newX - 100, newY - 110);
-  }
+  setLyricsWindowPosition(newX, newY);
   petConfig.set('position', { x: newX, y: newY });
 });
 
@@ -1731,9 +1777,7 @@ ipcMain.handle('roam-pet', async (event, { dx = 0, dy = 0 } = {}) => {
   const rawY = bounds.y + Number(dy || 0);
   const next = clampToScreen(rawX, rawY, bounds.width, bounds.height);
   mainWindow.setPosition(next.x, next.y);
-  if (lyricsWindow && !lyricsWindow.isDestroyed()) {
-    lyricsWindow.setPosition(next.x - 100, next.y - 110);
-  }
+  setLyricsWindowPosition(next.x, next.y);
   petConfig.set('position', { x: next.x, y: next.y });
   return {
     success: true,
@@ -1762,19 +1806,14 @@ function petAssetUrl(relativePath) {
 
 function getAppearanceState() {
   const appearance = normalizeAppearanceConfig(petConfig.get('appearance'));
-  const cowCat = createBuiltInCowCatManifest();
-  const builtInCowCat = {
-    id: COW_CAT_ID,
-    name: cowCat.name,
-    source: cowCat.source,
-    renderer: cowCat.renderer,
-    assetDir: 'assets/pets/cow-cat',
-    manifestPath: 'assets/pets/cow-cat/pet.json',
-    createdAt: '',
-  };
+  const builtInManifests = createBuiltInPetManifests();
+  const builtInManifestById = new Map(builtInManifests.map(manifest => [manifest.id, manifest]));
+  const builtInPets = builtInManifests.map(createBuiltInPetRecord);
+  const builtInPetById = new Map(builtInPets.map(pet => [pet.id, pet]));
+  const cowCat = builtInManifestById.get(COW_CAT_ID);
   const readPetManifest = (pet) => {
     if (!pet) return null;
-    if (pet.id === COW_CAT_ID) return cowCat;
+    if (builtInManifestById.has(pet.id)) return builtInManifestById.get(pet.id);
     try {
       return JSON.parse(fs.readFileSync(path.join(__dirname, pet.manifestPath), 'utf-8'));
     } catch (err) {
@@ -1790,19 +1829,16 @@ function getAppearanceState() {
     if (idle && idle.image) return petAssetUrl(path.posix.join(pet.assetDir, idle.image));
     return '';
   };
-  const activePet = appearance.activePetId === COW_CAT_ID
-    ? builtInCowCat
-    : appearance.customPets.find(pet => pet.id === appearance.activePetId) || null;
+  const activePet = builtInPetById.get(appearance.activePetId) ||
+    appearance.customPets.find(pet => pet.id === appearance.activePetId) ||
+    null;
   let activeManifest = null;
   let activeImageUrl = '';
-  if (activePet && activePet.id === COW_CAT_ID) {
-    activeManifest = cowCat;
-    activeImageUrl = resolvePetImageUrl(activePet, activeManifest);
-  } else if (activePet) {
+  if (activePet) {
     activeManifest = readPetManifest(activePet);
     activeImageUrl = resolvePetImageUrl(activePet, activeManifest);
   }
-  const petCatalog = [builtInCowCat, ...appearance.customPets].map((pet) => {
+  const petCatalog = [...builtInPets, ...appearance.customPets].map((pet) => {
     const manifest = readPetManifest(pet);
     return {
       ...pet,
@@ -1818,7 +1854,7 @@ function getAppearanceState() {
     activeManifest,
     activeImageUrl,
     cowCat,
-    builtInPets: [builtInCowCat],
+    builtInPets,
     petCatalog
   };
 }
@@ -1881,8 +1917,8 @@ ipcMain.handle('appearance-reset', async () => {
 });
 
 ipcMain.handle('appearance-delete-pet', async (event, petId) => {
-  if (!petId || petId === COW_CAT_ID) {
-    return { success: false, error: 'The built-in cow-cat cannot be deleted.' };
+  if (!petId || isBuiltInPetId(petId)) {
+    return { success: false, error: 'Built-in pets cannot be deleted.' };
   }
   const appearance = normalizeAppearanceConfig(petConfig.get('appearance'));
   const target = appearance.customPets.find(pet => pet.id === petId);
@@ -2289,6 +2325,8 @@ function decorateProgress(progress) {
     ...normalized,
     abilityTree: getAbilityTree(normalized),
     skillCards: listSkillCards(normalized),
+    affinityTier: getAffinityTier(normalized.affinityXp),
+    bondItemCatalog: BOND_ITEMS,
   };
 }
 
@@ -2357,11 +2395,31 @@ ipcMain.handle('focus-adventure-finish', async (event, payload = {}) => {
     summary: payload.summary,
     skillSeedEligible: seedCheck.eligible,
   });
-  const next = await petProgressStore.save(applyFinishedSession(progress, finishedSession));
+  const settled = settleFinishedSession(progress, finishedSession);
+  const next = await petProgressStore.save(settled.progress);
   return {
     success: true,
     session: finishedSession,
     seedCheck,
+    affinityEvents: settled.affinityEvents,
+    progress: broadcastPetProgressChanged(next),
+  };
+});
+
+ipcMain.handle('pet-affinity-record', async (event, payload = {}) => {
+  const eventType = typeof payload === 'string' ? payload : payload.eventType;
+  const progress = await ensurePetProgress();
+  const result = applyAffinityEvent(progress, eventType);
+  const next = await petProgressStore.save(result.progress);
+  return {
+    success: !result.error,
+    eventType,
+    appliedXp: result.appliedXp,
+    capped: result.capped,
+    levelChanged: result.levelChanged,
+    unlockedBondItems: result.unlockedBondItems,
+    reaction: result.reaction,
+    error: result.error || '',
     progress: broadcastPetProgressChanged(next),
   };
 });
@@ -2401,6 +2459,19 @@ ipcMain.handle('pet-skill-seed-create', async (event, payload = {}) => {
   return { success: true, seed, progress: broadcastPetProgressChanged(next) };
 });
 
+ipcMain.handle('pet-skill-learn', async (event, payload = {}) => {
+  try {
+    const progress = await ensurePetProgress();
+    const seedId = typeof payload === 'string' ? payload : payload.seedId;
+    const next = await petProgressStore.save(learnSkillFromSeed(progress, seedId));
+    const skill = next.skills.find(item => item.sourceSeedId === seedId) || null;
+    return { success: true, skill, progress: broadcastPetProgressChanged(next) };
+  } catch (err) {
+    const progress = await ensurePetProgress();
+    return { success: false, error: err.message, progress: decorateProgress(progress) };
+  }
+});
+
 ipcMain.handle('pet-skill-card-list', async () => {
   const progress = await ensurePetProgress();
   return { success: true, skillCards: listSkillCards(progress), progress: decorateProgress(progress) };
@@ -2408,26 +2479,146 @@ ipcMain.handle('pet-skill-card-list', async () => {
 
 ipcMain.handle('show-history', async () => {
   try {
-    const logs = workLogger.getRecentMessages ? workLogger.getRecentMessages(20) : [];
-    // 在歌词窗口依次显示最近消息
-    if (lyricsReady && logs.length > 0) {
-      const recent = logs.slice(-5); // 最近5条
-      for (let i = 0; i < recent.length; i++) {
-        setTimeout(() => {
-          sendLyric({
-            text: recent[i].content || recent[i].message || '',
-            type: recent[i].sender === '小K' ? 'agent' : 'user',
-            sender: recent[i].sender || '',
-            duration: 8000
-          });
-        }, i * 2000);
-      }
-    }
-    return { success: true };
+    const logs = workLogger.getRecentMessages ? workLogger.getRecentMessages(Number.MAX_SAFE_INTEGER) : [];
+    const recent = logs.slice(0, 5); // 最新5条预览保留给渲染层按需使用
+    return { success: true, messages: logs, recent };
   } catch(e) {
     return { success: false, error: e.message };
   }
 });
+
+function getCurrentDirectChatTarget() {
+  if (!modelSwitcher || !modelSwitcher.getCurrent()) {
+    return { error: '请先在模型面板配置并选择一个模型。' };
+  }
+  const model = modelSwitcher.getCurrent();
+  const provider = modelSwitcher.providers?.[model.provider] || {};
+  if (!provider.baseUrl && !model.providerBaseUrl) {
+    return { error: '当前模型缺少直连 API 地址。' };
+  }
+  if (!provider.apiKey) {
+    return { error: '当前模型缺少 API Key，请在模型面板配置。' };
+  }
+  return {
+    model,
+    provider,
+    api: model.api || provider.api || 'openai-completions',
+    baseUrl: model.providerBaseUrl || provider.baseUrl,
+    apiKey: provider.apiKey,
+  };
+}
+
+function joinDirectChatUrl(baseUrl, endpoint) {
+  const base = String(baseUrl || '').replace(/\/+$/, '');
+  if (!base) return endpoint;
+  if (base.endsWith(endpoint)) return base;
+  return `${base}${endpoint}`;
+}
+
+function parseOpenAIResponse(data) {
+  if (data?.output_text) return data.output_text;
+  const outputText = data?.output
+    ?.flatMap(item => item?.content || [])
+    ?.map(part => part?.text || part?.content || '')
+    ?.filter(Boolean)
+    ?.join('\n');
+  return outputText || data?.choices?.[0]?.message?.content || '';
+}
+
+async function sendDirectChatMessage(message) {
+  const target = getCurrentDirectChatTarget();
+  if (target.error) return { success: false, error: target.error, mode: 'basic' };
+
+  const { model, api, baseUrl, apiKey } = target;
+  const timeoutSignal = AbortSignal.timeout ? AbortSignal.timeout(45000) : undefined;
+
+  try {
+    if (api === 'anthropic-messages') {
+      const response = await fetch(joinDirectChatUrl(baseUrl, '/v1/messages'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: model.modelId,
+          system: BASIC_CHAT_SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: message }],
+          max_tokens: Math.min(model.maxTokens || 4096, 4096),
+        }),
+        signal: timeoutSignal,
+      });
+      if (!response.ok) return { success: false, error: `普通 AI 请求失败 (${response.status})`, mode: 'basic' };
+      const data = await response.json();
+      const content = (data.content || []).map(part => part.text || '').join('\n').trim();
+      return content ? { success: true, content, mode: 'basic' } : { success: false, error: '普通 AI 没有返回内容。', mode: 'basic' };
+    }
+
+    if (api === 'openai-responses') {
+      const response = await fetch(joinDirectChatUrl(baseUrl, '/responses'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model.modelId,
+          instructions: BASIC_CHAT_SYSTEM_PROMPT,
+          input: message,
+        }),
+        signal: timeoutSignal,
+      });
+      if (!response.ok) return { success: false, error: `普通 AI 请求失败 (${response.status})`, mode: 'basic' };
+      const data = await response.json();
+      const content = parseOpenAIResponse(data).trim();
+      return content ? { success: true, content, mode: 'basic' } : { success: false, error: '普通 AI 没有返回内容。', mode: 'basic' };
+    }
+
+    if (api !== 'openai-completions') {
+      return { success: false, error: `当前模型协议 ${api} 暂不支持普通直连对话。`, mode: 'basic' };
+    }
+
+    const response = await fetch(joinDirectChatUrl(baseUrl, '/chat/completions'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model.modelId,
+        messages: [
+          { role: 'system', content: BASIC_CHAT_SYSTEM_PROMPT },
+          { role: 'user', content: message },
+        ],
+        stream: false,
+      }),
+      signal: timeoutSignal,
+    });
+    if (!response.ok) return { success: false, error: `普通 AI 请求失败 (${response.status})`, mode: 'basic' };
+    const data = await response.json();
+    const content = parseOpenAIResponse(data).trim();
+    return content ? { success: true, content, mode: 'basic' } : { success: false, error: '普通 AI 没有返回内容。', mode: 'basic' };
+  } catch (err) {
+    return { success: false, error: `普通 AI 连接失败: ${err.message}`, mode: 'basic' };
+  }
+}
+
+async function handleDirectChatSend(event, message) {
+  workLogger.logMessage('用户', message);
+  const response = await sendDirectChatMessage(message);
+  if (!response.success) {
+    workLogger.logError(response.error);
+    return response;
+  }
+  publishAgentResponse(response.content, {
+    emotion: 'calm',
+    voiceEmotion: 'calm',
+    mode: 'basic',
+    sender: 'Basic AI'
+  });
+  return response;
+}
 
 // Gateway 消息处理（串行队列 + 异常重试，避免流事件乱序）
 let gatewaySendQueue = Promise.resolve();
@@ -2441,7 +2632,7 @@ async function handleGatewaySend(event, message) {
       const response = `错误: ${chatAvailability.reason}`;
       workLogger.logError(response);
       showServiceNotification('聊天暂不可用', chatAvailability.reason);
-      return response;
+      return { success: false, error: response, mode: 'openclaw' };
     }
 
     let response = await gatewayClient.sendMessage(message);
@@ -2455,12 +2646,17 @@ async function handleGatewaySend(event, message) {
 
     if (response && !response.startsWith('请求失败') && !response.startsWith('连接失败') && !response.startsWith('错误')) {
       workLogger.logSuccess('消息发送成功');
-      workLogger.log('message', `AI回复: ${response.substring(0, 100)}`);
+      publishAgentResponse(response, {
+        emotion: 'happy',
+        voiceEmotion: 'calm',
+        mode: 'openclaw',
+        sender: 'OpenClaw'
+      });
+      return { success: true, content: response, mode: 'openclaw' };
     } else {
       workLogger.logError(response || '发送失败');
+      return { success: false, error: response || '发送失败', mode: 'openclaw' };
     }
-
-    return response;
   };
 
   // 串行化发送，避免并发请求导致会话流事件顺序错乱
@@ -2472,9 +2668,19 @@ async function handleGatewaySend(event, message) {
 async function handleGatewayStatus() {
   const connected = await gatewayClient.checkConnection();
   const status = await gatewayClient.getStatus();
-  return { connected, status };
+  const availability = gatewayClient.getChatAvailability();
+  const compat = backendCompat.resolve();
+  const backend = {
+    mode: compat.active.mode,
+    label: compat.active.label,
+    installed: Boolean(compat.active.installed),
+    cliPath: compat.active.cliPath || null,
+    apiHost: compat.active.apiHost || null,
+  };
+  return { connected, status, availability, backend };
 }
 
+ipcMain.handle('direct-chat-send', handleDirectChatSend);
 ipcMain.handle('gateway-send', handleGatewaySend);
 ipcMain.handle('openclaw-send', handleGatewaySend);
 
@@ -2667,7 +2873,7 @@ fi
   <key>CFBundleDisplayName</key>
   <string>Claw 桌面宠物</string>
   <key>CFBundleIdentifier</key>
-  <string>com.kk43994.kkclaw</string>
+  <string>com.kk43994.petclaw</string>
   <key>CFBundleVersion</key>
   <string>3.5.0</string>
   <key>CFBundleExecutable</key>
@@ -2945,7 +3151,7 @@ ipcMain.handle('model-fetch-models', async (event, providerName) => {
   return await modelSwitcher.fetchModels(providerName);
 });
 
-// 🔍 KKClaw Switch 监控日志 IPC
+// 🔍 Petclaw Switch 监控日志 IPC
 ipcMain.handle('switch-log-list', async (event, count, levelFilter) => {
   if (!modelSwitcher?.switchLog) return [];
   return modelSwitcher.switchLog.getRecent(count || 100, levelFilter || null);
@@ -3014,10 +3220,10 @@ ipcMain.handle('model-query-quota', async (event, providerName) => {
   }
 });
 
-ipcMain.handle('model-analyze-kkclaw', async (event, providerName) => {
+ipcMain.handle('model-analyze-petclaw', async (event, providerName) => {
   if (!modelSwitcher) return { success: false, error: 'not initialized' };
   try {
-    const analysis = await modelSwitcher.analyzeKKCLAW(providerName);
+    const analysis = await modelSwitcher.analyzePETCLAW(providerName);
     return { success: true, analysis };
   } catch (err) {
     return { success: false, error: err.message };
@@ -3298,7 +3504,7 @@ ipcMain.handle('diag-doctor', async () => {
         name: '模型配置',
         status: current ? 'pass' : 'warn',
         message: current ? `当前: ${current.shortName || current.id} | ${providerCount} 服务商, ${modelCount} 模型` : '未选择模型',
-        fix: current ? null : '在 KKClaw Switch 中选择一个模型'
+        fix: current ? null : '在 Petclaw Switch 中选择一个模型'
       });
     } else {
       checks.push({ name: '模型配置', status: 'fail', message: '模型切换器未初始化' });

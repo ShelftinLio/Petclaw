@@ -36,7 +36,7 @@ describe('backend compat', () => {
 
     jest.doMock('../../utils/path-resolver', () => ({
       getUserHome: jest.fn(() => '/Users/test'),
-      getProjectRoot: jest.fn(() => '/repo/kkclaw'),
+      getProjectRoot: jest.fn(() => '/repo/petclaw'),
       getOpenClawConfigDir: jest.fn(() => '/Users/test/.openclaw'),
       getOpenClawConfigPath: jest.fn(() => '/Users/test/.openclaw/openclaw.json'),
     }))
@@ -60,5 +60,46 @@ describe('backend compat', () => {
     expect(result.hermes.installed).toBe(false)
     expect(result.hermes.cliPath).toBeNull()
     expect(result.active.mode).toBe('openclaw')
+  })
+
+  test('does not treat a leftover OpenClaw config directory as installed when the CLI is missing', () => {
+    jest.doMock('fs', () => {
+      const actual = jest.requireActual('fs')
+      return {
+        ...actual,
+        existsSync: jest.fn((target) => {
+          const normalized = String(target)
+          if (normalized === '/Users/test/.openclaw') {
+            return true
+          }
+          return false
+        }),
+        readFileSync: jest.fn(() => ''),
+      }
+    })
+
+    jest.doMock('../../utils/path-resolver', () => ({
+      getUserHome: jest.fn(() => '/Users/test'),
+      getProjectRoot: jest.fn(() => '/repo/petclaw'),
+      getOpenClawConfigDir: jest.fn(() => '/Users/test/.openclaw'),
+      getOpenClawConfigPath: jest.fn(() => '/Users/test/.openclaw/openclaw.json'),
+    }))
+
+    jest.doMock('../../utils/openclaw-path-resolver', () => ({
+      findOpenClawCliPath: jest.fn(() => null),
+      resolveOpenClawInvocation: jest.fn(() => null),
+    }))
+
+    jest.doMock('../../utils/safe-config-loader', () => ({
+      load: jest.fn(() => ({})),
+    }))
+
+    const backendCompat = require('../../utils/backend-compat')
+    const result = backendCompat.resolve()
+
+    expect(result.openclaw.installed).toBe(false)
+    expect(result.openclaw.cliPath).toBeNull()
+    expect(result.openclaw.chatReady).toBe(false)
+    expect(result.openclaw.chatBlockReason).toContain('OpenClaw CLI not found')
   })
 })

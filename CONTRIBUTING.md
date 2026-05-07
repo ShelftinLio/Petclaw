@@ -1,6 +1,6 @@
-# Contributing to KKClaw
+# Contributing to Petclaw
 
-感谢你对 KKClaw 的关注！欢迎通过以下方式参与贡献。
+感谢你对 Petclaw 的关注！欢迎通过以下方式参与贡献。
 
 ## Getting Started
 
@@ -15,8 +15,8 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/kk43994/kkclaw.git
-cd kkclaw
+git clone https://github.com/kk43994/petclaw.git
+cd petclaw
 
 # Install dependencies
 npm install
@@ -31,7 +31,7 @@ npm start
 ### Project Structure
 
 ```
-kkclaw/
+petclaw/
 ├── main.js                 # Electron main process entry
 ├── preload.js              # Main window preload script
 ├── setup-preload.js        # Setup wizard preload script
@@ -57,14 +57,14 @@ kkclaw/
 
 ### Reporting Bugs
 
-1. Check [existing issues](https://github.com/kk43994/kkclaw/issues) first
+1. Check [existing issues](https://github.com/kk43994/petclaw/issues) first
 2. Use the bug report template
-3. Include: OS, KKClaw version, steps to reproduce, expected vs actual behavior
-4. Attach logs from `%APPDATA%/kkclaw/logs/` (Windows) or `~/Library/Logs/kkclaw/` (macOS)
+3. Include: OS, Petclaw version, steps to reproduce, expected vs actual behavior
+4. Attach logs from `%APPDATA%/petclaw/logs/` (Windows) or `~/Library/Logs/petclaw/` (macOS)
 
 ### Suggesting Features
 
-1. Open a [feature request issue](https://github.com/kk43994/kkclaw/issues/new)
+1. Open a [feature request issue](https://github.com/kk43994/petclaw/issues/new)
 2. Describe the use case and expected behavior
 3. If possible, include mockups or references
 
@@ -98,7 +98,7 @@ kkclaw/
 
 ## Release Discipline
 
-KKClaw is a continuously maintained project, so every meaningful iteration should be traceable.
+Petclaw is a continuously maintained project, so every meaningful iteration should be traceable.
 
 - Update `CHANGELOG.md` for every user-facing change
 - Bump the version when shipping an iteration

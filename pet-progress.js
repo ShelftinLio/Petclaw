@@ -4,8 +4,14 @@ const path = require('path')
 
 const { calculatePetLevel, unlockAbility: unlockAbilityCore } = require('./pet-abilities')
 const {
+  AFFINITY_EVENT_TYPES,
+  applyAffinityEvent,
+  normalizeAffinity,
+} = require('./pet-affinity')
+const {
   createMemoryCrystal,
   createSkillSeed,
+  createSkillCardFromSeed,
   isSkillSeedEligible,
   listSkillCards,
 } = require('./pet-skills')
@@ -23,6 +29,22 @@ function createDefaultProgress() {
     memories: [],
     skillSeeds: [],
     skills: [],
+    affinityXp: 0,
+    affinityLevel: 1,
+    bondItems: [],
+    interactionStats: {
+      dailyAffinity: {
+        date: '',
+        clickXp: 0,
+        chatXp: 0,
+        voiceXp: 0,
+      },
+      totalClicks: 0,
+      totalTextMessages: 0,
+      totalVoiceInteractions: 0,
+      totalAffinityEvents: 0,
+      lastInteractionAt: '',
+    },
   }
 }
 
@@ -37,7 +59,7 @@ function normalizeProgress(raw = {}) {
     ...base.unlockedAbilities,
     ...(Array.isArray(raw.unlockedAbilities) ? raw.unlockedAbilities : []),
   ])
-  return {
+  return normalizeAffinity({
     ...base,
     ...raw,
     version: 1,
@@ -53,10 +75,48 @@ function normalizeProgress(raw = {}) {
     memories: Array.isArray(raw.memories) ? raw.memories : [],
     skillSeeds: Array.isArray(raw.skillSeeds) ? raw.skillSeeds : [],
     skills: Array.isArray(raw.skills) ? raw.skills : [],
+  })
+}
+
+function applyFocusAffinityRewards(progress = {}, session = {}, options = {}) {
+  let next = normalizeProgress(progress)
+  const now = options.now || new Date()
+  const appliedEvents = []
+
+  function apply(eventType) {
+    const result = applyAffinityEvent(next, eventType, { now })
+    next = result.progress
+    appliedEvents.push({
+      eventType,
+      appliedXp: result.appliedXp,
+      capped: result.capped,
+      levelChanged: result.levelChanged,
+      unlockedBondItems: result.unlockedBondItems,
+      reaction: result.reaction,
+    })
+  }
+
+  const finishedWithProgress = ['completed', 'partial'].includes(session.status)
+
+  if (finishedWithProgress) {
+    apply(AFFINITY_EVENT_TYPES.FOCUS_FINISHED)
+  }
+
+  if (finishedWithProgress && String(session.summary || '').trim()) {
+    apply(AFFINITY_EVENT_TYPES.FOCUS_SUMMARY)
+  }
+
+  if (session.rewards?.memoryCrystal) {
+    apply(AFFINITY_EVENT_TYPES.MEMORY_CREATED)
+  }
+
+  return {
+    progress: next,
+    affinityEvents: appliedEvents,
   }
 }
 
-function applyFinishedSession(progress = {}, session = {}, { now = new Date() } = {}) {
+function settleFinishedSession(progress = {}, session = {}, { now = new Date() } = {}) {
   const normalized = normalizeProgress(progress)
   const rewards = session.rewards || {}
   let next = {
@@ -78,7 +138,15 @@ function applyFinishedSession(progress = {}, session = {}, { now = new Date() } 
   }
 
   next.petLevel = calculatePetLevel(next.focusXp)
-  return normalizeProgress(next)
+  const affinity = applyFocusAffinityRewards(next, session, { now })
+  return {
+    progress: normalizeProgress(affinity.progress),
+    affinityEvents: affinity.affinityEvents,
+  }
+}
+
+function applyFinishedSession(progress = {}, session = {}, options = {}) {
+  return settleFinishedSession(progress, session, options).progress
 }
 
 class PetProgressStore {
@@ -130,11 +198,44 @@ function unlockAbility(progress, abilityId) {
   return normalizeProgress(unlockAbilityCore(progress, abilityId))
 }
 
+function learnSkillFromSeed(progress = {}, seedId, { now = new Date() } = {}) {
+  const normalized = normalizeProgress(progress)
+  const seed = normalized.skillSeeds.find(item => item.id === seedId)
+  if (!seed) {
+    const error = new Error('Skill seed not found')
+    error.code = 'SKILL_SEED_NOT_FOUND'
+    throw error
+  }
+
+  const skillId = `skill-${seed.id}`
+  if (normalized.skills.some(skill => skill.id === skillId || skill.sourceSeedId === seed.id)) {
+    const error = new Error('Skill already learned')
+    error.code = 'SKILL_ALREADY_LEARNED'
+    throw error
+  }
+
+  const learnedAt = (now instanceof Date ? now : new Date(now)).toISOString()
+  const skill = {
+    ...createSkillCardFromSeed(seed),
+    status: 'learned',
+    learnedAt,
+  }
+
+  return normalizeProgress({
+    ...normalized,
+    skillSeeds: normalized.skillSeeds.filter(item => item.id !== seed.id),
+    skills: [...normalized.skills, skill],
+  })
+}
+
 module.exports = {
   createDefaultProgress,
   normalizeProgress,
   applyFinishedSession,
+  settleFinishedSession,
+  applyFocusAffinityRewards,
   unlockAbility,
+  learnSkillFromSeed,
   listSkillCards,
   PetProgressStore,
 }

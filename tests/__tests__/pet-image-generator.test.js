@@ -57,6 +57,34 @@ function createRgbPng(width, height, pixelAt) {
   ])
 }
 
+function createRgbaPng(width, height, pixelAt) {
+  const header = Buffer.alloc(13)
+  header.writeUInt32BE(width, 0)
+  header.writeUInt32BE(height, 4)
+  header[8] = 8
+  header[9] = 6
+  const stride = width * 4
+  const raw = Buffer.alloc((stride + 1) * height)
+  for (let y = 0; y < height; y += 1) {
+    const row = y * (stride + 1)
+    raw[row] = 0
+    for (let x = 0; x < width; x += 1) {
+      const [r, g, b, a] = pixelAt(x, y)
+      const i = row + 1 + x * 4
+      raw[i] = r
+      raw[i + 1] = g
+      raw[i + 2] = b
+      raw[i + 3] = a
+    }
+  }
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk('IHDR', header),
+    pngChunk('IDAT', zlib.deflateSync(raw)),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ])
+}
+
 function decodeRgbaPng(buffer) {
   let offset = 8
   let width = 0
@@ -109,6 +137,24 @@ function bboxForColor(decoded, [r, g, b]) {
     }
   }
   return { minX, minY, maxX, maxY }
+}
+
+function countColor(decoded, [r, g, b]) {
+  let count = 0
+  for (let y = 0; y < decoded.height; y += 1) {
+    for (let x = 0; x < decoded.width; x += 1) {
+      const i = (y * decoded.width + x) * 4
+      if (
+        decoded.pixels[i] === r &&
+        decoded.pixels[i + 1] === g &&
+        decoded.pixels[i + 2] === b &&
+        decoded.pixels[i + 3] > 0
+      ) {
+        count += 1
+      }
+    }
+  }
+  return count
 }
 
 describe('pet image generator', () => {
@@ -235,6 +281,155 @@ describe('pet image generator', () => {
 
     expect(prepared.recenteredFrames).toBe(1)
     expect(blue).toEqual({ minX: 4, minY: 4, maxX: 5, maxY: 5 })
+  })
+
+  test('prepareGeneratedPetSpritesheet normalizes images to an integer grid', () => {
+    const png = createRgbPng(4, 3, (x, y) => {
+      if (x === 1 && y === 1) return [40, 90, 220]
+      return [255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 2, rows: 2 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+
+    expect(decoded.width).toBe(4)
+    expect(decoded.height).toBe(4)
+    expect(prepared.width).toBe(4)
+    expect(prepared.height).toBe(4)
+    expect(prepared.normalizedGrid).toBe(true)
+  })
+
+  test('prepareGeneratedPetSpritesheet removes smaller opaque slivers inside each cell', () => {
+    const png = createRgbPng(10, 6, (x, y) => {
+      if (x >= 1 && x <= 2 && y >= 2 && y <= 3) return [40, 90, 220]
+      if (x === 4 && y >= 2 && y <= 3) return [220, 20, 40]
+      return [255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 2, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+
+    expect(countColor(decoded, [220, 20, 40])).toBe(0)
+    expect(countColor(decoded, [40, 90, 220])).toBe(4)
+    expect(prepared.removedCellSlivers).toBeGreaterThan(0)
+  })
+
+  test('prepareGeneratedPetSpritesheet ignores tiny interior frame fragments when recentering', () => {
+    const png = createRgbaPng(20, 20, (x, y) => {
+      if (x >= 2 && x <= 6 && y >= 7 && y <= 12) return [40, 90, 220, 255]
+      if (x === 17 && y === 8) return [220, 20, 40, 255]
+      return [0, 0, 0, 0]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+    const blue = bboxForColor(decoded, [40, 90, 220])
+
+    expect(countColor(decoded, [220, 20, 40])).toBe(0)
+    expect(blue).toEqual({ minX: 8, minY: 7, maxX: 12, maxY: 12 })
+    expect(prepared.removedCellSlivers).toBeGreaterThan(0)
+  })
+
+  test('prepareGeneratedPetSpritesheet centers the character core instead of side extensions', () => {
+    const png = createRgbaPng(30, 20, (x, y) => {
+      if (x >= 4 && x <= 7 && y >= 3 && y <= 7) return [40, 90, 220, 255]
+      if (x >= 3 && x <= 6 && y >= 8 && y <= 15) return [40, 90, 220, 255]
+      if (x >= 7 && x <= 15 && y >= 10 && y <= 14) return [220, 20, 40, 255]
+      return [0, 0, 0, 0]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+    const core = bboxForColor(decoded, [40, 90, 220])
+
+    expect(core.minX).toBe(12)
+    expect(core.maxX).toBe(16)
+  })
+
+  test('prepareGeneratedPetSpritesheet preserves detached interior character parts', () => {
+    const png = createRgbPng(12, 12, (x, y) => {
+      if (x >= 2 && x <= 4 && y >= 4 && y <= 6) return [40, 90, 220]
+      if (x >= 7 && x <= 8 && y >= 5 && y <= 6) return [220, 20, 40]
+      return [255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+
+    expect(countColor(decoded, [40, 90, 220])).toBe(9)
+    expect(countColor(decoded, [220, 20, 40])).toBe(4)
+  })
+
+  test('prepareGeneratedPetSpritesheet repairs transparent holes inside a character', () => {
+    const png = createRgbaPng(7, 7, (x, y) => {
+      if (x >= 1 && x <= 5 && y >= 1 && y <= 5) {
+        if (x === 3 && y === 3) return [0, 0, 0, 0]
+        return [40, 90, 220, 255]
+      }
+      return [255, 255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+    const center = (3 * decoded.width + 3) * 4
+
+    expect(decoded.pixels[center + 3]).toBeGreaterThan(0)
+    expect(prepared.repairedInteriorHoles).toBeGreaterThan(0)
+  })
+
+  test('prepareGeneratedPetSpritesheet repairs narrow connected cutout marks inside a character', () => {
+    const png = createRgbaPng(9, 9, (x, y) => {
+      if (x >= 1 && x <= 7 && y >= 1 && y <= 7) {
+        if (x === 4 && y >= 1 && y <= 4) return [245, 245, 245, 0]
+        return [40, 90, 220, 255]
+      }
+      return [255, 255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+    const center = (4 * decoded.width + 4) * 4
+
+    expect(decoded.pixels[center + 3]).toBeGreaterThan(0)
+    expect(prepared.repairedCutoutMarks).toBeGreaterThan(0)
+  })
+
+  test('prepareGeneratedPetSpritesheet repairs wider connected cutout marks with matching surrounding color', () => {
+    const png = createRgbaPng(11, 11, (x, y) => {
+      if (x >= 1 && x <= 9 && y >= 1 && y <= 9) {
+        if (x >= 5 && x <= 6 && y >= 1 && y <= 5) return [245, 245, 245, 0]
+        return [40, 90, 220, 255]
+      }
+      return [255, 255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+    const leftCut = (5 * decoded.width + 5) * 4
+    const rightCut = (5 * decoded.width + 6) * 4
+
+    expect(decoded.pixels[leftCut + 3]).toBeGreaterThan(0)
+    expect(decoded.pixels[rightCut + 3]).toBeGreaterThan(0)
+    expect(prepared.repairedCutoutMarks).toBeGreaterThan(0)
+  })
+
+  test('prepareGeneratedPetSpritesheet repairs enclosed holes after sealing a connected cutout path', () => {
+    const png = createRgbaPng(21, 21, (x, y) => {
+      if (x >= 2 && x <= 18 && y >= 2 && y <= 18) {
+        if (x >= 6 && x <= 14 && y >= 6 && y <= 14) return [245, 245, 245, 0]
+        if (x === 10 && y >= 2 && y <= 5) return [245, 245, 245, 0]
+        return [40, 90, 220, 255]
+      }
+      return [255, 255, 255, 255]
+    })
+
+    const prepared = prepareGeneratedPetSpritesheet(png, { extension: 'png', columns: 1, rows: 1 })
+    const decoded = decodeRgbaPng(prepared.buffer)
+    const center = (10 * decoded.width + 10) * 4
+
+    expect(decoded.pixels[center + 3]).toBeGreaterThan(0)
+    expect(prepared.repairedInteriorHoles).toBeGreaterThan(0)
+    expect(prepared.repairedCutoutMarks).toBeGreaterThan(0)
   })
 
   test('generatePetSpritesheet uses text generation endpoint without a reference image', async () => {

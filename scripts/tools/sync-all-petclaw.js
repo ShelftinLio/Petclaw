@@ -1,25 +1,25 @@
-// 批量同步所有 KKCLAW provider 到完整模型列表
+// 批量同步所有 PETCLAW provider 到完整模型列表
 const ModelSwitcher = require('./model-switcher');
 
-async function syncAllKKCLAW() {
-  console.log('🔄 批量同步所有 KKCLAW provider...\n');
+async function syncAllPETCLAW() {
+  console.log('🔄 批量同步所有 PETCLAW provider...\n');
 
   try {
     const switcher = new ModelSwitcher();
     const providers = switcher.getProviders();
 
-    const kkclawProviders = providers.filter(p =>
+    const petclawProviders = providers.filter(p =>
       p.baseUrl?.includes('gptclubapi') || p.features?.includes('quota-query')
     );
 
-    if (kkclawProviders.length === 0) {
-      console.log('❌ 没有检测到 KKCLAW provider');
+    if (petclawProviders.length === 0) {
+      console.log('❌ 没有检测到 PETCLAW provider');
       return;
     }
 
-    console.log(`📋 检测到 ${kkclawProviders.length} 个 KKCLAW provider\n`);
+    console.log(`📋 检测到 ${petclawProviders.length} 个 PETCLAW provider\n`);
 
-    for (const p of kkclawProviders) {
+    for (const p of petclawProviders) {
       console.log(`🔄 同步 ${p.name} (当前 ${p.modelCount} 个模型)...`);
       try {
         const result = await switcher.syncProviderModels(p.name);
@@ -35,4 +35,4 @@ async function syncAllKKCLAW() {
   }
 }
 
-syncAllKKCLAW();
+syncAllPETCLAW();

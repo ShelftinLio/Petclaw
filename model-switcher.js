@@ -91,8 +91,8 @@ const PROVIDER_PRESETS = {
     ]
   },
   // ── 中转站 ──
-  'kkclaw': {
-    name: 'KKCLAW 拼车',
+  'petclaw': {
+    name: 'PETCLAW 拼车',
     baseUrl: 'https://api.gptclubapi.xyz',
     website: 'https://api.gptclubapi.xyz',
     api: 'multi-protocol',
@@ -627,7 +627,7 @@ class ModelSwitcher {
     
     // 通过 baseUrl 关键词匹配
     if (baseUrl) {
-      if (baseUrl.includes('gptclubapi')) return PROVIDER_PRESETS['kkclaw'];
+      if (baseUrl.includes('gptclubapi')) return PROVIDER_PRESETS['petclaw'];
       if (baseUrl.includes('anthropic')) return PROVIDER_PRESETS['anthropic'];
       if (baseUrl.includes('openai.com')) return PROVIDER_PRESETS['openai'];
       if (baseUrl.includes('googleapis')) return PROVIDER_PRESETS['google'];
@@ -2251,7 +2251,7 @@ class ModelSwitcher {
     return warnings;
   }
 
-  async analyzeKKCLAW(providerName) {
+  async analyzePETCLAW(providerName) {
     const provider = this.providers[providerName];
     if (!provider) throw new Error(`Provider "${providerName}" not found`);
 

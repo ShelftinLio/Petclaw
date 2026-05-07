@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>KKClaw 新手引导</title>
+<title>Petclaw 新手引导</title>
 <style>
   :root {
     --wood-dark: #5a3a1a;
@@ -862,7 +862,7 @@
 <body>
 
 <div class="wizard-header">
-  <h1>KKClaw 新手引导</h1>
+  <h1>Petclaw 新手引导</h1>
   <button class="skip-btn" onclick="skipWizard()">SKIP</button>
 </div>
 
@@ -1231,7 +1231,7 @@ async function renderStep(step) {
 
 // ─── Step 0 (-1): 环境预检（Smart Setup） ───────────────────────
 async function renderEnvCheck() {
-  await addBubble('你好呀~ 我是小K！(^_^) 欢迎使用 KKClaw 桌面宠物~');
+  await addBubble('你好呀~ 我是小K！(^_^) 欢迎使用 Petclaw 桌面宠物~');
   await addBubble('在正式配置之前，让我先做一次全面环境检测，确保一切就绪！');
 
   addCard(`
@@ -1806,7 +1806,7 @@ function updateEnvSummary(r, gatewayJustStarted = false) {
 }
 async function renderStep1() {
   console.log('[Wizard] renderStep1 called, chatArea:', document.getElementById('chatArea'));
-  await addBubble('你好呀~ 我是小K！(^_^) 欢迎使用 KKClaw 桌面宠物~');
+  await addBubble('你好呀~ 我是小K！(^_^) 欢迎使用 Petclaw 桌面宠物~');
   await addBubble('先帮你确认一下这次要优先使用哪个兼容后端吧：OpenClaw、Hermes，或自动模式。');
   await addBubble('然后我再帮你检查 Gateway 的连接状态~');
   await addBubble('让我找找你的 Gateway... (o_O)');

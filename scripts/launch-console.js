@@ -161,9 +161,9 @@ function buildChildEnv(mode) {
   const env = { ...process.env };
   const normalizedMode = normalizeMode(mode);
   if (normalizedMode) {
-    env.KKCLAW_COMPAT_MODE = normalizedMode;
+    env.PETCLAW_COMPAT_MODE = normalizedMode;
   } else {
-    delete env.KKCLAW_COMPAT_MODE;
+    delete env.PETCLAW_COMPAT_MODE;
   }
   return env;
 }
@@ -172,7 +172,7 @@ function printMenu(snapshot, defaultMeta) {
   const defaultMode = defaultMeta.mode;
   const defaultLabel = defaultMode ? describeDefault(snapshot, defaultMode, defaultMeta) : null;
   const sourceLine = defaultMeta.requiresChoice
-    ? 'First launch detected: choose the backend you want KKClaw to keep using'
+    ? 'First launch detected: choose the backend you want Petclaw to keep using'
     : defaultMeta.fixed
     ? 'Saved choice from `pet-config.json` -> `compatMode`'
     : defaultMeta.source === 'pet-config.lastCompatMode'
@@ -180,7 +180,7 @@ function printMenu(snapshot, defaultMeta) {
     : 'Defaulting to automatic backend detection';
 
   console.log('');
-  console.log(`${COLOR.bold}${COLOR.white}KKClaw Console Launcher${COLOR.reset}`);
+  console.log(`${COLOR.bold}${COLOR.white}Petclaw Console Launcher${COLOR.reset}`);
   console.log(`${COLOR.gray}Choose a backend for this launch.${COLOR.reset}`);
   if (defaultLabel) {
     console.log(`${COLOR.gray}Press Enter to keep: ${COLOR.bold}${defaultLabel}${COLOR.reset}`);
@@ -219,7 +219,7 @@ function askQuestion(promptText) {
 }
 
 async function promptForMode(snapshot) {
-  const explicitEnv = String(process.env.KKCLAW_COMPAT_MODE || '').trim().toLowerCase();
+  const explicitEnv = String(process.env.PETCLAW_COMPAT_MODE || '').trim().toLowerCase();
   if (normalizeMode(explicitEnv)) {
     return explicitEnv;
   }

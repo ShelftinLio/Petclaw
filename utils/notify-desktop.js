@@ -2,7 +2,7 @@
 const http = require('http');
 
 function notifyDesktop(type, payload, port) {
-    const notifyPort = port || process.env.KKCLAW_NOTIFY_PORT || 18788;
+    const notifyPort = port || process.env.PETCLAW_NOTIFY_PORT || 18788;
     const data = JSON.stringify({ type, payload });
 
     const options = {

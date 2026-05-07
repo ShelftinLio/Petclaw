@@ -1,13 +1,35 @@
 const {
   INTENT_TYPES,
+  DURATION_PRESETS,
   startFocusAdventure,
   finishFocusAdventure,
   calculateRewards,
+  getFocusTimerState,
 } = require('../../focus-adventure')
 
 describe('focus adventure lifecycle', () => {
   const startedAt = new Date('2026-05-05T10:00:00.000Z')
   const endedAt = new Date('2026-05-05T10:25:00.000Z')
+
+  test('offers the focus task duration presets requested by the game board', () => {
+    expect(DURATION_PRESETS).toEqual([5, 15, 25, 55])
+    expect(startFocusAdventure({
+      taskTitle: 'Quick triage',
+      plannedMinutes: 5,
+      intentType: 'Planning',
+      now: startedAt,
+    })).toMatchObject({
+      plannedMinutes: 5,
+    })
+    expect(startFocusAdventure({
+      taskTitle: 'Deep work',
+      plannedMinutes: 55,
+      intentType: 'Code',
+      now: startedAt,
+    })).toMatchObject({
+      plannedMinutes: 55,
+    })
+  })
 
   test('starts a normalized focus adventure session', () => {
     expect(startFocusAdventure({
@@ -29,7 +51,7 @@ describe('focus adventure lifecycle', () => {
   test('falls back to safe title, duration, and intent', () => {
     expect(startFocusAdventure({
       taskTitle: '',
-      plannedMinutes: 999,
+      plannedMinutes: 90,
       intentType: 'Unknown',
       now: startedAt,
     })).toMatchObject({
@@ -53,6 +75,21 @@ describe('focus adventure lifecycle', () => {
       focusXp: 60,
       abilityFragments: 2,
       stardust: 7,
+      memoryCrystal: true,
+      skillSeed: true,
+    })
+  })
+
+  test('gives a short completed run enough fragments for the first ability choice', () => {
+    expect(calculateRewards({
+      actualMinutes: 5,
+      plannedMinutes: 5,
+      status: 'completed',
+      summary: 'Make this reusable: inspect, compare, add tests, run Jest.',
+      skillSeedEligible: true,
+    })).toMatchObject({
+      focusXp: 20,
+      abilityFragments: 1,
       memoryCrystal: true,
       skillSeed: true,
     })
@@ -102,6 +139,48 @@ describe('focus adventure lifecycle', () => {
         memoryCrystal: true,
         skillSeed: true,
       },
+    })
+  })
+
+  test('reports countdown timer state for active focus adventures', () => {
+    const active = startFocusAdventure({
+      taskTitle: 'Fix failing tests',
+      plannedMinutes: 25,
+      intentType: 'Code',
+      now: startedAt,
+    })
+
+    expect(getFocusTimerState(active, {
+      now: new Date('2026-05-05T10:10:30.000Z'),
+    })).toEqual({
+      active: true,
+      elapsedSeconds: 630,
+      elapsedMinutes: 10,
+      remainingSeconds: 870,
+      remainingMinutes: 15,
+      totalSeconds: 1500,
+      progress: 0.42,
+      isOvertime: false,
+      label: '14:30',
+    })
+  })
+
+  test('reports overtime timer state without going negative', () => {
+    const active = startFocusAdventure({
+      taskTitle: 'Fix failing tests',
+      plannedMinutes: 15,
+      intentType: 'Code',
+      now: startedAt,
+    })
+
+    expect(getFocusTimerState(active, {
+      now: new Date('2026-05-05T10:17:05.000Z'),
+    })).toMatchObject({
+      active: true,
+      remainingSeconds: 0,
+      progress: 1,
+      isOvertime: true,
+      label: '+02:05',
     })
   })
 })

@@ -6,8 +6,15 @@ const {
   createDefaultProgress,
   normalizeProgress,
   applyFinishedSession,
+  learnSkillFromSeed,
+  listSkillCards,
   PetProgressStore,
 } = require('../../pet-progress')
+const { getAbilityTree } = require('../../pet-abilities')
+const {
+  startFocusAdventure,
+  finishFocusAdventure,
+} = require('../../focus-adventure')
 
 describe('pet progress persistence', () => {
   test('creates default progress with warm chat unlocked', () => {
@@ -23,6 +30,9 @@ describe('pet progress persistence', () => {
       memories: [],
       skillSeeds: [],
       skills: [],
+      affinityXp: 0,
+      affinityLevel: 1,
+      bondItems: [],
     })
   })
 
@@ -32,6 +42,8 @@ describe('pet progress persistence', () => {
       focusXp: 160,
       unlockedAbilities: ['warm-chat', 'task-echo'],
       focusSessions: [],
+      affinityXp: 0,
+      affinityLevel: 1,
     })
   })
 
@@ -69,6 +81,112 @@ describe('pet progress persistence', () => {
     expect(next.focusSessions).toHaveLength(1)
     expect(next.memories[0]).toMatchObject({ id: 'memory-focus-1' })
     expect(next.skillSeeds[0]).toMatchObject({ id: 'seed-focus-1' })
+  })
+
+  test('applies affinity rewards from finished focus sessions', () => {
+    const progress = normalizeProgress({
+      affinityXp: 35,
+    })
+    const session = {
+      id: 'focus-2',
+      taskTitle: 'Write affinity plan',
+      intentType: 'Writing',
+      status: 'completed',
+      summary: 'Draft the relationship loop.',
+      rewards: {
+        focusXp: 20,
+        abilityFragments: 1,
+        stardust: 4,
+        memoryCrystal: true,
+        skillSeed: false,
+      },
+      endedAt: '2026-05-07T10:25:00.000Z',
+    }
+
+    const next = applyFinishedSession(progress, session, {
+      now: new Date('2026-05-07T10:26:00.000Z'),
+    })
+
+    expect(next.affinityXp).toBe(52)
+    expect(next.affinityLevel).toBe(2)
+    expect(next.bondItems).toEqual([
+      {
+        id: 'small-toy',
+        levelRequired: 2,
+        unlockedAt: '2026-05-07T10:26:00.000Z',
+      },
+    ])
+  })
+
+  test('does not grant focus-finished affinity for interrupted sessions', () => {
+    const progress = normalizeProgress({ affinityXp: 35 })
+    const session = {
+      id: 'focus-3',
+      taskTitle: 'Interrupted run',
+      intentType: 'Planning',
+      status: 'interrupted',
+      summary: '',
+      rewards: {
+        focusXp: 3,
+        abilityFragments: 0,
+        stardust: 1,
+        memoryCrystal: false,
+        skillSeed: false,
+      },
+      endedAt: '2026-05-07T10:25:00.000Z',
+    }
+
+    const next = applyFinishedSession(progress, session, {
+      now: new Date('2026-05-07T10:26:00.000Z'),
+    })
+
+    expect(next.affinityXp).toBe(35)
+    expect(next.affinityLevel).toBe(1)
+    expect(next.bondItems).toEqual([])
+  })
+
+  test('connects a short focus run to first ability unlock and learned skill', () => {
+    const progress = normalizeProgress({
+      unlockedAbilities: ['warm-chat'],
+    })
+    const active = startFocusAdventure({
+      taskTitle: 'Forge a reusable debugging flow',
+      plannedMinutes: 5,
+      intentType: 'Code',
+      now: new Date('2026-05-05T10:00:00.000Z'),
+    })
+    const finished = finishFocusAdventure(active, {
+      status: 'completed',
+      summary: 'Make this reusable: inspect logs, compare handlers, add tests, run Jest.',
+      skillSeedEligible: true,
+      now: new Date('2026-05-05T10:05:00.000Z'),
+    })
+
+    const settled = applyFinishedSession(progress, finished, {
+      now: new Date('2026-05-05T10:05:30.000Z'),
+    })
+
+    expect(settled.abilityFragments).toBe(1)
+    expect(getAbilityTree(settled).abilities.find(ability => ability.id === 'task-echo')).toMatchObject({
+      canUnlock: true,
+    })
+    expect(settled.skillSeeds).toHaveLength(1)
+
+    const learned = learnSkillFromSeed(settled, settled.skillSeeds[0].id, {
+      now: new Date('2026-05-05T10:06:00.000Z'),
+    })
+
+    expect(learned.skillSeeds).toHaveLength(0)
+    expect(learned.skills[0]).toMatchObject({
+      id: 'skill-seed-focus-20260505-100000',
+      name: 'Forge a reusable debugging flow',
+      status: 'learned',
+      sourceSeedId: 'seed-focus-20260505-100000',
+      learnedAt: '2026-05-05T10:06:00.000Z',
+    })
+    expect(listSkillCards(learned).find(card => card.id === 'skill-seed-focus-20260505-100000')).toMatchObject({
+      status: 'learned',
+    })
   })
 
   test('store loads defaults and saves progress file', async () => {

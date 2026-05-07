@@ -200,12 +200,14 @@
     /* 输入条 */
     .input-bar {
         position: absolute;
-        bottom: 174px;
+        bottom: 122px;
         left: 50%;
         transform: translateX(-50%);
-        display: flex;
-        gap: 6px;
+        display: grid;
+        grid-template-rows: auto auto;
+        gap: 5px;
         padding: 6px;
+        width: 236px;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.16s steps(2), transform 0.16s steps(2);
@@ -213,13 +215,30 @@
         background: var(--hud-bg);
         border: 2px solid var(--hud-line);
         box-shadow: var(--pixel-shadow);
+        clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
     }
     .input-bar.show {
         opacity: 1;
         pointer-events: auto;
+        transform: translateX(-50%) translateY(-4px);
+    }
+    .conversation-input-row {
+        display: grid;
+        grid-template-columns: 1fr 30px;
+        gap: 5px;
+        min-width: 0;
+    }
+    .conversation-tools-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-width: 0;
+        height: 24px;
     }
     .input-bar input {
-        width: 166px;
+        width: 100%;
+        height: 30px;
+        min-width: 0;
         padding: 6px 8px;
         border: 2px solid var(--hud-line);
         border-radius: 0;
@@ -230,13 +249,341 @@
         letter-spacing: 0;
     }
     .input-bar button {
-        padding: 4px 9px;
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+        padding: 0;
         border: 2px solid var(--hud-line);
         border-radius: 0;
         background: #111111;
         color: var(--hud-invert);
         font-size: 12px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .input-bar .conversation-send-button {
+        font-size: 16px;
+        font-weight: 900;
+        line-height: 1;
+    }
+    .input-bar button svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: square;
+        stroke-linejoin: miter;
+    }
+    .input-bar .conversation-mode-button {
+        width: auto;
+        min-width: 54px;
+        height: 24px;
+        padding: 0 7px;
+        background: #ffffff;
+        color: var(--hud-text);
+        font-size: 9px;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+    .input-bar .conversation-mode-button.openclaw {
+        background: #111111;
+        color: var(--hud-invert);
+    }
+    .input-bar #conversationHistoryButton {
+        width: 28px;
+        min-width: 28px;
+        height: 24px;
+    }
+    .conversation-tools-row button svg {
+        width: 13px;
+        height: 13px;
+    }
+    .conversation-status {
+        display: none;
+        flex: 1;
+        min-width: 0;
+        padding: 0;
+        color: #111111;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        overflow-wrap: normal;
+    }
+    .conversation-status.show {
+        display: block;
+    }
+    .conversation-status.error {
+        color: #7a0000;
+    }
+
+    .reply-bubble,
+    .conversation-panel {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 238px;
+        border: 2px solid var(--hud-line);
+        background: rgba(255, 255, 255, 0.98);
+        color: var(--hud-text);
+        box-shadow: var(--pixel-shadow);
+        z-index: 36;
+        clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+    }
+    .reply-bubble {
+        bottom: 118px;
+        display: none;
+        padding: 9px 10px;
+        gap: 4px;
+        line-height: 1.36;
+    }
+    .reply-bubble.show {
+        display: grid;
+    }
+    .reply-bubble-header {
+        display: grid;
+        grid-template-columns: 1fr 18px 22px;
+        align-items: start;
+        gap: 6px;
+        min-width: 0;
+    }
+    .reply-bubble-sender,
+    .conversation-title {
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.16;
+        color: #000000;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-transform: none;
+    }
+    .reply-bubble-state {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #8d8d8d;
+        border-radius: 50%;
+        align-self: center;
+        position: relative;
+    }
+    .reply-bubble.pending .reply-bubble-state {
+        border-color: #a0a0a0;
+        border-top-color: #111111;
+        animation: reply-spin 0.85s linear infinite;
+    }
+    .reply-bubble.ready .reply-bubble-header {
+        grid-template-columns: 1fr 22px;
+    }
+    .reply-bubble.ready .reply-bubble-state {
+        display: none;
+    }
+    .reply-bubble-collapse {
+        width: 22px;
+        height: 22px;
+        border: 2px solid #dddddd;
+        border-radius: 50%;
+        background: #ffffff;
+        color: #111111;
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .reply-bubble-text {
+        max-height: 88px;
+        overflow: hidden;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.36;
+        overflow-wrap: anywhere;
+        color: #050505;
+    }
+    .reply-bubble-text p,
+    .conversation-message p {
+        margin: 0 0 6px;
+    }
+    .reply-bubble-text p:last-child,
+    .conversation-message p:last-child {
+        margin-bottom: 0;
+    }
+    .reply-bubble-text ul,
+    .reply-bubble-text ol,
+    .conversation-message ul,
+    .conversation-message ol {
+        margin: 0 0 6px 15px;
+        padding: 0;
+    }
+    .reply-bubble-text li,
+    .conversation-message li {
+        margin: 2px 0;
+    }
+    .reply-bubble-text code,
+    .conversation-message code {
+        padding: 0 3px;
+        border: 1px solid var(--hud-line);
+        background: #eeeeea;
+        color: #050505;
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 11px;
+        font-weight: 800;
+    }
+    .reply-bubble-text pre,
+    .conversation-message pre {
+        margin: 0 0 6px;
+        padding: 5px;
+        border: 2px solid var(--hud-line);
+        background: #eeeeea;
+        color: #050505;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 11px;
+        line-height: 1.28;
+    }
+    .reply-bubble-text a,
+    .conversation-message a {
+        color: #000000;
+        text-decoration: underline;
+        pointer-events: auto;
+    }
+    .reply-bubble.expanded {
+        bottom: 96px;
+    }
+    .reply-bubble.expanded .reply-bubble-text {
+        max-height: 188px;
+        overflow-y: auto !important;
+        padding-right: 2px;
+    }
+    .reply-bubble-toggle {
+        display: none;
+        justify-self: end;
+        width: auto;
+        min-width: 42px;
+        height: 22px;
+        padding: 0 7px;
+        border: 2px solid var(--hud-line);
+        border-radius: 0;
+        background: #111111;
+        color: var(--hud-invert);
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .reply-bubble.has-more .reply-bubble-toggle {
+        display: block;
+    }
+    .reply-bubble-next {
+        display: none;
+        justify-self: end;
+        width: auto;
+        min-width: 46px;
+        height: 22px;
+        padding: 0 8px;
+        border: 2px solid var(--hud-line);
+        border-radius: 0;
+        background: #ffffff;
+        color: #111111;
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.14);
+    }
+    .reply-bubble.ready .reply-bubble-next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .reply-bubble.pending .reply-bubble-next {
+        display: none;
+    }
+    .conversation-dock-button {
+        position: absolute;
+        right: 14px;
+        bottom: 82px;
+        width: 38px;
+        height: 38px;
+        border: 2px solid #d7d7d7;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 3px 0 rgba(0,0,0,0.16);
+        z-index: 38;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .conversation-dock-button.show {
+        display: flex;
+    }
+    .conversation-dock-status {
+        width: 17px;
+        height: 17px;
+        border: 2px solid #8d8d8d;
+        border-radius: 50%;
+        position: relative;
+    }
+    .conversation-dock-button.pending .conversation-dock-status {
+        border-color: #a0a0a0;
+        border-top-color: #111111;
+        animation: reply-spin 0.85s linear infinite;
+    }
+    .conversation-dock-button.ready .conversation-dock-status {
+        width: 13px;
+        height: 13px;
+        border: 0;
+        border-right: 3px solid #555555;
+        border-bottom: 3px solid #555555;
+        border-radius: 0;
+        transform: rotate(-45deg);
+    }
+    .conversation-dock-button.ready .conversation-dock-status::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+    }
+    .conversation-panel {
+        bottom: 116px;
+        display: none;
+        max-height: 224px;
+        padding: 8px;
+        overflow-y: auto !important;
+        gap: 6px;
+    }
+    .conversation-panel.show {
+        display: grid;
+    }
+    .conversation-list {
+        display: grid;
+        gap: 5px;
+    }
+    .conversation-entry {
+        display: grid;
+        gap: 2px;
+        padding: 6px;
+        border: 2px solid var(--hud-line);
+        background: #f7f7f2;
+        font-size: 11px;
+        line-height: 1.28;
+        overflow-wrap: anywhere;
+    }
+    .conversation-entry.agent {
+        background: #fff1bd;
+    }
+    .conversation-sender {
+        font-size: 9px;
+        font-weight: 900;
+        color: #000000;
+        text-transform: uppercase;
     }
 
     @keyframes fluid-spin {
@@ -253,6 +600,9 @@
         0% { opacity: 0; transform: translateY(0) scale(0.3); }
         15% { opacity: 0.5; }
         100% { opacity: 0; transform: translateY(-30px) translateX(5px) scale(1); }
+    }
+    @keyframes reply-spin {
+        to { transform: rotate(360deg); }
     }
     @keyframes squish {
         0% { transform: scale(1, 1); }
@@ -393,7 +743,8 @@
         z-index: 4;
         pointer-events: none;
     }
-    .custom-pet-sheet {
+    .custom-pet-sheet,
+    .custom-pet-canvas {
         position: absolute;
         top: 0;
         left: 0;
@@ -404,6 +755,9 @@
         object-fit: fill;
         image-rendering: pixelated;
         transform-origin: 0 0;
+    }
+    .custom-pet-canvas {
+        display: none;
     }
     .pet-wrapper.custom-image .inner-fluid,
     .pet-wrapper.custom-image .fluid-blob,
@@ -591,6 +945,50 @@
         width: 100%;
         margin-top: 5px;
     }
+    .bond-item-overlay {
+        position: absolute;
+        left: 50%;
+        bottom: -12px;
+        z-index: 5;
+        display: flex;
+        gap: 4px;
+        transform: translateX(-50%);
+        pointer-events: none;
+    }
+    .bond-item {
+        min-width: 22px;
+        height: 18px;
+        display: grid;
+        place-items: center;
+        border: 2px solid rgba(20, 20, 20, 0.82);
+        background: rgba(255, 255, 255, 0.92);
+        color: #1d1d1d;
+        font-size: 9px;
+        font-weight: 900;
+        line-height: 1;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.14);
+    }
+    .affinity-gain {
+        position: absolute;
+        left: 50%;
+        top: -18px;
+        z-index: 6;
+        padding: 2px 5px;
+        border: 2px solid rgba(20, 20, 20, 0.82);
+        background: rgba(255, 255, 255, 0.94);
+        color: #1d1d1d;
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+        transform: translateX(-50%);
+        pointer-events: none;
+        animation: affinity-pop 900ms ease forwards;
+    }
+    @keyframes affinity-pop {
+        0% { opacity: 0; transform: translate(-50%, 6px); }
+        18% { opacity: 1; transform: translate(-50%, 0); }
+        100% { opacity: 0; transform: translate(-50%, -16px); }
+    }
     @keyframes cow-tail {
         0%, 100% { transform: rotate(0deg); }
         50% { transform: rotate(10deg); }
@@ -619,11 +1017,33 @@
         <div class="bub bub-2"></div>
         <div class="custom-pet-image" id="customPetImage">
             <img class="custom-pet-sheet" id="customPetSheet" alt="">
+            <canvas class="custom-pet-canvas" id="customPetCanvas"></canvas>
         </div>
         <div class="particles" id="particles"></div>
+        <div class="bond-item-overlay" id="bondItemOverlay" aria-hidden="true"></div>
     </div>
 
     <!-- 图标工具栏 -->
+    <div class="reply-bubble" id="replyBubble" aria-live="polite">
+        <div class="reply-bubble-header">
+            <div class="reply-bubble-sender" id="replyBubbleSender">小K</div>
+            <div class="reply-bubble-state" id="replyBubbleState" aria-hidden="true"></div>
+            <button class="reply-bubble-collapse" id="replyBubbleCollapse" type="button" aria-label="Collapse reply" onclick="collapseReplyBubble()">×</button>
+        </div>
+        <div class="reply-bubble-text" id="replyBubbleText"></div>
+        <button class="reply-bubble-toggle" id="replyBubbleToggle" type="button" onclick="toggleReplyBubbleExpanded()">展开</button>
+        <button class="reply-bubble-next" id="replyBubbleNext" type="button" onclick="continueConversation()">继续</button>
+    </div>
+
+    <button class="conversation-dock-button" id="replyDockButton" type="button" aria-label="Show reply" onclick="restoreCollapsedReplyBubble()">
+        <span class="conversation-dock-status" id="replyDockStatus" aria-hidden="true"></span>
+    </button>
+
+    <div class="conversation-panel" id="conversationPanel">
+        <div class="conversation-title">Recent Chat</div>
+        <div class="conversation-list" id="conversationList"></div>
+    </div>
+
     <div class="toolbar" id="toolbar">
         <div class="tool-icon" id="btnChat" title="发消息" onclick="toggleInput()">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -665,10 +1085,10 @@
         <div class="settings-title">Focus Adventure</div>
         <input class="game-input" id="focusTaskTitle" placeholder="Task title">
         <div class="game-row" id="focusDurations">
+            <button data-minutes="5" onclick="selectFocusDuration(5)">5</button>
             <button data-minutes="15" onclick="selectFocusDuration(15)">15</button>
             <button data-minutes="25" onclick="selectFocusDuration(25)">25</button>
-            <button data-minutes="45" onclick="selectFocusDuration(45)">45</button>
-            <button data-minutes="90" onclick="selectFocusDuration(90)">90</button>
+            <button data-minutes="55" onclick="selectFocusDuration(55)">55</button>
         </div>
         <select class="game-input" id="focusIntentType">
             <option>Code</option>
@@ -701,8 +1121,17 @@
 
     <!-- 输入条 -->
     <div class="input-bar" id="inputBar">
-        <input type="text" id="input" placeholder="说点什么..." onkeypress="if(event.key==='Enter')send()">
-        <button onclick="send()">↑</button>
+        <div class="conversation-input-row">
+            <input type="text" id="input" placeholder="说点什么..." onkeypress="if(event.key==='Enter')send()">
+            <button class="conversation-send-button" title="Send" aria-label="Send" onclick="send()">↑</button>
+        </div>
+        <div class="conversation-tools-row">
+            <button class="conversation-mode-button" id="conversationModeToggle" title="Basic AI / OpenClaw" onclick="toggleConversationMode()">Basic</button>
+            <button id="conversationHistoryButton" title="History" aria-label="History" onclick="showConversationHistory()">
+                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/><path d="M12 7v5l3 2"/></svg>
+            </button>
+            <div class="conversation-status" id="conversationStatus"></div>
+        </div>
     </div>
 </div>
 
@@ -717,14 +1146,18 @@ let _moodTimer = null;
 const blushL = document.getElementById('blushL');
 const blushR = document.getElementById('blushR');
 const particlesEl = document.getElementById('particles');
+const bondItemOverlay = document.getElementById('bondItemOverlay');
 const glassShell = document.querySelector('.glass-shell');
 const inputBar = document.getElementById('inputBar');
 const inputEl = document.getElementById('input');
+const conversationModeToggle = document.getElementById('conversationModeToggle');
+const conversationStatus = document.getElementById('conversationStatus');
 const btnVoice = document.getElementById('btnVoice');
 const settingsVoiceButton = document.getElementById('settingsVoiceButton');
 const toolbar = document.getElementById('toolbar');
 const customPetImage = document.getElementById('customPetImage');
 const customPetSheet = document.getElementById('customPetSheet');
+const customPetCanvas = document.getElementById('customPetCanvas');
 const settingsPanel = document.getElementById('settingsPanel');
 const appearanceCurrent = document.getElementById('appearanceCurrent');
 const settingsNote = document.getElementById('settingsNote');
@@ -741,6 +1174,13 @@ const focusFinishButton = document.getElementById('focusFinishButton');
 const petLevelText = document.getElementById('petLevelText');
 const abilityList = document.getElementById('abilityList');
 const skillCardList = document.getElementById('skillCardList');
+const replyBubble = document.getElementById('replyBubble');
+const replyBubbleSender = document.getElementById('replyBubbleSender');
+const replyBubbleText = document.getElementById('replyBubbleText');
+const replyBubbleToggle = document.getElementById('replyBubbleToggle');
+const replyDockButton = document.getElementById('replyDockButton');
+const conversationPanel = document.getElementById('conversationPanel');
+const conversationList = document.getElementById('conversationList');
 
 let voiceOn = true;
 let isConnected = false;
@@ -753,17 +1193,68 @@ let focusTimerInterval = null;
 let spriteFrameTimer = null;
 let spriteFrameIndex = 0;
 let spriteReactionTimer = null;
+let customPetFrameImage = new Image();
+let customPetFrameReady = false;
+let customPetFrameSrc = '';
 let petFacing = 1;
 let roamDirection = Math.random() < 0.5 ? -1 : 1;
 let roamPausedUntil = Date.now() + 4000;
 let roamInFlight = false;
+let replyBubbleTimer = null;
+let replyBubbleFullContent = '';
+let replyBubblePreviewContent = '';
+let currentConversationTitle = '';
+let replyBubbleCollapsed = false;
+let replyDockState = '';
+let conversationModeActive = false;
+let awaitingConversationReply = false;
+let conversationMode = 'basic';
 
 function hideGamePanels() {
     [focusAdventurePanel, abilityTreePanel, skillBookPanel].forEach(panel => panel?.classList.remove('show'));
 }
 
+function hasReplyConversation() {
+    return Boolean(currentConversationTitle || replyBubbleFullContent || awaitingConversationReply);
+}
+
+function setDockState(state = '') {
+    replyDockState = state;
+    if (!replyDockButton) return;
+    const showDock = replyBubbleCollapsed && hasReplyConversation();
+    replyDockButton.classList.toggle('show', showDock);
+    replyDockButton.classList.toggle('pending', state === 'pending');
+    replyDockButton.classList.toggle('ready', state === 'ready');
+    replyDockButton.title = state === 'pending' ? '正在回复，点击展开' : '查看回复';
+}
+
+function closeReplyBubble() {
+    if (replyBubbleTimer) clearTimeout(replyBubbleTimer);
+    replyBubbleTimer = null;
+    replyBubble?.classList.remove('show', 'expanded', 'has-more', 'pending', 'ready');
+    if (replyBubbleToggle) replyBubbleToggle.textContent = '展开';
+    setDockState(replyDockState);
+}
+
+function clearReplyConversation() {
+    closeReplyBubble();
+    replyBubbleFullContent = '';
+    replyBubblePreviewContent = '';
+    currentConversationTitle = '';
+    replyBubbleCollapsed = false;
+    setDockState('');
+}
+
+function endConversationMode() {
+    conversationModeActive = false;
+    inputBar.classList.remove('show');
+    hideConversationPanel();
+    closeReplyBubble();
+}
+
 function showGamePanel(panel) {
     hideGamePanels();
+    endConversationMode();
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
     inputBar.classList.remove('show');
@@ -778,7 +1269,7 @@ function setAppearanceNote(text) {
 function toggleSettingsPanel() {
     settingsPanel.classList.toggle('show');
     setAppearanceNote('');
-    inputBar.classList.remove('show');
+    endConversationMode();
     hideGamePanels();
     pauseRoam(2500);
 }
@@ -790,6 +1281,7 @@ function togglePetOptions() {
         inputBar.classList.remove('show');
         hideGamePanels();
     }
+    if (!toolbar.classList.contains('show')) endConversationMode();
     pauseRoam(2500);
 }
 
@@ -804,12 +1296,16 @@ document.addEventListener('click', e => {
         toolbar.contains(e.target) ||
         settingsPanel.contains(e.target) ||
         inputBar.contains(e.target) ||
+        replyBubble.contains(e.target) ||
+        replyDockButton.contains(e.target) ||
+        conversationPanel.contains(e.target) ||
         focusAdventurePanel.contains(e.target) ||
         abilityTreePanel.contains(e.target) ||
         skillBookPanel.contains(e.target)
     ) return;
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
+    endConversationMode();
     hideGamePanels();
 });
 
@@ -820,15 +1316,14 @@ function renderAppearance(state) {
     const isCustomImage = state.activePet && ['image','spritesheet','frames'].includes(state.activePet.renderer) && state.activeImageUrl;
     pet.classList.toggle('custom-image', Boolean(isCustomImage));
     if (isCustomImage) {
-        customPetSheet.src = state.activeImageUrl;
         if (state.activePet.renderer === 'spritesheet') {
-            const columns = activePetManifest?.layout?.columns || 8;
-            const rows = activePetManifest?.layout?.rows || Object.keys(activePetManifest?.states || {}).length || 9;
-            customPetSheet.style.width = `${columns * 100}%`;
-            customPetSheet.style.height = `${rows * 100}%`;
-            customPetSheet.style.objectFit = 'fill';
-            customPetSheet.style.transform = 'translate3d(0, 0, 0)';
+            customPetSheet.style.display = 'none';
+            customPetCanvas.style.display = 'block';
+            loadCustomPetFrameImage(state.activeImageUrl);
         } else {
+            customPetCanvas.style.display = 'none';
+            customPetSheet.style.display = 'block';
+            customPetSheet.src = state.activeImageUrl;
             customPetSheet.style.width = '100%';
             customPetSheet.style.height = '100%';
             customPetSheet.style.objectFit = 'contain';
@@ -837,6 +1332,10 @@ function renderAppearance(state) {
         appearanceCurrent.textContent = state.activePet.name || 'Custom Pet';
     } else {
         customPetSheet.removeAttribute('src');
+        customPetSheet.style.display = 'block';
+        customPetCanvas.style.display = 'none';
+        customPetFrameReady = false;
+        customPetFrameSrc = '';
         customPetSheet.style.width = '100%';
         customPetSheet.style.height = '100%';
         customPetSheet.style.objectFit = 'contain';
@@ -850,27 +1349,143 @@ function renderAppearance(state) {
     startSpriteAnimation();
 }
 
+function loadCustomPetFrameImage(src) {
+    if (customPetFrameSrc === src && customPetFrameReady) return;
+    customPetFrameSrc = src;
+    customPetFrameReady = false;
+    customPetFrameImage = new Image();
+    customPetFrameImage.onload = () => {
+        customPetFrameReady = true;
+        startSpriteAnimation();
+    };
+    customPetFrameImage.onerror = () => {
+        customPetFrameReady = false;
+    };
+    customPetFrameImage.src = src;
+}
+
 function stopSpriteAnimation() {
     if (spriteFrameTimer) clearInterval(spriteFrameTimer);
     spriteFrameTimer = null;
     spriteFrameIndex = 0;
 }
 
+function getCustomPetFrameGeometry(action, frame) {
+    const columns = activePetManifest?.layout?.columns || 8;
+    const rows = activePetManifest?.layout?.rows || Object.keys(activePetManifest?.states || {}).length || 9;
+    const state = activePetManifest?.states?.[action] || activePetManifest?.states?.idle || {};
+    const sourceCellWidth = Math.max(1, Math.floor((customPetFrameImage.naturalWidth || customPetFrameImage.width) / columns));
+    const sourceCellHeight = Math.max(1, Math.floor((customPetFrameImage.naturalHeight || customPetFrameImage.height) / rows));
+    const frames = Math.max(1, Math.min(state.frames || 1, columns));
+    const row = typeof state.row === 'number' ? state.row : 0;
+    return {
+        sourceCellWidth,
+        sourceCellHeight,
+        sourceX: (frame % frames) * sourceCellWidth,
+        sourceY: row * sourceCellHeight,
+        frames,
+    };
+}
+
+function clampFrameOffset(offset, min, max, size) {
+    return Math.max(-min, Math.min(size - 1 - max, offset));
+}
+
+function calculateFrameCoreOffset(frameData, width, height) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    let opaqueCount = 0;
+    for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+            const alpha = frameData.data[(y * width + x) * 4 + 3];
+            if (alpha <= 40) continue;
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            opaqueCount += 1;
+        }
+    }
+    if (!Number.isFinite(minX)) return { dx: 0, dy: 0 };
+
+    const contentHeight = maxY - minY + 1;
+    const coreMaxY = minY + Math.max(2, Math.floor(contentHeight * 0.38));
+    let coreMinX = Infinity;
+    let coreMaxX = -Infinity;
+    let coreSamples = 0;
+    for (let y = minY; y <= coreMaxY; y += 1) {
+        for (let x = minX; x <= maxX; x += 1) {
+            const alpha = frameData.data[(y * width + x) * 4 + 3];
+            if (alpha <= 40) continue;
+            coreMinX = Math.min(coreMinX, x);
+            coreMaxX = Math.max(coreMaxX, x);
+            coreSamples += 1;
+        }
+    }
+
+    const coreAnchorX = coreSamples >= Math.max(4, Math.floor(opaqueCount * 0.08))
+        ? (coreMinX + coreMaxX) / 2
+        : (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    return {
+        dx: clampFrameOffset(Math.round((width - 1) / 2 - coreAnchorX), minX, maxX, width),
+        dy: clampFrameOffset(Math.round((height - 1) / 2 - centerY), minY, maxY, height),
+    };
+}
+
+function drawCustomPetFrame(action, frame) {
+    if (!customPetFrameReady || !activePetManifest) return { frames: 1 };
+    const geometry = getCustomPetFrameGeometry(action, frame);
+    const context = customPetCanvas.getContext('2d', { willReadFrequently: true });
+    customPetCanvas.width = geometry.sourceCellWidth;
+    customPetCanvas.height = geometry.sourceCellHeight;
+    context.imageSmoothingEnabled = false;
+    context.clearRect(0, 0, customPetCanvas.width, customPetCanvas.height);
+    context.drawImage(
+        customPetFrameImage,
+        geometry.sourceX,
+        geometry.sourceY,
+        geometry.sourceCellWidth,
+        geometry.sourceCellHeight,
+        0,
+        0,
+        geometry.sourceCellWidth,
+        geometry.sourceCellHeight
+    );
+
+    const frameData = context.getImageData(0, 0, customPetCanvas.width, customPetCanvas.height);
+    const { dx, dy } = calculateFrameCoreOffset(frameData, customPetCanvas.width, customPetCanvas.height);
+    if (dx !== 0 || dy !== 0) {
+        context.clearRect(0, 0, customPetCanvas.width, customPetCanvas.height);
+        context.drawImage(
+            customPetFrameImage,
+            geometry.sourceX,
+            geometry.sourceY,
+            geometry.sourceCellWidth,
+            geometry.sourceCellHeight,
+            dx,
+            dy,
+            geometry.sourceCellWidth,
+            geometry.sourceCellHeight
+        );
+    }
+    return geometry;
+}
+
 function updateSpriteFrame() {
     if (!activePetManifest || !pet.classList.contains('custom-image')) return;
     const state = activePetManifest.states?.[currentMood] || activePetManifest.states?.idle;
     if (!state || typeof state.row !== 'number') return;
-    const frames = state.frames || 8;
-    const columns = activePetManifest.layout?.columns || 8;
-    const rows = activePetManifest.layout?.rows || Object.keys(activePetManifest.states || {}).length || 9;
-    const frame = spriteFrameIndex % Math.min(frames, columns);
-    customPetSheet.style.transform = `translate3d(${-frame * (100 / columns)}%, ${-state.row * (100 / rows)}%, 0)`;
-    spriteFrameIndex = (spriteFrameIndex + 1) % frames;
+    const geometry = drawCustomPetFrame(currentMood, spriteFrameIndex);
+    spriteFrameIndex = (spriteFrameIndex + 1) % (geometry.frames || 1);
 }
 
 function startSpriteAnimation() {
     stopSpriteAnimation();
     if (!activePetManifest || activePetManifest.renderer !== 'spritesheet') return;
+    if (!customPetFrameReady) return;
     const state = activePetManifest.states?.[currentMood] || activePetManifest.states?.idle;
     const duration = state?.duration || 140;
     updateSpriteFrame();
@@ -948,6 +1563,346 @@ function escapeHtml(value) {
     })[char]);
 }
 
+function renderMarkdownInline(value) {
+    const codeTokens = [];
+    let text = escapeHtml(value).replace(/`([^`]+)`/g, (_, code) => {
+        const token = `@@CODE${codeTokens.length}@@`;
+        codeTokens.push(`<code>${code}</code>`);
+        return token;
+    });
+
+    text = text
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
+        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[\s(])_([^_\n]+)_/g, '$1<em>$2</em>');
+
+    return text.replace(/@@CODE(\d+)@@/g, (_, index) => codeTokens[Number(index)] || '');
+}
+
+function renderMarkdown(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+
+    const lines = text.replace(/\r\n/g, '\n').split('\n');
+    let html = '';
+    let listType = '';
+    let inCodeBlock = false;
+    let codeLines = [];
+    let paragraphLines = [];
+
+    const flushParagraph = () => {
+        if (!paragraphLines.length) return;
+        html += `<p>${renderMarkdownInline(paragraphLines.join(' '))}</p>`;
+        paragraphLines = [];
+    };
+    const closeList = () => {
+        if (!listType) return;
+        html += `</${listType}>`;
+        listType = '';
+    };
+    const openList = (type) => {
+        if (listType === type) return;
+        closeList();
+        listType = type;
+        html += `<${type}>`;
+    };
+    const flushCodeBlock = () => {
+        html += `<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`;
+        codeLines = [];
+    };
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('```')) {
+            if (inCodeBlock) {
+                flushCodeBlock();
+                inCodeBlock = false;
+            } else {
+                flushParagraph();
+                closeList();
+                inCodeBlock = true;
+                codeLines = [];
+            }
+            continue;
+        }
+        if (inCodeBlock) {
+            codeLines.push(line);
+            continue;
+        }
+        if (!trimmed) {
+            flushParagraph();
+            closeList();
+            continue;
+        }
+
+        const heading = trimmed.match(/^#{1,6}\s+(.+)$/);
+        if (heading) {
+            flushParagraph();
+            closeList();
+            html += `<p><strong>${renderMarkdownInline(heading[1])}</strong></p>`;
+            continue;
+        }
+
+        const bullet = trimmed.match(/^[-*+]\s+(.+)$/);
+        if (bullet) {
+            flushParagraph();
+            openList('ul');
+            html += `<li>${renderMarkdownInline(bullet[1])}</li>`;
+            continue;
+        }
+
+        const numbered = trimmed.match(/^\d+[.)]\s+(.+)$/);
+        if (numbered) {
+            flushParagraph();
+            openList('ol');
+            html += `<li>${renderMarkdownInline(numbered[1])}</li>`;
+            continue;
+        }
+
+        closeList();
+        paragraphLines.push(trimmed);
+    }
+
+    if (inCodeBlock) flushCodeBlock();
+    flushParagraph();
+    closeList();
+
+    return html;
+}
+
+function setReplyBubbleContent(content) {
+    if (!replyBubbleText) return;
+    replyBubbleText.innerHTML = renderMarkdown(content);
+}
+
+function hideConversationPanel() {
+    conversationPanel?.classList.remove('show');
+}
+
+function enterConversationMode({ focusInput = true } = {}) {
+    conversationModeActive = true;
+    toolbar.classList.remove('show');
+    settingsPanel.classList.remove('show');
+    hideGamePanels();
+    closeReplyBubble();
+    setConversationStatus('', '');
+    updateConversationModeUI();
+    inputBar.classList.add('show');
+    if (focusInput) inputEl.focus();
+    pauseRoam(3500);
+}
+
+function shouldShowConversationReply() {
+    return conversationModeActive || awaitingConversationReply;
+}
+
+function updateConversationModeUI() {
+    if (!conversationModeToggle) return;
+    const isOpenClaw = conversationMode === 'openclaw';
+    conversationModeToggle.textContent = isOpenClaw ? 'Claw' : 'Basic';
+    conversationModeToggle.title = isOpenClaw ? 'OpenClaw conversation' : 'Basic AI conversation';
+    conversationModeToggle.classList.toggle('openclaw', isOpenClaw);
+}
+
+function setConversationStatus(message = '', type = '') {
+    if (!conversationStatus) return;
+    conversationStatus.textContent = message;
+    conversationStatus.classList.toggle('show', Boolean(message));
+    conversationStatus.classList.toggle('error', type === 'error');
+}
+
+function toggleConversationMode() {
+    conversationMode = conversationMode === 'openclaw' ? 'basic' : 'openclaw';
+    updateConversationModeUI();
+    setConversationStatus(
+        conversationMode === 'openclaw'
+            ? 'OpenClaw mode: uses the local Gateway workflow.'
+            : 'Basic mode: direct AI chat with the current model.',
+        ''
+    );
+    inputEl.focus();
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForOpenClawGateway({ attempts = 1, delayMs = 0 } = {}) {
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+        try {
+            const gatewaySnapshot = await electronAPI.invoke('gateway-status');
+            const availability = gatewaySnapshot?.availability;
+            if (availability && !availability.ready) {
+                return { ready: false, blocked: true, reason: availability.reason };
+            }
+            isConnected = Boolean(gatewaySnapshot?.connected);
+            if (isConnected) return { ready: true };
+        } catch (_) {
+            isConnected = false;
+        }
+        if (delayMs > 0 && attempt < attempts - 1) await sleep(delayMs);
+    }
+    return { ready: false };
+}
+
+async function ensureOpenClawReady() {
+    if (conversationMode !== 'openclaw') return true;
+    const initialGateway = await waitForOpenClawGateway({ attempts: 1 });
+    if (initialGateway.ready) return true;
+    if (initialGateway.blocked) {
+        setConversationStatus(initialGateway.reason || 'OpenClaw Gateway is offline.', 'error');
+        return false;
+    }
+
+    setConversationStatus('OpenClaw Gateway is offline. Restarting...', 'error');
+    try {
+        const restart = await electronAPI.invoke('diag-restart-gateway');
+        if (!restart?.success) {
+            setConversationStatus(restart?.error || restart?.message || 'OpenClaw Gateway is offline.', 'error');
+            return false;
+        }
+
+        const ready = await waitForOpenClawGateway({ attempts: 6, delayMs: 900 });
+        if (ready.ready) {
+            setConversationStatus('OpenClaw Gateway reconnected.', '');
+            return true;
+        }
+        if (ready.blocked) {
+            setConversationStatus(ready.reason || 'OpenClaw Gateway is offline.', 'error');
+            return false;
+        }
+        setConversationStatus('OpenClaw Gateway is offline. Use tray > Restart Gateway.', 'error');
+        return false;
+    } catch (err) {
+        setConversationStatus(err?.message || 'OpenClaw Gateway is offline.', 'error');
+        return false;
+    }
+}
+
+function showReplyBubble(response = {}) {
+    if (!replyBubble || !replyBubbleText) return;
+    const content = String(response.content || response.text || '').trim();
+    if (!content) return;
+    const previewLimit = 110;
+    const hasMore = content.length > previewLimit;
+    hideConversationPanel();
+    currentConversationTitle = String(response.title || currentConversationTitle || response.sender || '小K').trim();
+    if (replyBubbleSender) replyBubbleSender.textContent = currentConversationTitle;
+    replyBubbleFullContent = content;
+    replyBubblePreviewContent = hasMore ? `${content.slice(0, previewLimit - 3)}...` : content;
+    setDockState('ready');
+    if (replyBubbleCollapsed) return;
+    setReplyBubbleContent(replyBubblePreviewContent);
+    replyBubble.classList.remove('expanded', 'pending');
+    replyBubble.classList.add('ready');
+    replyBubble.classList.toggle('has-more', hasMore);
+    if (replyBubbleToggle) replyBubbleToggle.textContent = '展开';
+    setConversationStatus('', '');
+    replyBubble.classList.add('show');
+    if (replyBubbleTimer) clearTimeout(replyBubbleTimer);
+    replyBubbleTimer = setTimeout(() => {
+        collapseReplyBubble();
+        if (!inputBar.classList.contains('show') && !conversationPanel.classList.contains('show')) {
+            conversationModeActive = false;
+        }
+    }, 12000);
+}
+
+function showPendingReplyBubble(title) {
+    currentConversationTitle = String(title || '正在回复').trim();
+    replyBubbleFullContent = '正在思考';
+    replyBubblePreviewContent = replyBubbleFullContent;
+    replyBubbleCollapsed = false;
+    if (replyBubbleSender) replyBubbleSender.textContent = currentConversationTitle;
+    setReplyBubbleContent(replyBubblePreviewContent);
+    replyBubble?.classList.remove('expanded', 'has-more', 'ready');
+    replyBubble?.classList.add('show', 'pending');
+    if (replyBubbleToggle) replyBubbleToggle.textContent = '展开';
+    setDockState('pending');
+    if (replyBubbleTimer) clearTimeout(replyBubbleTimer);
+    replyBubbleTimer = null;
+}
+
+function collapseReplyBubble() {
+    if (!hasReplyConversation()) return;
+    replyBubbleCollapsed = true;
+    closeReplyBubble();
+    setDockState(awaitingConversationReply ? 'pending' : 'ready');
+}
+
+function restoreCollapsedReplyBubble() {
+    if (!hasReplyConversation()) return;
+    replyBubbleCollapsed = false;
+    setDockState(replyDockState);
+    if (awaitingConversationReply && !replyBubbleFullContent) {
+        showPendingReplyBubble(currentConversationTitle);
+        return;
+    }
+    if (awaitingConversationReply && replyBubbleFullContent === '正在思考') {
+        showPendingReplyBubble(currentConversationTitle);
+        return;
+    }
+    showReplyBubble({
+        title: currentConversationTitle,
+        content: replyBubbleFullContent || replyBubblePreviewContent || '正在思考',
+    });
+}
+
+function continueConversation() {
+    clearReplyConversation();
+    conversationModeActive = true;
+    enterConversationMode({ focusInput: true });
+}
+
+function toggleReplyBubbleExpanded() {
+    if (!replyBubble || !replyBubbleText || !replyBubbleFullContent) return;
+    const expanded = !replyBubble.classList.contains('expanded');
+    replyBubble.classList.toggle('expanded', expanded);
+    setReplyBubbleContent(expanded ? replyBubbleFullContent : replyBubblePreviewContent);
+    if (replyBubbleToggle) {
+        if (expanded) {
+            replyBubbleToggle.textContent = '收起';
+        } else {
+            replyBubbleToggle.textContent = '展开';
+        }
+    }
+    if (replyBubbleTimer) clearTimeout(replyBubbleTimer);
+    replyBubbleTimer = setTimeout(() => {
+        closeReplyBubble();
+        awaitingConversationReply = false;
+    }, expanded ? 24000 : 12000);
+}
+
+function renderConversationMessages(messages = []) {
+    if (!conversationPanel || !conversationList) return;
+    closeReplyBubble();
+    const normalized = Array.isArray(messages) ? messages : [];
+    conversationList.innerHTML = normalized.length ? normalized.map(message => {
+        const sender = message.sender || '';
+        const type = sender === '小K' ? 'agent' : 'user';
+        return `<div class="conversation-entry ${type}">
+            <div class="conversation-sender">${escapeHtml(sender || (type === 'agent' ? '小K' : 'User'))}</div>
+            <div class="conversation-message">${renderMarkdown(message.content || message.message || '')}</div>
+        </div>`;
+    }).join('') : '<div class="conversation-entry"><div>No recent conversation yet.</div></div>';
+    conversationPanel.classList.add('show');
+}
+
+async function showConversationHistory() {
+    if (!electronAPI) return;
+    conversationModeActive = true;
+    inputBar.classList.remove('show');
+    hideConversationPanel();
+    try {
+        const result = await electronAPI.invoke('show-history');
+        if (result?.success) {
+            renderConversationMessages(result.messages || []);
+        }
+    } catch (err) {
+        renderConversationMessages([{ sender: 'System', content: err.message || 'Conversation history unavailable.' }]);
+    }
+}
+
 function updateFocusTimerText() {
     if (!focusTimerText) return;
     if (!activeFocusSession) {
@@ -970,6 +1925,80 @@ function updateFocusButtons() {
     });
 }
 
+function getBondItemCatalog(state = {}) {
+    const catalog = {};
+    (state.bondItemCatalog || []).forEach(item => {
+        catalog[item.id] = item;
+    });
+    return catalog;
+}
+
+function getBondItemLabel(item = {}, catalog = {}) {
+    const name = catalog[item.id]?.name || item.id || '';
+    return String(name)
+        .split(/[\s-]+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0]?.toUpperCase() || '')
+        .join('') || 'B';
+}
+
+function renderBondItemOverlay(state = {}) {
+    if (!bondItemOverlay) return;
+    const catalog = getBondItemCatalog(state);
+    const items = (state.bondItems || []).slice(-3);
+    bondItemOverlay.innerHTML = items.map(item => `
+        <div class="bond-item" title="${escapeHtml(catalog[item.id]?.name || item.id)}">${escapeHtml(getBondItemLabel(item, catalog))}</div>
+    `).join('');
+}
+
+function showAffinityGain(appliedXp = 0) {
+    if (!pet || !appliedXp) return;
+    const popup = document.createElement('div');
+    popup.className = 'affinity-gain';
+    popup.textContent = `+${appliedXp}`;
+    pet.appendChild(popup);
+    setTimeout(() => popup.remove(), 950);
+}
+
+function playAffinityReaction(reaction) {
+    if (!reaction || reaction === 'idle') return;
+    if (reaction === 'surprised') {
+        setMood('surprised');
+        setTimeout(() => setMood('happy'), 900);
+        setTimeout(() => setMood('idle'), 2200);
+        return;
+    }
+    if (reaction === 'thinking') {
+        setMood('thinking');
+        setTimeout(() => setMood('happy'), 1200);
+        setTimeout(() => setMood('idle'), 2600);
+        return;
+    }
+    setMood(reaction);
+    setTimeout(() => setMood('idle'), 1600);
+}
+
+async function recordPetAffinity(eventType) {
+    if (!window.electronAPI) return null;
+    try {
+        const result = await electronAPI.invoke('pet-affinity-record', { eventType });
+        if (result?.progress) renderPetProgress(result.progress);
+        if (result?.success && result.appliedXp > 0) showAffinityGain(result.appliedXp);
+        if (result?.success) playAffinityReaction(result.reaction);
+        return result;
+    } catch (err) {
+        return null;
+    }
+}
+
+function formatAffinityEvents(events = []) {
+    const total = events.reduce((sum, event) => sum + Number(event.appliedXp || 0), 0);
+    if (!total) return '';
+    const unlocked = events.flatMap(event => event.unlockedBondItems || []);
+    return `, +${total} bond${unlocked.length ? ', Bond item' : ''}`;
+}
+
 function renderPetProgress(state) {
     if (!state) return;
     petProgressState = state;
@@ -977,7 +2006,7 @@ function renderPetProgress(state) {
     const tree = state.abilityTree || { abilities: [], petLevel: state.petLevel || 1, tiers: [] };
     const tier = (tree.tiers || []).find(item => item.level === tree.petLevel);
     if (petLevelText) {
-        petLevelText.textContent = `Level ${tree.petLevel} ${tier?.tier || 'Companion'} | XP ${state.focusXp || 0} | Fragments ${state.abilityFragments || 0} | Stardust ${state.stardust || 0}`;
+        petLevelText.textContent = `Level ${tree.petLevel} ${tier?.tier || 'Companion'} | XP ${state.focusXp || 0} | Fragments ${state.abilityFragments || 0} | Stardust ${state.stardust || 0} | Bond Lv ${state.affinityLevel || 1}`;
     }
     if (abilityList) {
         abilityList.innerHTML = (tree.abilities || []).map(ability => {
@@ -999,14 +2028,22 @@ function renderPetProgress(state) {
     }
     const skillCards = state.skillCards || [];
     if (skillCardList) {
-        skillCardList.innerHTML = skillCards.length ? skillCards.map(card => `
-            <div class="skill-card ${card.status === 'locked' ? 'locked' : ''}">
-                <strong>${escapeHtml(card.name)}</strong>
-                <div class="skill-meta">${escapeHtml(card.rarity || 'common')} | ${escapeHtml(card.status || 'candidate')} | Lv ${card.level || 1}</div>
-                <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
-            </div>
-        `).join('') : '<div class="game-current">No skills yet.</div>';
+        skillCardList.innerHTML = skillCards.length ? skillCards.map(card => {
+            const status = card.status || 'candidate';
+            const action = status === 'candidate' && card.sourceSeedId
+                ? `<button onclick="learnPetSkill('${escapeHtml(card.sourceSeedId)}')">Learn</button>`
+                : `<div>${escapeHtml(status === 'learned' ? 'Learned' : status)}</div>`;
+            return `
+                <div class="skill-card ${status === 'locked' ? 'locked' : ''}">
+                    <strong>${escapeHtml(card.name)}</strong>
+                    <div class="skill-meta">${escapeHtml(card.rarity || 'common')} | ${escapeHtml(status)} | Lv ${card.level || 1}</div>
+                    <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
+                    ${action}
+                </div>
+            `;
+        }).join('') : '<div class="game-current">No skills yet.</div>';
     }
+    renderBondItemOverlay(state);
     updateFocusTimerText();
     updateFocusButtons();
 }
@@ -1149,6 +2186,7 @@ function loop() {
     requestAnimationFrame(loop);
 }
 loop();
+updateConversationModeUI();
 loadAppearance();
 loadPetProgress();
 if (window.electronAPI) {
@@ -2047,15 +3085,16 @@ setInterval(() => {
 
 // 记录互动时间
 pet.addEventListener('mousedown', () => { lastInteraction = Date.now(); });
+pet.addEventListener('click', () => { recordPetAffinity('pet-click'); });
 document.addEventListener('keydown', () => { lastInteraction = Date.now(); });
 
 // ===== 工具栏 =====
 function toggleInput() {
-    pauseRoam(3500);
-    settingsPanel.classList.remove('show');
-    hideGamePanels();
-    inputBar.classList.toggle('show');
-    if (inputBar.classList.contains('show')) inputEl.focus();
+    if (inputBar.classList.contains('show')) {
+        endConversationMode();
+        return;
+    }
+    enterConversationMode();
 }
 
 function toggleVoice() {
@@ -2109,7 +3148,7 @@ async function openPetGame(tab = 'focus') {
     hideGamePanels();
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
-    inputBar.classList.remove('show');
+    endConversationMode();
     await electronAPI.invoke('pet-game-open', { tab });
 }
 
@@ -2170,7 +3209,7 @@ async function finishFocusAdventure(status) {
     setTimeout(() => setMood('idle'), 2500);
     if (focusSummary) focusSummary.value = '';
     const rewards = result.session.rewards;
-    focusRewardText.textContent = `+${rewards.focusXp} XP, +${rewards.abilityFragments} fragments, +${rewards.stardust} stardust${rewards.skillSeed ? ', Skill Seed found' : ''}`;
+    focusRewardText.textContent = `+${rewards.focusXp} XP, +${rewards.abilityFragments} fragments, +${rewards.stardust} stardust${rewards.skillSeed ? ', Skill Seed found' : ''}${formatAffinityEvents(result.affinityEvents)}`;
 }
 
 async function unlockPetAbility(abilityId) {
@@ -2182,6 +3221,19 @@ async function unlockPetAbility(abilityId) {
         return;
     }
     focusRewardText.textContent = 'Ability unlocked.';
+    setMood('happy');
+    setTimeout(() => setMood('idle'), 2000);
+}
+
+async function learnPetSkill(seedId) {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('pet-skill-learn', { seedId });
+    renderPetProgress(result.progress);
+    if (!result.success) {
+        focusRewardText.textContent = result.error || 'Could not learn Skill';
+        return;
+    }
+    focusRewardText.textContent = 'Skill learned.';
     setMood('happy');
     setTimeout(() => setMood('idle'), 2000);
 }
@@ -2231,10 +3283,50 @@ async function send() {
     const msg = inputEl.value.trim();
     if (!msg || !electronAPI) return;
     inputEl.value = '';
+    conversationModeActive = true;
+    awaitingConversationReply = true;
+    currentConversationTitle = msg;
     inputBar.classList.remove('show');
+    hideConversationPanel();
+    setConversationStatus('', '');
+    showPendingReplyBubble(msg);
+    setDockState('pending');
     setMood('thinking');
-    const reply = await electronAPI.invoke('gateway-send', msg);
-    if (reply) { setMood('happy'); setTimeout(() => setMood('idle'), 3000); }
+    if (conversationMode === 'openclaw') {
+        const openClawReady = await ensureOpenClawReady();
+        if (!openClawReady) {
+            awaitingConversationReply = false;
+            clearReplyConversation();
+            inputBar.classList.add('show');
+            setMood('idle');
+            return;
+        }
+    }
+    setConversationStatus(conversationMode === 'openclaw' ? 'OpenClaw is thinking...' : 'Basic AI is thinking...', '');
+    const channel = conversationMode === 'openclaw' ? 'gateway-send' : 'direct-chat-send';
+    let rawResult;
+    try {
+        rawResult = await electronAPI.invoke(channel, msg);
+    } catch (err) {
+        rawResult = { success: false, error: err?.message || 'Conversation failed.' };
+    }
+    const result = typeof rawResult === 'string'
+        ? { success: !/^(错误|请求失败|连接失败|Error)/.test(rawResult), content: rawResult, error: rawResult }
+        : rawResult;
+    if (!result?.success) {
+        awaitingConversationReply = false;
+        clearReplyConversation();
+        inputBar.classList.add('show');
+        setConversationStatus(result?.error || 'Conversation failed.', 'error');
+        setMood('idle');
+        return;
+    }
+    if (result?.content) {
+        inputBar.classList.remove('show');
+        setMood('happy');
+        recordPetAffinity('text-message');
+        setTimeout(() => setMood('idle'), 3000);
+    }
 }
 
 // ===== IPC =====
@@ -2247,6 +3339,10 @@ if (electronAPI) {
         setTimeout(() => setMood('idle'), 3000);
     });
     electronAPI.on('agent-response', (res) => {
+        if (shouldShowConversationReply()) {
+            showReplyBubble(res);
+            awaitingConversationReply = false;
+        }
         lastTone = detectTone(res.content);
         // 🎭 根据 emotion 直接切换对应的 mood（每种都有独立配色）
         const emotionMoodMap = {

@@ -72,7 +72,7 @@ commit fd64be3
 
 ### 🔗 GitHub链接
 
-https://github.com/kk43994/KKClaw-Desktop-Pet
+https://github.com/kk43994/Petclaw-Desktop-Pet
 
 ---
 

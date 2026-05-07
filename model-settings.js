@@ -1,5 +1,5 @@
 // ===== model-settings.js =====
-// KKClaw Switch - OpenAI Style
+// Petclaw Switch - OpenAI Style
 
 console.log('[model-settings] script loaded, electronAPI =', typeof window.electronAPI, window.electronAPI ? 'OK' : 'NULL');
 window.onerror = (msg, src, line, col, err) => {
@@ -11,7 +11,7 @@ const SVG_ICONS = {
   // Provider icons
   anthropic: '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M9.5 2L15 14H11.5L10 11H6L9.5 2zM1 14L4.5 2H7L3.5 14H1z" fill="currentColor"/></svg>',
   openai: '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M13.5 6.5a3.5 3.5 0 0 0-3-3.46A3.5 3.5 0 0 0 4 4.5a3.5 3.5 0 0 0-1.5 6.46A3.5 3.5 0 0 0 5.5 14a3.5 3.5 0 0 0 2.5-1.04A3.5 3.5 0 0 0 12 14a3.5 3.5 0 0 0 1.5-7.5z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>',
-  kkclaw: '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  petclaw: '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   default: '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>',
 
   // Status icons
@@ -158,23 +158,23 @@ function filterProvidersDebounced(query) {
   searchDebounceTimer = setTimeout(() => filterProviders(query), 300);
 }
 
-// ===== KKCLAW Quota =====
-async function analyzeKKCLAW(providerName) {
+// ===== PETCLAW Quota =====
+async function analyzePETCLAW(providerName) {
   if(!window.electronAPI) return null;
   try {
-    const result = await window.electronAPI.invoke('model-analyze-kkclaw', providerName);
+    const result = await window.electronAPI.invoke('model-analyze-petclaw', providerName);
     return result.success ? result.analysis : null;
   } catch(e) {
     return null;
   }
 }
 
-function renderKKCLAWQuota(analysis, idx) {
-  if(!analysis) return `<div class="kkclaw-quota" data-idx="${idx}" style="font-size:10px;color:var(--text-tertiary);">查询失败</div>`;
+function renderPETCLAWQuota(analysis, idx) {
+  if(!analysis) return `<div class="petclaw-quota" data-idx="${idx}" style="font-size:10px;color:var(--text-tertiary);">查询失败</div>`;
   const { series, quota, warnings } = analysis;
 
   if(!quota) {
-    return `<div class="kkclaw-quota" data-idx="${idx}" style="font-size:10px;color:var(--text-tertiary);">无额度数据 (API Key可能无效)</div>`;
+    return `<div class="petclaw-quota" data-idx="${idx}" style="font-size:10px;color:var(--text-tertiary);">无额度数据 (API Key可能无效)</div>`;
   }
 
   let statusClass = 'healthy', statusText = '';
@@ -187,18 +187,18 @@ function renderKKCLAWQuota(analysis, idx) {
 
     if(warnings.length > 0) {
       const w = warnings[0];
-      tipHtml = `<div class="kkclaw-tip ${escHtml(w.level)}">${escHtml(w.message)}</div>`;
+      tipHtml = `<div class="petclaw-tip ${escHtml(w.level)}">${escHtml(w.message)}</div>`;
     } else {
-      tipHtml = '<div class="kkclaw-tip">当前可以放心使用 Opus</div>';
+      tipHtml = '<div class="petclaw-tip">当前可以放心使用 Opus</div>';
     }
   }
 
-  return `<div class="kkclaw-quota" data-idx="${idx}">
-    ${series ? `<div class="kkclaw-series"><span class="status-dot ${statusClass}"></span>${escHtml(series.series)}</div>` : ''}
-    ${quota ? `<div class="kkclaw-quota-bar">
-      <div class="kkclaw-quota-label">Opus 本周额度 · 还剩 ${100-quota.opusWeekly.percentage}%</div>
-      <div class="kkclaw-progress">
-        <div class="kkclaw-progress-fill ${statusClass}" style="width:${quota.opusWeekly.percentage}%"></div>
+  return `<div class="petclaw-quota" data-idx="${idx}">
+    ${series ? `<div class="petclaw-series"><span class="status-dot ${statusClass}"></span>${escHtml(series.series)}</div>` : ''}
+    ${quota ? `<div class="petclaw-quota-bar">
+      <div class="petclaw-quota-label">Opus 本周额度 · 还剩 ${100-quota.opusWeekly.percentage}%</div>
+      <div class="petclaw-progress">
+        <div class="petclaw-progress-fill ${statusClass}" style="width:${quota.opusWeekly.percentage}%"></div>
       </div>
     </div>` : ''}
     ${tipHtml}
@@ -251,7 +251,7 @@ function renderProviderList() {
   el.innerHTML=allProviders.map((p, idx) => {
     const cur=p.isCurrent, spd=renderSpeedBadge(p.speedTest);
     const n=encArg(p.name);
-    const isKKCLAW = p.baseUrl?.includes('gptclubapi.xyz') || p.features?.includes('quota-query');
+    const isPETCLAW = p.baseUrl?.includes('gptclubapi.xyz') || p.features?.includes('quota-query');
 
     // Status indicator
     let statusClass = 'untested';
@@ -265,25 +265,25 @@ function renderProviderList() {
       <span class="collapse-btn" onclick="toggleProviderCollapse('${escHtml(p.name)}', event)">▼</span><div class="drag-handle"><div class="drag-dot"><span></span><span></span></div><div class="drag-dot"><span></span><span></span></div><div class="drag-dot"><span></span><span></span></div></div>
       <div class="provider-icon" style="background:${p.color}">${escHtml(p.icon)}</div>
       <div class="provider-info"><div class="provider-name-row"><span class="provider-name">${escHtml(p.name)}</span>${cur?`<span class="provider-badge">${t('currentlyUsing')}</span>`:''}</div>
-      <div class="provider-url">${escHtml(p.website||p.baseUrl||'')}</div>${isKKCLAW?`<div class="kkclaw-quota" data-idx="${idx}" style="margin-top:8px;font-size:10px;color:var(--text-tertiary);">${renderIcon('loading','spin')} 加载中...</div>`:''}</div>
+      <div class="provider-url">${escHtml(p.website||p.baseUrl||'')}</div>${isPETCLAW?`<div class="petclaw-quota" data-idx="${idx}" style="margin-top:8px;font-size:10px;color:var(--text-tertiary);">${renderIcon('loading','spin')} 加载中...</div>`:''}</div>
       <div class="provider-right">${spd}<div class="provider-api">${escHtml(p.api || 'unknown')}</div><div class="provider-models-count">${p.modelCount} model${p.modelCount!==1?'s':''}</div>
       <div class="provider-actions-row"><button class="btn btn-ghost btn-sm" title="${t('probe')}" onclick="event.stopPropagation();probeProvider(decodeURIComponent('${n}'))">${renderIcon('probe')}</button>
       <button class="btn btn-speed btn-sm" onclick="event.stopPropagation();speedTest(decodeURIComponent('${n}'))">${renderIcon('speed')}</button>
       <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editProvider(decodeURIComponent('${n}'))">${renderIcon('edit')}</button></div></div></div>`;
   }).join('');
 
-  // Async load KKCLAW quota using data-idx
+  // Async load PETCLAW quota using data-idx
   allProviders.forEach((p, idx) => {
-    const isKKCLAW = p.baseUrl?.includes('gptclubapi.xyz') || p.features?.includes('quota-query');
-    if(isKKCLAW) loadKKCLAWQuota(p.name, idx);
+    const isPETCLAW = p.baseUrl?.includes('gptclubapi.xyz') || p.features?.includes('quota-query');
+    if(isPETCLAW) loadPETCLAWQuota(p.name, idx);
   });
 }
 
-async function loadKKCLAWQuota(providerName, idx) {
-  const analysis = await analyzeKKCLAW(providerName);
-  const el = document.querySelector(`.kkclaw-quota[data-idx="${idx}"]`);
+async function loadPETCLAWQuota(providerName, idx) {
+  const analysis = await analyzePETCLAW(providerName);
+  const el = document.querySelector(`.petclaw-quota[data-idx="${idx}"]`);
   if(el) {
-    el.outerHTML = renderKKCLAWQuota(analysis, idx);
+    el.outerHTML = renderPETCLAWQuota(analysis, idx);
   }
 }
 
@@ -685,7 +685,7 @@ async function initPanel() {
     console.error('[model-settings] electronAPI unavailable after retry');
     renderCurrentIndicator();
     renderProviderList();
-    showToast('未连接到主进程，请重启 KKClaw','error');
+    showToast('未连接到主进程，请重启 Petclaw','error');
     return;
   }
 

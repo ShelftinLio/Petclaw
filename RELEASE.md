@@ -1,6 +1,6 @@
-# KKClaw Release Process
+# Petclaw Release Process
 
-Use this checklist for every user-facing KKClaw iteration. The goal is to keep versions, tags, docs, and GitHub artifacts aligned.
+Use this checklist for every user-facing Petclaw iteration. The goal is to keep versions, tags, docs, and GitHub artifacts aligned.
 
 ## Release rules
 
@@ -10,7 +10,7 @@ Use this checklist for every user-facing KKClaw iteration. The goal is to keep v
   - a changelog entry
   - a git tag
   - a GitHub push for both commit and tag
-- Keep KKClaw aligned with the installed OpenClaw workflow unless the release explicitly changes that contract.
+- Keep Petclaw aligned with the installed OpenClaw workflow unless the release explicitly changes that contract.
 
 ## Versioning
 
@@ -23,10 +23,10 @@ Use this checklist for every user-facing KKClaw iteration. The goal is to keep v
 1. Confirm the scope of the iteration.
 2. Run targeted tests for the touched surface.
 3. Run key manual checks:
-   - `kkclaw --version`
-   - `kkclaw gateway status`
-   - `kkclaw doctor`
-   - `kkclaw dashboard --no-open` or `kkclaw dashboard`
+   - `petclaw --version`
+   - `petclaw gateway status`
+   - `petclaw doctor`
+   - `petclaw dashboard --no-open` or `petclaw dashboard`
 4. Update `README.md` if user-facing behavior changed.
 5. Add a new entry to `CHANGELOG.md`.
 6. Bump versions in:

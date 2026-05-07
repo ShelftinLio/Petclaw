@@ -1,11 +1,11 @@
 {
-  "id": "custom-20260505-083518",
-  "name": "Generated Pet",
-  "description": "Generated with Codex $imagegen from: a tiny friendly pixel pet with vertical i-like glowing eyes",
-  "source": "imagegen",
+  "id": "chaos-devon-rex",
+  "name": "Chaos Devon Rex",
+  "description": "A bug-eyed, big-eared pixel Devon Rex with twitchy chaotic energy.",
+  "source": "built-in",
   "renderer": "spritesheet",
   "version": 1,
-  "spritesheet": "spritesheet.webp",
+  "spritesheet": "spritesheet.svg",
   "cell": {
     "width": 192,
     "height": 208
@@ -14,56 +14,59 @@
     "columns": 8,
     "rows": 10
   },
+  "motion": {
+    "roam": true
+  },
   "states": {
     "idle": {
       "row": 0,
       "frames": 8,
-      "duration": 140
+      "duration": 120
     },
     "happy": {
       "row": 1,
       "frames": 8,
-      "duration": 120
+      "duration": 92
     },
     "talking": {
       "row": 2,
       "frames": 8,
-      "duration": 100
+      "duration": 82
     },
     "thinking": {
       "row": 3,
       "frames": 8,
-      "duration": 160
+      "duration": 135
     },
     "sleepy": {
       "row": 4,
       "frames": 8,
-      "duration": 180
+      "duration": 165
     },
     "surprised": {
       "row": 5,
       "frames": 8,
-      "duration": 110
+      "duration": 78
     },
     "focused": {
       "row": 6,
       "frames": 8,
-      "duration": 140
+      "duration": 115
     },
     "offline": {
       "row": 7,
       "frames": 8,
-      "duration": 180
+      "duration": 170
     },
     "sad": {
       "row": 8,
       "frames": 8,
-      "duration": 160
+      "duration": 140
     },
     "walking": {
       "row": 9,
       "frames": 8,
-      "duration": 90
+      "duration": 72
     }
   }
 }

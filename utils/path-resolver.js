@@ -106,7 +106,7 @@ class PathResolver {
 
   /** 语音临时目录 */
   getVoiceTempDir() {
-    return path.join(this.getTempDir(), 'kkclaw-voice');
+    return path.join(this.getTempDir(), 'petclaw-voice');
   }
 
   /** 状态文件路径（pet-state.json） */

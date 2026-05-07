@@ -92,8 +92,21 @@ describe('pet skill and memory helpers', () => {
     }
 
     expect(listSkillCards(progress).map(card => card.id)).toEqual([
+      'skill-basic-conversation',
       'skill-existing',
       'skill-seed-focus-1',
     ])
+  })
+
+  test('shows basic conversation as the initial learned skill card', () => {
+    expect(listSkillCards({ unlockedAbilities: ['warm-chat'] })[0]).toMatchObject({
+      id: 'skill-basic-conversation',
+      name: 'Basic Conversation',
+      type: 'Conversation',
+      rarity: 'starter',
+      status: 'learned',
+      level: 1,
+      requires: [],
+    })
   })
 })

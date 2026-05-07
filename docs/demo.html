@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KKClaw Setup Wizard — Interactive Demo</title>
+<title>Petclaw Setup Wizard — Interactive Demo</title>
 <style>
   :root {
     --wood-dark: #5a3a1a;
@@ -360,7 +360,7 @@
 
 <div class="wizard-header">
   <span class="skip-btn" onclick="jumpToStep(7)">SKIP</span>
-  <h1>KKClaw Setup Wizard</h1>
+  <h1>Petclaw Setup Wizard</h1>
   <span class="demo-badge">DEMO</span>
 </div>
 
@@ -782,7 +782,7 @@ async function renderTest() {
     document.getElementById(`t-${t.id}-msg`).textContent = '通过';
     document.getElementById(`t-${t.id}-msg`).style.color = 'var(--grass)';
   }
-  await addBubble('全部通过！你的 KKClaw 已经准备就绪啦！✧*。ヾ(｡>﹏<｡)ﾉﾞ✧*。');
+  await addBubble('全部通过！你的 Petclaw 已经准备就绪啦！✧*。ヾ(｡>﹏<｡)ﾉﾞ✧*。');
 }
 
 // ─── Navigation ───────────────────────
@@ -812,8 +812,8 @@ function showCelebration() {
   el.classList.remove('hidden');
   el.innerHTML = `<div class="celebration-content">
     <h2>🎉 配置完成！</h2>
-    <p>你的 KKClaw 桌面宠物已经准备就绪！<br>享受你的 AI 桌面伴侣吧~ ✧*。(o^_^o)✧*。</p>
-    <a href="https://github.com/user/kkclaw/releases" target="_blank" class="btn btn-primary" style="display:inline-block;text-decoration:none;margin-top:16px">下载 KKClaw</a>
+    <p>你的 Petclaw 桌面宠物已经准备就绪！<br>享受你的 AI 桌面伴侣吧~ ✧*。(o^_^o)✧*。</p>
+    <a href="https://github.com/user/petclaw/releases" target="_blank" class="btn btn-primary" style="display:inline-block;text-decoration:none;margin-top:16px">下载 Petclaw</a>
   </div>`;
 }
 

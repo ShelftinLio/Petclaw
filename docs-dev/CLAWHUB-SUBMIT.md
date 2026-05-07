@@ -4,7 +4,7 @@
 
 ### 基本信息
 - **项目名称:** Claw Desktop Pet
-- **GitHub仓库:** https://github.com/kk43994/KKClaw-Desktop-Pet
+- **GitHub仓库:** https://github.com/kk43994/Petclaw-Desktop-Pet
 - **版本:** v1.3.0
 - **一句话描述:** 企业级7×24稳定运行的桌面龙虾智能助手
 
@@ -61,13 +61,13 @@ python
 
 ### 截图
 ```
-https://raw.githubusercontent.com/kk43994/KKClaw-Desktop-Pet/master/docs/images/screenshot-1.png
+https://raw.githubusercontent.com/kk43994/Petclaw-Desktop-Pet/master/docs/images/screenshot-1.png
 ```
 
 ### 链接
-- **GitHub:** https://github.com/kk43994/KKClaw-Desktop-Pet
-- **文档:** https://github.com/kk43994/KKClaw-Desktop-Pet#readme
-- **发布说明:** https://github.com/kk43994/KKClaw-Desktop-Pet/blob/master/RELEASE-v1.3.0.md
+- **GitHub:** https://github.com/kk43994/Petclaw-Desktop-Pet
+- **文档:** https://github.com/kk43994/Petclaw-Desktop-Pet#readme
+- **发布说明:** https://github.com/kk43994/Petclaw-Desktop-Pet/blob/master/RELEASE-v1.3.0.md
 
 ### 作者信息
 - **用户名:** kk43994
@@ -79,8 +79,8 @@ https://raw.githubusercontent.com/kk43994/KKClaw-Desktop-Pet/master/docs/images/
 
 ```bash
 # 克隆项目
-git clone https://github.com/kk43994/KKClaw-Desktop-Pet.git
-cd KKClaw-Desktop-Pet
+git clone https://github.com/kk43994/Petclaw-Desktop-Pet.git
+cd Petclaw-Desktop-Pet
 
 # 安装依赖
 npm install
@@ -163,14 +163,14 @@ npm start
 **📦 快速体验:**
 
 ```bash
-git clone https://github.com/kk43994/KKClaw-Desktop-Pet.git
-cd KKClaw-Desktop-Pet
+git clone https://github.com/kk43994/Petclaw-Desktop-Pet.git
+cd Petclaw-Desktop-Pet
 npm install && pip install edge-tts
 npm start
 ```
 
 **🔗 链接:**
-- GitHub: https://github.com/kk43994/KKClaw-Desktop-Pet
+- GitHub: https://github.com/kk43994/Petclaw-Desktop-Pet
 - 文档: 完整README和6份技术文档
 - 许可证: MIT（自由使用、修改、分发）
 

@@ -1,12 +1,15 @@
 ﻿// Gateway 连接模块
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 const pathResolver = require('./utils/openclaw-path-resolver');
 const configManager = require('./utils/config-manager');
 const backendCompat = require('./utils/backend-compat');
 const LogSanitizer = require('./utils/log-sanitizer');
 const SecureStorage = require('./utils/secure-storage');
 const SessionLockManager = require('./utils/session-lock-manager');
+
+const DEFAULT_OPENCLAW_SESSION_ID = 'petclaw-desktop-pet';
 
 // 从配置读取端口
 function getOpenClawHost() {
@@ -48,7 +51,7 @@ function getActiveModelName() {
 function getAgentHeaders() {
     const compat = backendCompat.resolve();
     const headers = {
-        'x-kkclaw-agent-id': 'main',
+        'x-petclaw-agent-id': 'main',
     };
 
     if (compat.active.mode === 'hermes') {
@@ -62,6 +65,14 @@ function getAgentHeaders() {
 
 function getChatAvailability() {
     const compat = backendCompat.resolve();
+    if (compat.active.chatReady === false) {
+        return {
+            ready: false,
+            reason: compat.active.chatBlockReason
+                || `${compat.active.label || 'Gateway'} chat is not ready.`,
+        };
+    }
+
     if (compat.active.mode === 'hermes' && !compat.active.apiServerEnabled) {
         return {
             ready: false,
@@ -73,6 +84,168 @@ function getChatAvailability() {
     return {
         ready: true,
         reason: null,
+    };
+}
+
+function parseOpenClawAgentJson(stdout) {
+    const text = String(stdout || '').trim();
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start < 0 || end <= start) return null;
+    try {
+        return JSON.parse(text.slice(start, end + 1));
+    } catch {
+        return null;
+    }
+}
+
+function getOpenClawAgentContent(stdout) {
+    const data = parseOpenClawAgentJson(stdout);
+    if (!data) return '';
+    const payloadText = Array.isArray(data.payloads)
+        ? data.payloads.map(payload => payload?.text || '').filter(Boolean).join('\n').trim()
+        : '';
+    return payloadText
+        || String(data.meta?.finalAssistantVisibleText || data.meta?.finalAssistantRawText || '').trim()
+        || String(data.finalAssistantVisibleText || data.finalAssistantRawText || '').trim();
+}
+
+function summarizeProcessOutput(stderr, stdout) {
+    const lines = `${stderr || ''}\n${stdout || ''}`
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+    return lines.slice(-3).join(' | ') || 'OpenClaw agent returned no content.';
+}
+
+function isNodeExecutable(candidate) {
+    return /^node(?:\.exe)?$/i.test(path.basename(String(candidate || '')));
+}
+
+function resolveNodeExecutable() {
+    const envCandidates = [
+        process.env.npm_node_execpath,
+        process.env.NODE_EXE,
+        process.env.NODE_BINARY,
+    ];
+
+    for (const candidate of envCandidates) {
+        if (candidate && isNodeExecutable(candidate) && fs.existsSync(candidate)) {
+            return candidate;
+        }
+    }
+
+    if (isNodeExecutable(process.execPath)) {
+        return process.execPath;
+    }
+
+    return process.platform === 'win32' ? 'node.exe' : 'node';
+}
+
+function getOpenClawSessionId() {
+    const sessionId = String(process.env.PETCLAW_OPENCLAW_SESSION_ID || '').trim();
+    return sessionId || DEFAULT_OPENCLAW_SESSION_ID;
+}
+
+function buildOpenClawConversationPrompt(message) {
+    return [
+        '请用简短、口语化的中文回答，默认 1-3 句。',
+        '除非用户明确要求详细步骤、长文或方案，否则不要展开长段说明。',
+        `用户消息：${message}`,
+    ].join('\n');
+}
+
+function runOpenClawAgentMessage(message, timeoutMs = 190000) {
+    const agentTimeoutSeconds = Math.max(1, Math.floor((timeoutMs - 10000) / 1000));
+    const invocation = pathResolver.resolveOpenClawInvocation([
+        'agent',
+        '--agent',
+        'main',
+        '--session-id',
+        getOpenClawSessionId(),
+        '--message',
+        buildOpenClawConversationPrompt(message),
+        '--thinking',
+        'low',
+        '--timeout',
+        String(agentTimeoutSeconds),
+        '--json',
+        '--local',
+    ]);
+
+    if (!invocation) {
+        return Promise.reject(new Error('OpenClaw CLI not found. Install OpenClaw or add it to PATH.'));
+    }
+    const spawnTarget = resolveOpenClawSpawnTarget(invocation);
+
+    return new Promise((resolve, reject) => {
+        let stdout = '';
+        let stderr = '';
+        let settled = false;
+        const settle = (fn, value) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            fn(value);
+        };
+
+        const child = spawn(spawnTarget.command, spawnTarget.args, {
+            cwd: spawnTarget.cwd,
+            shell: spawnTarget.shell,
+            windowsHide: spawnTarget.windowsHide,
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
+
+        const timer = setTimeout(() => {
+            try { child.kill(); } catch (_) {}
+            settle(reject, new Error(`OpenClaw agent timed out after ${Math.round(timeoutMs / 1000)}s.`));
+        }, timeoutMs);
+
+        child.stdout?.on('data', chunk => {
+            stdout += chunk.toString();
+        });
+        child.stderr?.on('data', chunk => {
+            stderr += chunk.toString();
+        });
+        child.on('error', err => {
+            settle(reject, err);
+        });
+        child.on('close', code => {
+            const content = getOpenClawAgentContent(stdout);
+            if (content) {
+                settle(resolve, content);
+                return;
+            }
+            const reason = summarizeProcessOutput(stderr, stdout);
+            settle(reject, new Error(code === 0 ? reason : `OpenClaw agent failed (${code}): ${reason}`));
+        });
+    });
+}
+
+function resolveOpenClawSpawnTarget(invocation) {
+    const command = String(invocation.command || '');
+    if (process.platform === 'win32' && /\.cmd$/i.test(command)) {
+        const moduleEntry = path.join(path.dirname(command), 'node_modules', 'openclaw', 'openclaw.mjs');
+        if (fs.existsSync(moduleEntry)) {
+            return {
+                command: resolveNodeExecutable(),
+                args: [
+                    moduleEntry,
+                    ...(invocation.args || []),
+                ],
+                cwd: invocation.cwd,
+                shell: false,
+                windowsHide: invocation.windowsHide ?? true,
+            };
+        }
+    }
+
+    return {
+        command: invocation.command,
+        args: invocation.args || [],
+        cwd: invocation.cwd,
+        shell: invocation.shell ?? false,
+        windowsHide: invocation.windowsHide ?? true,
     };
 }
 
@@ -164,6 +337,10 @@ class GatewayClient {
             this._recordError(requestId, chatAvailability.reason, 0, message);
             this.connected = false;
             return errorMsg;
+        }
+
+        if (backendCompat.resolve().active.mode === 'openclaw') {
+            return await this.sendOpenClawAgentMessage(message, requestId, startTime);
         }
 
         console.log(`[Req#${requestId}] 📤 发送消息: ${LogSanitizer.sanitizeMessage(message)}`);
@@ -263,6 +440,27 @@ class GatewayClient {
                 this.onError(err.message);
             }
             return `错误: ${err.message}`;
+        }
+    }
+
+    async sendOpenClawAgentMessage(message, requestId, startTime) {
+        console.log(`[Req#${requestId}] 📤 OpenClaw agent: ${LogSanitizer.sanitizeMessage(message)}`);
+        try {
+            const content = await runOpenClawAgentMessage(message);
+            const elapsed = Date.now() - startTime;
+            this.connected = true;
+            this.sessionTokenCount += this.estimateTokens(message) + this.estimateTokens(content);
+            console.log(`[Req#${requestId}] ✅ OpenClaw agent responded (耗时: ${elapsed}ms)`);
+            this._recordRequest(requestId, message, content, elapsed, true);
+            return content;
+        } catch (err) {
+            const elapsed = Date.now() - startTime;
+            const error = err?.message || String(err);
+            console.error(`[Req#${requestId}] ❌ OpenClaw agent failed (耗时: ${elapsed}ms):`, error);
+            this._recordError(requestId, error, elapsed, message);
+            this.connected = false;
+            if (this.onError) this.onError(error);
+            return `错误: ${error}`;
         }
     }
 

@@ -296,5 +296,5 @@ logDays: 30,                    // 保留30天
 
 **🎉 桌面龙虾现在是一个真正企业级的7×24智能助手！**
 
-仓库: https://github.com/kk43994/KKClaw-Desktop-Pet  
+仓库: https://github.com/kk43994/Petclaw-Desktop-Pet  
 提交: 0af8ef3

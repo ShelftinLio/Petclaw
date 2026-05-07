@@ -1,4 +1,4 @@
-// Open a system terminal and run KKClaw.
+// Open a system terminal and run Petclaw.
 const { execFile } = require('child_process');
 const path = require('path');
 

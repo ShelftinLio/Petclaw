@@ -1,12 +1,12 @@
 ﻿---
-name: kkclaw
+name: petclaw
 description: 给你的 AI Agent 一个桌面身体 — Setup Wizard、14情绪球体、语音克隆、歌词窗、Doctor 自检、跨平台支持（Windows + macOS）
 version: 3.1.2
 author: xiao-k-assistant
 tags: [desktop-pet, electron, tts, voice, emotion, openclaw, visualization, cross-platform]
 ---
 
-# kkclaw — 桌面龙虾 AI 伴侣
+# petclaw — 桌面龙虾 AI 伴侣
 
 给你的 AI Agent 一个桌面身体：可视化球体 + 语音交互 + 情绪表达。
 
@@ -35,16 +35,16 @@ tags: [desktop-pet, electron, tts, voice, emotion, openclaw, visualization, cros
 ## 安装
 
 ```bash
-git clone https://github.com/kk43994/kkclaw.git
-cd kkclaw
+git clone https://github.com/kk43994/petclaw.git
+cd petclaw
 npm install
 npm start
 ```
 
 或下载安装包：
-- **Windows:** https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-Setup.exe
-- **macOS (Intel):** https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-x64.dmg
-- **macOS (Apple Silicon):** https://github.com/kk43994/kkclaw/releases/download/v3.1.2/KKClaw-Desktop-Pet-3.1.2-arm64.dmg
+- **Windows:** https://github.com/kk43994/petclaw/releases/download/v3.1.2/Petclaw-Desktop-Pet-3.1.2-Setup.exe
+- **macOS (Intel):** https://github.com/kk43994/petclaw/releases/download/v3.1.2/Petclaw-Desktop-Pet-3.1.2-x64.dmg
+- **macOS (Apple Silicon):** https://github.com/kk43994/petclaw/releases/download/v3.1.2/Petclaw-Desktop-Pet-3.1.2-arm64.dmg
 
 ## 配置
 
@@ -58,7 +58,7 @@ npm start
 ## 目录结构
 
 ```
-kkclaw/
+petclaw/
 ├── main.js              # Electron 主进程
 ├── index.html           # 球体渲染 UI
 ├── lyrics.html          # 歌词字幕窗口
@@ -75,8 +75,8 @@ kkclaw/
 
 ## 链接
 
-- GitHub: https://github.com/kk43994/kkclaw
-- Landing Page: https://kk43994.github.io/kkclaw/
+- GitHub: https://github.com/kk43994/petclaw
+- Landing Page: https://kk43994.github.io/petclaw/
 - ClawHub: https://clawhub.ai/kk43994/desktop-pet
 - 版本: v3.1.2
 

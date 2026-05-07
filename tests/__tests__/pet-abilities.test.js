@@ -26,6 +26,17 @@ describe('pet ability progression', () => {
     })
   })
 
+  test('starts with basic conversation before OpenClaw execution skills', () => {
+    expect(ABILITY_IDS.BASIC_CONVERSATION).toBe('warm-chat')
+    expect(getAbilityById(ABILITY_IDS.BASIC_CONVERSATION)).toMatchObject({
+      id: 'warm-chat',
+      name: 'Basic Conversation',
+      tier: 'Companion',
+      levelRequired: 1,
+      cost: 0,
+    })
+  })
+
   test('builds ability tree with locked and unlocked states', () => {
     const tree = getAbilityTree({
       focusXp: 170,

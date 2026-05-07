@@ -1,8 +1,8 @@
 Use $imagegen to create a Codex/Hatch-style desktop pet spritesheet.
 
 Pet name: Generated Pet
-Primary request: a tiny friendly pixel pet with vertical i-like glowing eyes
-Reference image: reference.png. Use it as the character reference while simplifying the design.
+Primary request: 海贼王里的先可是
+Reference image: none. Generate from the written description only.
 
 Asset type: transparent pixel-art desktop pet spritesheet
 Style: compact chibi pixel art, chunky readable silhouette, thick dark 1-2 px outline, flat cel shading, vertical i-like glowing eyes, tiny ears/paws/tail where appropriate.

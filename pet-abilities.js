@@ -1,4 +1,5 @@
 const ABILITY_IDS = {
+  BASIC_CONVERSATION: 'warm-chat',
   WARM_CHAT: 'warm-chat',
   TASK_ECHO: 'task-echo',
   PROJECT_GLANCE: 'project-glance',
@@ -21,11 +22,11 @@ const LEVEL_THRESHOLDS = [
 const ABILITIES = [
   {
     id: ABILITY_IDS.WARM_CHAT,
-    name: 'Warm Chat',
+    name: 'Basic Conversation',
     tier: 'Companion',
     levelRequired: 1,
     cost: 0,
-    description: 'Basic AI API conversation with pet personality.',
+    description: 'Initial AI conversation with pet personality. OpenClaw execution skills unlock later.',
   },
   {
     id: ABILITY_IDS.TASK_ECHO,

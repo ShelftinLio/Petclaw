@@ -133,6 +133,30 @@
         white-space: nowrap;
     }
 
+    .status-cluster {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .script-status {
+        padding: 2px 4px;
+        border: 2px solid var(--ink);
+        background: var(--soft);
+        font-size: 9px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .script-status.ready {
+        background: var(--reward);
+    }
+
+    .script-status.error {
+        background: var(--danger);
+    }
+
     .stats {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -245,6 +269,49 @@
         overflow-wrap: anywhere;
     }
 
+    .timer-card {
+        display: grid;
+        gap: 4px;
+        padding: 7px;
+        border: 2px solid var(--ink);
+        background: var(--soft);
+    }
+
+    .timer-card[data-active-session="true"] {
+        background: var(--accent);
+    }
+
+    .timer-card.overtime {
+        background: var(--reward);
+    }
+
+    .timer-label {
+        font-size: 28px;
+        line-height: 1;
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .timer-meta {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .timer-bar {
+        height: 8px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        overflow: hidden;
+    }
+
+    .timer-fill {
+        width: 0%;
+        height: 100%;
+        background: var(--ink);
+        transition: width 180ms linear;
+    }
+
     .reward-box {
         min-height: 28px;
         padding: 6px;
@@ -252,6 +319,48 @@
         background: var(--reward);
         line-height: 1.25;
         overflow-wrap: anywhere;
+    }
+
+    .affinity-panel {
+        display: grid;
+        gap: 6px;
+        padding: 6px;
+        border: 2px solid var(--ink);
+        background: rgba(255, 255, 255, 0.78);
+    }
+
+    .affinity-meter {
+        height: 8px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        overflow: hidden;
+    }
+
+    .affinity-fill {
+        width: 0%;
+        height: 100%;
+        background: var(--accent);
+        transition: width 180ms linear;
+    }
+
+    .bond-collection {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .bond-card {
+        min-width: 0;
+        padding: 5px;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        font-size: 10px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .bond-card.locked {
+        opacity: 0.52;
     }
 
     .card-list {
@@ -321,34 +430,37 @@
 </head>
 <body>
 <div class="compact-shell">
-    <header class="topbar">
-        <div class="title-row">
-            <h1>Adventure</h1>
-            <div class="tier-badge" id="tierBadge">Loading</div>
-        </div>
+        <header class="topbar">
+            <div class="title-row">
+                <h1>Adventure</h1>
+                <div class="status-cluster">
+                    <div class="tier-badge" id="tierBadge">Companion</div>
+                    <div class="script-status" id="scriptStatus">Boot</div>
+                </div>
+            </div>
         <div class="stats" id="levelLine">
-            <div class="stat">Lv --</div>
-            <div class="stat">XP --</div>
-            <div class="stat">Fx --</div>
+            <div class="stat">Lv 1</div>
+            <div class="stat">XP 0</div>
+            <div class="stat">Fx 0 / Sd 0</div>
         </div>
     </header>
 
     <nav class="tabs" aria-label="Pet adventure tabs">
-        <button id="focusTab" onclick="setTab('focus')">Focus</button>
-        <button id="abilitiesTab" onclick="setTab('abilities')">Abilities</button>
-        <button id="skillsTab" onclick="setTab('skills')">Skills</button>
+        <button class="active" data-tab="focus" id="focusTab">Focus</button>
+        <button data-tab="abilities" id="abilitiesTab">Abilities</button>
+        <button data-tab="skills" id="skillsTab">Skills</button>
     </nav>
 
     <main>
-        <section class="view" id="focusView">
+        <section class="view active" id="focusView">
             <div class="block">
                 <div class="compact-title">Focus Run <span class="hint" id="activeLabel">idle</span></div>
                 <input id="taskTitle" placeholder="Task title">
                 <div class="duration-row" id="durationRow">
-                    <button data-minutes="15" onclick="selectDuration(15)">15</button>
-                    <button data-minutes="25" onclick="selectDuration(25)">25</button>
-                    <button data-minutes="45" onclick="selectDuration(45)">45</button>
-                    <button data-minutes="90" onclick="selectDuration(90)">90</button>
+                    <button data-minutes="5">5</button>
+                    <button data-minutes="15">15</button>
+                    <button data-minutes="25">25</button>
+                    <button data-minutes="55">55</button>
                 </div>
                 <select id="intentType">
                     <option>Code</option>
@@ -360,14 +472,29 @@
                     <option>Rest</option>
                 </select>
                 <div class="status-box" id="focusStatus">No active adventure</div>
+                <div class="timer-card" data-active-session="false" id="timerCard">
+                    <div class="timer-label" id="timerLabel">25:00</div>
+                    <div class="timer-meta" id="timerMeta">Choose a task and start the focus timer.</div>
+                    <div class="timer-bar" aria-hidden="true">
+                        <div class="timer-fill" id="timerFill"></div>
+                    </div>
+                </div>
                 <textarea id="focusSummary" placeholder="Outcome. Add 'make this reusable' to create a skill seed."></textarea>
                 <div class="action-row">
-                    <button class="primary" id="startButton" onclick="startFocusAdventure()">Start</button>
-                    <button id="finishButton" onclick="finishFocusAdventure('completed')">Done</button>
-                    <button id="partialButton" onclick="finishFocusAdventure('partial')">Part</button>
-                    <button class="danger-action" id="interruptButton" onclick="finishFocusAdventure('interrupted')">Stop</button>
+                    <button class="primary" id="startButton">Start</button>
+                    <button id="finishButton">Done</button>
+                    <button id="partialButton">Part</button>
+                    <button class="danger-action" id="interruptButton">Stop</button>
                 </div>
                 <div class="reward-box" id="rewardLine">Rewards appear after a run.</div>
+                <div class="affinity-panel" id="affinityPanel">
+                    <div class="compact-title">Affinity <span class="hint" id="affinityHint">First Meeting</span></div>
+                    <div class="meta" id="affinityLine">Bond Lv 1 | 0 XP</div>
+                    <div class="affinity-meter" aria-hidden="true">
+                        <div class="affinity-fill" id="affinityFill"></div>
+                    </div>
+                    <div class="bond-collection" id="bondCollection"></div>
+                </div>
             </div>
         </section>
 
@@ -392,13 +519,22 @@
 </div>
 
 <script>
-const electronAPI = window.electronAPI;
+const petBridge = window.electronAPI;
 const levelLine = document.getElementById('levelLine');
 const tierBadge = document.getElementById('tierBadge');
+const scriptStatus = document.getElementById('scriptStatus');
+const focusTab = document.getElementById('focusTab');
+const abilitiesTab = document.getElementById('abilitiesTab');
+const skillsTab = document.getElementById('skillsTab');
 const activeLabel = document.getElementById('activeLabel');
 const taskTitle = document.getElementById('taskTitle');
+const durationRow = document.getElementById('durationRow');
 const intentType = document.getElementById('intentType');
 const focusStatus = document.getElementById('focusStatus');
+const timerCard = document.getElementById('timerCard');
+const timerLabel = document.getElementById('timerLabel');
+const timerMeta = document.getElementById('timerMeta');
+const timerFill = document.getElementById('timerFill');
 const focusSummary = document.getElementById('focusSummary');
 const rewardLine = document.getElementById('rewardLine');
 const startButton = document.getElementById('startButton');
@@ -408,10 +544,16 @@ const interruptButton = document.getElementById('interruptButton');
 const abilityList = document.getElementById('abilityList');
 const skillCardList = document.getElementById('skillCardList');
 const recentRuns = document.getElementById('recentRuns');
+const affinityHint = document.getElementById('affinityHint');
+const affinityLine = document.getElementById('affinityLine');
+const affinityFill = document.getElementById('affinityFill');
+const bondCollection = document.getElementById('bondCollection');
 
 let selectedDuration = 25;
 let activeFocusSession = null;
 let progressState = null;
+let lastActiveSessionId = null;
+let timerDoneNotified = false;
 
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -440,12 +582,60 @@ function selectDuration(minutes) {
     document.querySelectorAll('#durationRow button').forEach(button => {
         button.classList.toggle('active', Number(button.dataset.minutes) === minutes);
     });
+    if (!activeFocusSession) updateFocusStatus();
 }
 
 function formatShortDate(value) {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '';
     return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+function padTimer(value) {
+    return String(Math.max(0, Math.floor(value))).padStart(2, '0');
+}
+
+function formatTimerLabel(seconds, overtime = false) {
+    const safeSeconds = Math.max(0, Math.floor(Number(seconds || 0)));
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainder = safeSeconds % 60;
+    return `${overtime ? '+' : ''}${padTimer(minutes)}:${padTimer(remainder)}`;
+}
+
+function getTimerState(session) {
+    if (!session || session.status !== 'active') {
+        const totalSeconds = selectedDuration * 60;
+        return {
+            active: false,
+            elapsedSeconds: 0,
+            remainingSeconds: totalSeconds,
+            totalSeconds,
+            progress: 0,
+            isOvertime: false,
+            label: formatTimerLabel(totalSeconds)
+        };
+    }
+
+    const started = new Date(session.startedAt).getTime();
+    const plannedMinutes = Number(session.plannedMinutes || selectedDuration || 25);
+    const totalSeconds = Math.max(60, plannedMinutes * 60);
+    const elapsedSeconds = Number.isFinite(started)
+        ? Math.max(0, Math.floor((Date.now() - started) / 1000))
+        : 0;
+    const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+    const overtimeSeconds = Math.max(0, elapsedSeconds - totalSeconds);
+
+    return {
+        active: true,
+        elapsedSeconds,
+        remainingSeconds,
+        totalSeconds,
+        progress: totalSeconds > 0 ? Math.min(1, elapsedSeconds / totalSeconds) : 1,
+        isOvertime: overtimeSeconds > 0,
+        label: overtimeSeconds > 0
+            ? formatTimerLabel(overtimeSeconds, true)
+            : formatTimerLabel(remainingSeconds)
+    };
 }
 
 function updateFocusButtons() {
@@ -458,16 +648,29 @@ function updateFocusButtons() {
 }
 
 function updateFocusStatus() {
+    const timer = getTimerState(activeFocusSession);
+    timerLabel.textContent = timer.label;
+    timerFill.style.width = `${Math.round(timer.progress * 100)}%`;
+    timerCard.dataset.activeSession = timer.active ? 'true' : 'false';
+    timerCard.classList.toggle('overtime', timer.isOvertime);
+
     if (!activeFocusSession) {
         focusStatus.textContent = 'No active adventure';
+        timerMeta.textContent = 'Choose a task and start the focus timer.';
         updateFocusButtons();
         return;
     }
-    const started = new Date(activeFocusSession.startedAt).getTime();
-    const elapsed = Number.isFinite(started)
-        ? Math.max(0, Math.floor((Date.now() - started) / 60000))
-        : 0;
-    focusStatus.textContent = `${activeFocusSession.taskTitle} | ${elapsed}/${activeFocusSession.plannedMinutes} min | ${activeFocusSession.intentType}`;
+
+    const elapsedMinutes = Math.floor(timer.elapsedSeconds / 60);
+    const remainingMinutes = Math.ceil(timer.remainingSeconds / 60);
+    focusStatus.textContent = `${activeFocusSession.taskTitle} | ${elapsedMinutes}/${activeFocusSession.plannedMinutes} min | ${activeFocusSession.intentType}`;
+    timerMeta.textContent = timer.isOvertime
+        ? 'Time is up. Add the outcome and finish the run.'
+        : `${remainingMinutes} min left. Stay with the current adventure.`;
+    if (!timerDoneNotified && timer.remainingSeconds === 0) {
+        timerDoneNotified = true;
+        rewardLine.textContent = 'Time is up. Add an outcome, then choose Done or Part.';
+    }
     updateFocusButtons();
 }
 
@@ -478,7 +681,7 @@ function renderAbilityCards(tree = {}) {
         const action = ability.unlocked
             ? `<span class="pill">Ready</span>`
             : ability.canUnlock
-                ? `<button class="mini-action" onclick="unlockPetAbility('${ability.id}')">Unlock</button>`
+                ? `<button class="mini-action" data-ability-id="${escapeHtml(ability.id)}">Unlock</button>`
                 : `<span class="pill">${escapeHtml(status)}</span>`;
         return `
             <article class="ability-card ${ability.unlocked ? '' : 'locked'}">
@@ -495,16 +698,23 @@ function renderAbilityCards(tree = {}) {
 
 function renderSkillCards(state = {}) {
     const skillCards = state.skillCards || [];
-    skillCardList.innerHTML = skillCards.length ? skillCards.map(card => `
-        <article class="skill-card ${card.status === 'locked' ? 'locked' : ''}">
-            <div class="card-top">
-                <div class="card-title">${escapeHtml(card.name)}</div>
-                <span class="pill">${escapeHtml(card.rarity || 'common')}</span>
-            </div>
-            <div class="meta">${escapeHtml(card.status || 'candidate')} | Lv ${card.level || 1}</div>
-            <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
-        </article>
-    `).join('') : '<div class="empty">Finish reusable focus runs to discover Skill Seeds.</div>';
+    skillCardList.innerHTML = skillCards.length ? skillCards.map(card => {
+        const status = card.status || 'candidate';
+        const action = status === 'candidate' && card.sourceSeedId
+            ? `<button class="mini-action" data-skill-seed-id="${escapeHtml(card.sourceSeedId)}">Learn</button>`
+            : `<span class="pill">${escapeHtml(status === 'learned' ? 'Learned' : status)}</span>`;
+        return `
+            <article class="skill-card ${status === 'locked' ? 'locked' : ''}">
+                <div class="card-top">
+                    <div class="card-title">${escapeHtml(card.name)}</div>
+                    <span class="pill">${escapeHtml(card.rarity || 'common')}</span>
+                </div>
+                <div class="meta">${escapeHtml(status)} | Lv ${card.level || 1}</div>
+                <div>${escapeHtml(card.description || 'A pet skill card.')}</div>
+                ${action}
+            </article>
+        `;
+    }).join('') : '<div class="empty">Finish reusable focus runs to discover Skill Seeds.</div>';
 }
 
 function renderRecentRuns(state = {}) {
@@ -515,7 +725,7 @@ function renderRecentRuns(state = {}) {
         const button = hasSeed
             ? '<span class="pill">Seeded</span>'
             : canTrySeed
-                ? `<button class="mini-action" onclick="createSkillSeedFromSession('${session.id}')">Seed</button>`
+                ? `<button class="mini-action" data-session-id="${escapeHtml(session.id)}">Seed</button>`
                 : '<span class="pill">No summary</span>';
         return `
             <article class="run-card">
@@ -530,10 +740,59 @@ function renderRecentRuns(state = {}) {
     }).join('') : '<div class="empty">No completed focus runs yet.</div>';
 }
 
+function renderBondItems(state = {}) {
+    const catalog = state.bondItemCatalog || [];
+    const unlocked = new Set((state.bondItems || []).map(item => item.id));
+    bondCollection.innerHTML = catalog.length ? catalog.map(item => {
+        const isUnlocked = unlocked.has(item.id);
+        return `
+            <div class="bond-card ${isUnlocked ? '' : 'locked'}">
+                <div>${escapeHtml(item.name || item.id)}</div>
+                <div class="meta">${isUnlocked ? 'Unlocked' : `Lv ${item.levelRequired}`}</div>
+            </div>
+        `;
+    }).join('') : '<div class="empty">No bond collection yet.</div>';
+}
+
+function renderAffinityProgress(state = {}) {
+    const tier = state.affinityTier || {
+        level: state.affinityLevel || 1,
+        name: 'First Meeting',
+        xp: 0,
+        nextXp: 40,
+        currentXp: state.affinityXp || 0
+    };
+    const currentXp = Number(state.affinityXp || tier.currentXp || 0);
+    const startXp = Number(tier.xp || 0);
+    const nextXp = tier.nextXp === null ? null : Number(tier.nextXp || 0);
+    const progress = nextXp
+        ? Math.max(0, Math.min(1, (currentXp - startXp) / Math.max(1, nextXp - startXp)))
+        : 1;
+    affinityHint.textContent = tier.name || `Lv ${tier.level}`;
+    affinityLine.textContent = nextXp
+        ? `Bond Lv ${tier.level} | ${currentXp}/${nextXp} XP`
+        : `Bond Lv ${tier.level} | ${currentXp} XP`;
+    affinityFill.style.width = `${Math.round(progress * 100)}%`;
+    renderBondItems(state);
+}
+
+function formatAffinityEvents(events = []) {
+    const total = events.reduce((sum, event) => sum + Number(event.appliedXp || 0), 0);
+    if (!total) return '';
+    const unlocked = events.flatMap(event => event.unlockedBondItems || []);
+    return `, +${total} bond${unlocked.length ? ', bond item' : ''}`;
+}
+
 function renderPetProgress(state) {
     if (!state) return;
     progressState = state;
-    activeFocusSession = state.activeFocusSession || null;
+    const nextActiveSession = state.activeFocusSession || null;
+    const nextActiveSessionId = nextActiveSession?.id || null;
+    if (nextActiveSessionId !== lastActiveSessionId) {
+        timerDoneNotified = false;
+        lastActiveSessionId = nextActiveSessionId;
+    }
+    activeFocusSession = nextActiveSession;
     const tree = state.abilityTree || { petLevel: state.petLevel || 1, tiers: [], abilities: [] };
     const tier = (tree.tiers || []).find(item => item.level === tree.petLevel);
     tierBadge.textContent = tier?.tier || 'Companion';
@@ -545,17 +804,56 @@ function renderPetProgress(state) {
     renderAbilityCards(tree);
     renderSkillCards(state);
     renderRecentRuns(state);
+    renderAffinityProgress(state);
     updateFocusStatus();
 }
 
+function renderOfflineProgress(message = 'Adventure backend unavailable. Restart Petclaw and try again.') {
+    renderPetProgress({
+        version: 1,
+        petLevel: 1,
+        focusXp: 0,
+        stardust: 0,
+        abilityFragments: 0,
+        unlockedAbilities: ['warm-chat'],
+        activeFocusSession: null,
+        focusSessions: [],
+        memories: [],
+        skillSeeds: [],
+        skills: [],
+        affinityXp: 0,
+        affinityLevel: 1,
+        bondItems: [],
+        affinityTier: { level: 1, name: 'First Meeting', xp: 0, nextXp: 40, currentXp: 0 },
+        bondItemCatalog: [],
+        abilityTree: {
+            petLevel: 1,
+            tiers: [{ level: 1, tier: 'Companion' }],
+            abilities: []
+        },
+        skillCards: []
+    });
+    rewardLine.textContent = message;
+}
+
 async function loadPetProgress() {
-    if (!electronAPI) return;
-    renderPetProgress(await electronAPI.invoke('pet-progress-get'));
+    if (!petBridge) {
+        renderOfflineProgress();
+        return;
+    }
+    try {
+        renderPetProgress(await petBridge.invoke('pet-progress-get'));
+    } catch (err) {
+        renderOfflineProgress(err.message || 'Progress unavailable');
+    }
 }
 
 async function startFocusAdventure() {
-    if (!electronAPI) return;
-    const result = await electronAPI.invoke('focus-adventure-start', {
+    if (!petBridge) {
+        renderOfflineProgress();
+        return;
+    }
+    const result = await petBridge.invoke('focus-adventure-start', {
         taskTitle: taskTitle.value,
         plannedMinutes: selectedDuration,
         intentType: intentType.value
@@ -565,13 +863,17 @@ async function startFocusAdventure() {
         renderPetProgress(result.progress);
         return;
     }
+    timerDoneNotified = false;
     rewardLine.textContent = 'Run started. Finish it to earn XP, fragments, and stardust.';
     renderPetProgress(result.progress);
 }
 
 async function finishFocusAdventure(status) {
-    if (!electronAPI) return;
-    const result = await electronAPI.invoke('focus-adventure-finish', {
+    if (!petBridge) {
+        renderOfflineProgress();
+        return;
+    }
+    const result = await petBridge.invoke('focus-adventure-finish', {
         status,
         summary: focusSummary.value.trim()
     });
@@ -581,14 +883,17 @@ async function finishFocusAdventure(status) {
         return;
     }
     const rewards = result.session.rewards || {};
-    rewardLine.textContent = `+${rewards.focusXp || 0} XP, +${rewards.abilityFragments || 0} Fx, +${rewards.stardust || 0} Sd${rewards.skillSeed ? ', Skill Seed' : ''}`;
+    rewardLine.textContent = `+${rewards.focusXp || 0} XP, +${rewards.abilityFragments || 0} Fx, +${rewards.stardust || 0} Sd${rewards.skillSeed ? ', Skill Seed' : ''}${formatAffinityEvents(result.affinityEvents)}`;
     focusSummary.value = '';
     renderPetProgress(result.progress);
 }
 
 async function unlockPetAbility(abilityId) {
-    if (!electronAPI) return;
-    const result = await electronAPI.invoke('pet-ability-unlock', abilityId);
+    if (!petBridge) {
+        renderOfflineProgress();
+        return;
+    }
+    const result = await petBridge.invoke('pet-ability-unlock', abilityId);
     if (!result.success) {
         rewardLine.textContent = result.error || 'Ability locked';
     } else {
@@ -598,8 +903,11 @@ async function unlockPetAbility(abilityId) {
 }
 
 async function createSkillSeedFromSession(sessionId) {
-    if (!electronAPI) return;
-    const result = await electronAPI.invoke('pet-skill-seed-create', { sessionId });
+    if (!petBridge) {
+        renderOfflineProgress();
+        return;
+    }
+    const result = await petBridge.invoke('pet-skill-seed-create', { sessionId });
     if (!result.success) {
         rewardLine.textContent = result.error || 'Could not create Skill Seed';
     } else {
@@ -609,17 +917,81 @@ async function createSkillSeedFromSession(sessionId) {
     renderPetProgress(result.progress);
 }
 
-const initialTab = new URLSearchParams(window.location.search).get('tab') || 'focus';
-setTab(initialTab);
-selectDuration(selectedDuration);
-loadPetProgress().catch(err => {
-    rewardLine.textContent = err.message || 'Progress unavailable';
-});
-setInterval(updateFocusStatus, 15000);
+async function learnPetSkill(seedId) {
+    if (!petBridge) {
+        renderOfflineProgress();
+        return;
+    }
+    const result = await petBridge.invoke('pet-skill-learn', { seedId });
+    if (!result.success) {
+        rewardLine.textContent = result.error || 'Could not learn Skill';
+    } else {
+        rewardLine.textContent = 'Skill learned.';
+        setTab('skills');
+    }
+    renderPetProgress(result.progress);
+}
 
-if (electronAPI) {
-    electronAPI.on('pet-progress-changed', renderPetProgress);
-    electronAPI.on('pet-game-tab', setTab);
+function markScriptReady() {
+    scriptStatus.textContent = 'Ready';
+    scriptStatus.classList.remove('error');
+    scriptStatus.classList.add('ready');
+}
+
+function markScriptError(error) {
+    scriptStatus.textContent = 'Error';
+    scriptStatus.classList.remove('ready');
+    scriptStatus.classList.add('error');
+    rewardLine.textContent = error?.message || 'Adventure UI script error';
+}
+
+function bindPetGameControls() {
+    focusTab.addEventListener('click', () => setTab('focus'));
+    abilitiesTab.addEventListener('click', () => setTab('abilities'));
+    skillsTab.addEventListener('click', () => setTab('skills'));
+    durationRow.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-minutes]');
+        if (!button) return;
+        selectDuration(Number(button.dataset.minutes));
+    });
+    startButton.addEventListener('click', startFocusAdventure);
+    finishButton.addEventListener('click', () => finishFocusAdventure('completed'));
+    partialButton.addEventListener('click', () => finishFocusAdventure('partial'));
+    interruptButton.addEventListener('click', () => finishFocusAdventure('interrupted'));
+    abilityList.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-ability-id]');
+        if (!button) return;
+        unlockPetAbility(button.dataset.abilityId);
+    });
+    recentRuns.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-session-id]');
+        if (!button) return;
+        createSkillSeedFromSession(button.dataset.sessionId);
+    });
+    skillCardList.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-skill-seed-id]');
+        if (!button) return;
+        learnPetSkill(button.dataset.skillSeedId);
+    });
+    markScriptReady();
+}
+
+const initialTab = new URLSearchParams(window.location.search).get('tab') || 'focus';
+try {
+    bindPetGameControls();
+    setTab(initialTab);
+    selectDuration(selectedDuration);
+    loadPetProgress().catch(err => {
+        rewardLine.textContent = err.message || 'Progress unavailable';
+    });
+    setInterval(updateFocusStatus, 1000);
+} catch (err) {
+    markScriptError(err);
+}
+
+if (petBridge) {
+    petBridge.on('pet-progress-changed', renderPetProgress);
+    petBridge.on('pet-game-tab', setTab);
 }
 </script>
 </body>

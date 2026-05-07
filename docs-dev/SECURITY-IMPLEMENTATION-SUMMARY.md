@@ -1,4 +1,4 @@
-# KKClaw Desktop Pet v3.1.2 - 安全审阅实施总结
+# Petclaw Desktop Pet v3.1.2 - 安全审阅实施总结
 
 ## 实施完成情况
 

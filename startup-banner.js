@@ -1,4 +1,4 @@
-// KKClaw Startup Hero Banner
+// Petclaw Startup Hero Banner
 // Animation: fire-sweep + flash + eye-open
 
 const os = require('os');
@@ -200,7 +200,7 @@ function printReady(target = 18789, options = {}) {
   const gatewayTarget = typeof target === 'string' ? target : `http://127.0.0.1:${target}`;
   printSeparator();
   console.log('');
-  console.log(c.bGreen + c.bold + '  [OK] KKClaw is ready!' + c.reset);
+  console.log(c.bGreen + c.bold + '  [OK] Petclaw is ready!' + c.reset);
   console.log('');
   console.log(c.gray + '  Backend   ' + c.reset + theme.accent + c.bold +
     theme.backendLabel + c.reset);

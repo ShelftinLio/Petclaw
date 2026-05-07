@@ -3,6 +3,36 @@ const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
+function parseCommandPathLines(output) {
+    return String(output || '')
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+}
+
+function pickExistingCommandPath(output) {
+    const candidates = parseCommandPathLines(output);
+    const preferred = process.platform === 'win32'
+        ? [
+            ...candidates.filter(candidate => /\.cmd$/i.test(candidate)),
+            ...candidates.filter(candidate => /\.(exe|bat|ps1)$/i.test(candidate)),
+            ...candidates,
+        ]
+        : candidates;
+
+    const seen = new Set();
+    for (const candidate of preferred) {
+        const normalized = path.normalize(candidate);
+        const key = normalized.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        if (fs.existsSync(normalized)) {
+            return normalized;
+        }
+    }
+    return null;
+}
+
 class OpenClawPathResolver {
     constructor() {
         this._cachedPath = null;
@@ -52,16 +82,19 @@ class OpenClawPathResolver {
         if (!openclawPath) {
             try {
                 const cmd = process.platform === 'win32' ? 'where openclaw' : 'which openclaw';
-                const binPath = execSync(cmd, { encoding: 'utf8', windowsHide: true }).trim().split('\n')[0];
-                const binDir = path.dirname(binPath);
-                const candidates = [
-                    path.join(binDir, '..', 'node_modules', 'openclaw', 'dist', 'index.js'),
-                    path.join(binDir, '..', 'lib', 'node_modules', 'openclaw', 'dist', 'index.js'),
-                ];
-                for (const c of candidates) {
-                    if (fs.existsSync(path.normalize(c))) {
-                        openclawPath = path.normalize(c);
-                        break;
+                const binPath = pickExistingCommandPath(execSync(cmd, { encoding: 'utf8', windowsHide: true }));
+                if (binPath) {
+                    const binDir = path.dirname(binPath);
+                    const candidates = [
+                        path.join(binDir, 'node_modules', 'openclaw', 'dist', 'index.js'),
+                        path.join(binDir, '..', 'node_modules', 'openclaw', 'dist', 'index.js'),
+                        path.join(binDir, '..', 'lib', 'node_modules', 'openclaw', 'dist', 'index.js'),
+                    ];
+                    for (const c of candidates) {
+                        if (fs.existsSync(path.normalize(c))) {
+                            openclawPath = path.normalize(c);
+                            break;
+                        }
                     }
                 }
             } catch (e) { /* fallback */ }
@@ -93,8 +126,7 @@ class OpenClawPathResolver {
     findOpenClawCliPath() {
         try {
             const cmd = process.platform === 'win32' ? 'where openclaw' : 'which openclaw';
-            const binPath = execSync(cmd, { encoding: 'utf8', windowsHide: true }).trim().split('\n')[0];
-            return binPath && fs.existsSync(binPath) ? path.normalize(binPath) : null;
+            return pickExistingCommandPath(execSync(cmd, { encoding: 'utf8', windowsHide: true }));
         } catch (e) {
             return null;
         }

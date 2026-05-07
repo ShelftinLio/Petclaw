@@ -17,12 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.7.0] - 2026-04-11
 
 ### Added
-- **Hermes compatibility mode** — KKClaw can now drive Hermes as a compatible backend via `KKCLAW_COMPAT_MODE` or `pet-config.json.compatMode` (`openclaw` / `hermes` / `auto`)
+- **Hermes compatibility mode** — Petclaw can now drive Hermes as a compatible backend via `PETCLAW_COMPAT_MODE` or `pet-config.json.compatMode` (`openclaw` / `hermes` / `auto`)
 - **Backend-aware launcher** — Added a launch selector for OpenClaw / Hermes / Auto, and it remembers the last backend you chose
-- **Hermes reuse detection** — If a Hermes Gateway service is already running, KKClaw detects it and reuses it instead of treating it as a conflicting process
+- **Hermes reuse detection** — If a Hermes Gateway service is already running, Petclaw detects it and reuses it instead of treating it as a conflicting process
 
 ### Improved
-- **Gateway diagnostics** — `kkclaw status`, `kkclaw doctor`, and `kkclaw gateway status` now report the active backend, CLI path, probe source, log paths, and Hermes API server readiness
+- **Gateway diagnostics** — `petclaw status`, `petclaw doctor`, and `petclaw gateway status` now report the active backend, CLI path, probe source, log paths, and Hermes API server readiness
 - **Backend-themed startup banners** — Startup and ready banners now adapt labels and colors for OpenClaw vs Hermes
 - **Backend-routed dashboard / client config** — The dashboard target, API host, token usage, and gateway stop/start flow now follow the active compatible backend
 - **Voice-trigger documentation** — README and smart voice docs now explain that AI reply playback requires the agent to actively call `desktop-bridge.js`
@@ -35,12 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.0] - 2026-04-02
 
 ### Added
-- **`kkclaw` CLI entrypoint** — Added a native command surface with `kkclaw gateway`, `kkclaw doctor`, `kkclaw status`, and `kkclaw dashboard`
-- **Gateway companion commands** — Added `kkclaw gateway status`, `kkclaw gateway logs`, `kkclaw gateway open`, `kkclaw gateway restart`, and `kkclaw gateway stop`
+- **`petclaw` CLI entrypoint** — Added a native command surface with `petclaw gateway`, `petclaw doctor`, `petclaw status`, and `petclaw dashboard`
+- **Gateway companion commands** — Added `petclaw gateway status`, `petclaw gateway logs`, `petclaw gateway open`, `petclaw gateway restart`, and `petclaw gateway stop`
 - **Gateway log tailing** — Added command output for recent gateway logs and error logs with configurable tail length
 
 ### Improved
-- **Animated terminal launcher reuse** — Reworked the terminal-opening helper so `kkclaw gateway` launches the same animated console flow as `npm start`
+- **Animated terminal launcher reuse** — Reworked the terminal-opening helper so `petclaw gateway` launches the same animated console flow as `npm start`
 - **Doctor observability** — Added Gateway ownership checks, Dashboard URL output, OpenClaw CLI version reporting, and process summaries to make port conflicts easier to diagnose
 
 ## [3.5.2] - 2026-03-12
@@ -149,7 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **项目重构** — 97 个文件重新组织，按职责分离（`voice/`、`utils/`、`scripts/`、`docs-dev/`、`archive/`、`tests/`）
-- **品牌升级** — 全面使用 kkclaw 品牌
+- **品牌升级** — 全面使用 petclaw 品牌
 
 ### Security
 - **清除硬编码凭证** — 5 个文件清理（API keys、tokens、个人路径）
@@ -157,7 +157,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Asar 审计** — 打包产物 0 泄漏验证
 
 ### Added
-- **KKClaw Switch 日志** (`utils/switch-logger.js`) — Provider 切换跟踪
+- **Petclaw Switch 日志** (`utils/switch-logger.js`) — Provider 切换跟踪
 - **服务管理器** (`service-manager.js`) — 统一服务生命周期
 - **GitHub Pages v3.0** — 交互式 7 情绪球 demo
 
@@ -172,7 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **三层渐变时序** — inner fluid (2.2s)、blob1 (1.8s)、blob2 (2.6s) 营造视觉层次
 
 ### Added
-- **KKClaw Switch 自动同步** (`kkclaw-auto-sync.js`) — 监控 `~/.cc-switch/cc-switch.db`，自动同步 Provider 变更
+- **Petclaw Switch 自动同步** (`petclaw-auto-sync.js`) — 监控 `~/.cc-switch/cc-switch.db`，自动同步 Provider 变更
 - **集成到桌面宠物生命周期** — 随宠物启动/退出，无需手动管理
 
 ## [2.0.2] - 2026-02-10
@@ -184,10 +184,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.1] - 2026-02-10
 
 ### Fixed
-- KKClaw Switch → OpenClaw 同步因大小写冲突导致 Provider 键重复
+- Petclaw Switch → OpenClaw 同步因大小写冲突导致 Provider 键重复
 
 ### Added
-- `kkclaw-hotswitch.js` — 同步当前 Provider 并可选重启 OpenClaw
+- `petclaw-hotswitch.js` — 同步当前 Provider 并可选重启 OpenClaw
 - `fix-openclaw-config.js` — 修复重复键的配置修复工具
 
 ## [1.4.0] - 2026-02-07
@@ -237,22 +237,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenClaw 集成
 - 简单语音系统
 
-[3.7.1]: https://github.com/kk43994/kkclaw/compare/v3.7.0...v3.7.1
-[3.7.0]: https://github.com/kk43994/kkclaw/compare/v3.6.0...v3.7.0
-[3.6.0]: https://github.com/kk43994/kkclaw/compare/v3.5.2...v3.6.0
-[3.5.2]: https://github.com/kk43994/kkclaw/compare/v3.5.1...v3.5.2
-[3.5.1]: https://github.com/kk43994/kkclaw/compare/v3.5.0...v3.5.1
-[3.5.0]: https://github.com/kk43994/kkclaw/compare/v3.1.2...v3.5.0
-[3.1.2]: https://github.com/kk43994/kkclaw/compare/v3.1.1...v3.1.2
-[3.1.1]: https://github.com/kk43994/kkclaw/compare/v3.0.0...v3.1.1
-[3.0.0]: https://github.com/kk43994/kkclaw/compare/v2.2.0...v3.0.0
-[2.2.0]: https://github.com/kk43994/kkclaw/compare/v2.0.4...v2.2.0
-[2.0.4]: https://github.com/kk43994/kkclaw/compare/v2.0.3...v2.0.4
-[2.0.3]: https://github.com/kk43994/kkclaw/compare/v2.0.2...v2.0.3
-[2.0.2]: https://github.com/kk43994/kkclaw/compare/v2.0.1...v2.0.2
-[2.0.1]: https://github.com/kk43994/kkclaw/compare/v1.4.0...v2.0.1
-[1.4.0]: https://github.com/kk43994/kkclaw/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/kk43994/kkclaw/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/kk43994/kkclaw/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/kk43994/kkclaw/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/kk43994/kkclaw/releases/tag/v1.0.0
+[3.7.1]: https://github.com/kk43994/petclaw/compare/v3.7.0...v3.7.1
+[3.7.0]: https://github.com/kk43994/petclaw/compare/v3.6.0...v3.7.0
+[3.6.0]: https://github.com/kk43994/petclaw/compare/v3.5.2...v3.6.0
+[3.5.2]: https://github.com/kk43994/petclaw/compare/v3.5.1...v3.5.2
+[3.5.1]: https://github.com/kk43994/petclaw/compare/v3.5.0...v3.5.1
+[3.5.0]: https://github.com/kk43994/petclaw/compare/v3.1.2...v3.5.0
+[3.1.2]: https://github.com/kk43994/petclaw/compare/v3.1.1...v3.1.2
+[3.1.1]: https://github.com/kk43994/petclaw/compare/v3.0.0...v3.1.1
+[3.0.0]: https://github.com/kk43994/petclaw/compare/v2.2.0...v3.0.0
+[2.2.0]: https://github.com/kk43994/petclaw/compare/v2.0.4...v2.2.0
+[2.0.4]: https://github.com/kk43994/petclaw/compare/v2.0.3...v2.0.4
+[2.0.3]: https://github.com/kk43994/petclaw/compare/v2.0.2...v2.0.3
+[2.0.2]: https://github.com/kk43994/petclaw/compare/v2.0.1...v2.0.2
+[2.0.1]: https://github.com/kk43994/petclaw/compare/v1.4.0...v2.0.1
+[1.4.0]: https://github.com/kk43994/petclaw/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/kk43994/petclaw/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/kk43994/petclaw/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/kk43994/petclaw/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/kk43994/petclaw/releases/tag/v1.0.0

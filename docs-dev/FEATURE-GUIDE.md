@@ -1,4 +1,4 @@
-# 🦞 KKClaw Desktop Pet 全方位功能介绍
+# 🦞 Petclaw Desktop Pet 全方位功能介绍
 
 **完整技术文档 + 使用指南 + 最佳实践**
 
@@ -10,7 +10,7 @@
 2. [UI系统详解](#ui系统详解)
 3. [情绪与表情系统](#情绪与表情系统)
 4. [智能语音系统](#智能语音系统)
-5. [KKClaw Switch集成](#kkclaw-switch集成)
+5. [Petclaw Switch集成](#petclaw-switch集成)
 6. [工具栏与交互](#工具栏与交互)
 7. [稳定性系统](#稳定性系统)
 8. [配置与定制](#配置与定制)
@@ -21,7 +21,7 @@
 
 ## 核心概念
 
-### 什么是KKClaw Desktop Pet？
+### 什么是Petclaw Desktop Pet？
 
 **一句话总结**：给OpenClaw AI一个可视化的身体，让AI从聊天框走到桌面上。
 
@@ -50,7 +50,7 @@
 - ❌ 遮挡工作区域
 - ❌ 交互不便
 
-KKClaw的解决方案：
+Petclaw的解决方案：
 - ✅ 精灵窗口（200×220px）— 最小化视觉占用
 - ✅ 歌词窗口（400×100px）— 完全鼠标穿透
 - ✅ 拖动同步 — 两窗口联动
@@ -663,9 +663,9 @@ async function speak(text) {
 
 ---
 
-## KKClaw Switch集成
+## Petclaw Switch集成
 
-### 什么是KKClaw Switch？
+### 什么是Petclaw Switch？
 
 **问题**：AI模型切换需要：
 1. 打开配置文件
@@ -673,7 +673,7 @@ async function speak(text) {
 3. 重启Gateway
 4. 等待30秒
 
-**KKClaw Switch解决方案**：
+**Petclaw Switch解决方案**：
 - 点击切换 → 3秒生效
 - 无需编辑文件
 - 自动重启
@@ -685,7 +685,7 @@ async function speak(text) {
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│ KKClaw Switch│ →   │ SQLite DB    │ →   │ Auto Monitor │
+│ Petclaw Switch│ →   │ SQLite DB    │ →   │ Auto Monitor │
 │ 选择provider │     │ 保存选择     │     │ 每2秒检测     │
 └──────────────┘     └──────────────┘     └──────────────┘
                                                    ↓
@@ -718,13 +718,13 @@ let syncWatcher;
 app.on('ready', () => {
   // 启动自动同步监听器
   syncWatcher = spawn('node', [
-    path.join(__dirname, 'kkclaw-auto-sync.js')
+    path.join(__dirname, 'petclaw-auto-sync.js')
   ], {
     detached: false,
     stdio: 'inherit'
   });
   
-  console.log('✅ KKClaw auto-sync started');
+  console.log('✅ Petclaw auto-sync started');
 });
 
 app.on('will-quit', () => {
@@ -738,7 +738,7 @@ app.on('will-quit', () => {
 **监听器代码**：
 
 ```javascript
-// kkclaw-auto-sync.js
+// petclaw-auto-sync.js
 const Database = require('better-sqlite3');
 const { execSync } = require('child_process');
 const path = require('path');
@@ -759,7 +759,7 @@ setInterval(() => {
       console.log(`🔄 Provider changed: ${lastProvider} → ${currentProvider}`);
       
       // 执行同步
-      execSync('node kkclaw-hotswitch.js --restart', {
+      execSync('node petclaw-hotswitch.js --restart', {
         cwd: __dirname,
         stdio: 'inherit'
       });
@@ -778,23 +778,23 @@ setInterval(() => {
 
 ```bash
 # 方式1：只同步config，不重启
-node kkclaw-hotswitch.js
+node petclaw-hotswitch.js
 
 # 方式2：同步 + 重启Gateway
-node kkclaw-hotswitch.js --restart
+node petclaw-hotswitch.js --restart
 ```
 
 **同步脚本**：
 
 ```javascript
-// kkclaw-hotswitch.js
+// petclaw-hotswitch.js
 const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync } = require('child_process');
 
-// 1. 读取KKClaw Switch DB
+// 1. 读取Petclaw Switch DB
 const dbPath = path.join(os.homedir(), '.cc-switch', 'cc-switch.db');
 const db = new Database(dbPath, { readonly: true });
 const row = db.prepare('SELECT name FROM active_provider LIMIT 1').get();
@@ -837,11 +837,11 @@ if (process.argv.includes('--restart')) {
 
 ```
 你：需要写长文档
-操作：KKClaw Switch → 选择 Claude Opus 4
+操作：Petclaw Switch → 选择 Claude Opus 4
 结果：3秒后生效，开始使用Opus写作
 
 你：需要快速回答
-操作：KKClaw Switch → 选择 GPT-5.3
+操作：Petclaw Switch → 选择 GPT-5.3
 结果：3秒后生效，切换到GPT
 ```
 
@@ -905,8 +905,8 @@ const contextMenu = Menu.buildFromTemplate([
   },
   { type: 'separator' },
   {
-    label: '🔁 KKClaw Switch',
-    click: () => openKKClawSwitch()
+    label: '🔁 Petclaw Switch',
+    click: () => openPetclawSwitch()
   },
   {
     label: '⚙️ 设置',
@@ -1305,7 +1305,7 @@ curl -X POST https://api.minimax.chat/v1/voice_clone \
 **需求**：不同任务用不同模型
 
 **工作流**：
-1. 打开KKClaw Switch
+1. 打开Petclaw Switch
 2. 预设3个profile：
    - 写作：Claude Opus 4
    - 编程：GPT-5.3 Codex
@@ -1325,7 +1325,7 @@ curl -X POST https://api.minimax.chat/v1/voice_clone \
 
 **后端**：
 - Node.js 18.x
-- SQLite（KKClaw Switch DB）
+- SQLite（Petclaw Switch DB）
 - Python 3.10（截图、TTS辅助）
 
 **通信**：
@@ -1368,8 +1368,8 @@ desktop-pet/
 ├── docs-dev/                 # 开发文档
 ├── archive/                  # 归档
 │
-├── kkclaw-hotswitch.js       # 模型切换脚本
-├── kkclaw-auto-sync.js       # 自动同步监听器
+├── petclaw-hotswitch.js       # 模型切换脚本
+├── petclaw-auto-sync.js       # 自动同步监听器
 ├── create-shortcut.ps1       # 快捷方式生成
 │
 ├── package.json

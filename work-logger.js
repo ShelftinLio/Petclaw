@@ -106,6 +106,7 @@ class WorkLogger {
         const messages = this.sessionLog
             .filter(entry => entry.type === 'message')
             .slice(-count)
+            .reverse()
             .map(entry => {
                 // 解析 "**sender**: content" 格式
                 const match = entry.content.match(/^\*\*(.+?)\*\*:\s*(.+)$/s);
@@ -113,14 +114,14 @@ class WorkLogger {
                     return {
                         timestamp: entry.timestamp,
                         sender: match[1],
-                        content: match[2].substring(0, 100), // 截取前100字符
+                        content: match[2],
                         type: entry.type,
                     };
                 }
                 return {
                     timestamp: entry.timestamp,
                     sender: '',
-                    content: entry.content.substring(0, 100),
+                    content: entry.content,
                     type: entry.type,
                 };
             });

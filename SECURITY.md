@@ -23,7 +23,7 @@ If you discover a security vulnerability, please report it responsibly:
 
 - **Audio playback** — `exec()` shell string interpolation replaced with `execFile()`/`spawn()` + argument arrays in `_playAudioFile()` and `_playAudio()`
 - **Edge TTS** — User text passed via temp file (`--text-file`) instead of inline `--text` to prevent shell injection
-- **Commit**: [`f8f73a3`](https://github.com/kk43994/kkclaw/commit/f8f73a3)
+- **Commit**: [`f8f73a3`](https://github.com/kk43994/petclaw/commit/f8f73a3)
 
 ### v3.0.0+ — Electron Security Hardening
 
@@ -56,5 +56,5 @@ If you discover a security vulnerability, please report it responsibly:
 
 1. **Never share** your `pet-config.json` — it may contain API keys
 2. **Use `.env`** for sensitive configuration (see `.env.example`)
-3. **Keep KKClaw updated** to get the latest security fixes
+3. **Keep Petclaw updated** to get the latest security fixes
 4. **Review permissions** before granting microphone/file access in Setup Wizard

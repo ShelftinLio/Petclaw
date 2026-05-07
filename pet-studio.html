@@ -104,6 +104,10 @@
       padding: 12px;
     }
 
+    .content.library-collapsed {
+      grid-template-columns: 56px minmax(300px, 1fr) 260px;
+    }
+
     .panel {
       min-height: 0;
       border: 4px solid var(--line);
@@ -120,6 +124,46 @@
       font-size: 13px;
       font-weight: 900;
       text-transform: uppercase;
+    }
+
+    .library-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .panel-toggle {
+      width: 26px;
+      height: 24px;
+      border: 3px solid var(--line);
+      border-radius: 0;
+      background: var(--white);
+      color: var(--ink);
+      box-shadow: inset -2px -2px 0 var(--shadow);
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .panel-toggle:hover {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .content.library-collapsed .library-panel {
+      overflow: hidden;
+    }
+
+    .content.library-collapsed .library-head {
+      justify-content: center;
+      padding-inline: 8px;
+    }
+
+    .content.library-collapsed .library-title,
+    .content.library-collapsed .library {
+      display: none;
     }
 
     .library,
@@ -186,6 +230,20 @@
       image-rendering: pixelated;
     }
 
+    .thumb.sprite-thumb img {
+      max-width: none;
+      max-height: none;
+      object-fit: fill;
+      transform-origin: top left;
+    }
+
+    .sprite-thumb-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
     .name {
       font-size: 12px;
       font-weight: 900;
@@ -219,11 +277,20 @@
       grid-template-rows: auto minmax(0, 1fr) auto;
     }
 
+    .preview-body {
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      grid-template-rows: minmax(210px, 1fr) auto;
+      gap: 12px;
+      padding: 12px;
+    }
+
     .stage-wrap {
       min-height: 0;
       display: grid;
       place-items: center;
-      padding: 16px;
+      padding: 4px;
     }
 
     .stage {
@@ -244,7 +311,7 @@
       box-shadow: inset 0 -8px 0 rgba(23, 25, 22, 0.12);
     }
 
-    .sprite-viewport {
+    .still-viewport {
       width: 192px;
       height: 208px;
       overflow: hidden;
@@ -252,10 +319,51 @@
       transform: scale(1.25);
     }
 
-    .sprite-viewport img {
+    .still-viewport img,
+    .still-viewport canvas {
       display: block;
       image-rendering: pixelated;
       transform-origin: top left;
+    }
+
+    .still-viewport canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .sheet-block {
+      min-height: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .sheet-title {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .sheet-preview {
+      max-height: 156px;
+      overflow: auto;
+      border: 3px solid var(--line);
+      background:
+        linear-gradient(45deg, #ffffff 25%, transparent 25%),
+        linear-gradient(-45deg, #ffffff 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ffffff 75%),
+        linear-gradient(-45deg, transparent 75%, #ffffff 75%),
+        #f0f0ea;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-size: 16px 16px;
+      box-shadow: inset -3px -3px 0 rgba(23, 25, 22, 0.12);
+    }
+
+    .sheet-preview img {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
     }
 
     .empty-preview {
@@ -311,6 +419,19 @@
       text-transform: uppercase;
     }
 
+    .toolbar button:disabled,
+    .field button:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: inset -3px -3px 0 rgba(23, 25, 22, 0.12);
+    }
+
+    .toolbar button:disabled:hover,
+    .field button:disabled:hover {
+      background: var(--white);
+      color: var(--ink);
+    }
+
     .field {
       margin-top: 14px;
       padding-top: 12px;
@@ -345,6 +466,27 @@
       color: var(--muted);
       font-size: 11px;
       line-height: 1.35;
+    }
+
+    .read-only-info {
+      border: 3px solid var(--line);
+      background: #fbfbf6;
+      padding: 8px;
+      box-shadow: inset -3px -3px 0 rgba(23, 25, 22, 0.12);
+    }
+
+    .read-only-info strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .read-only-info div {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      white-space: pre-wrap;
     }
 
     .generation-progress {
@@ -423,43 +565,64 @@
       <button type="button" title="Close" onclick="window.close()">X</button>
     </header>
 
-    <section class="content">
-      <aside class="panel">
-        <div class="panel-head">Library</div>
+    <section class="content" id="studioContent">
+      <aside class="panel library-panel" id="libraryPanel">
+        <div class="panel-head library-head">
+          <span class="library-title">Library</span>
+          <button type="button" class="panel-toggle" id="libraryToggle" title="Collapse Library" aria-label="Collapse Library">&lt;</button>
+        </div>
         <div class="library" id="library"></div>
       </aside>
 
-      <section class="panel preview-panel">
-        <div class="panel-head" id="previewTitle">Preview</div>
-        <div class="stage-wrap">
-          <div class="stage">
-            <div class="sprite-viewport" id="spriteViewport">
-              <img id="spriteImage" alt="">
+        <section class="panel preview-panel">
+          <div class="panel-head" id="previewTitle">Preview</div>
+          <div class="preview-body">
+            <div class="stage-wrap">
+              <div class="stage">
+                <div class="still-viewport" id="stillViewport">
+                  <img id="stillImage" alt="">
+                  <canvas id="stillCanvas"></canvas>
+                </div>
+                <div class="empty-preview" id="emptyPreview">Select a pet to inspect its initial pose.</div>
+              </div>
             </div>
-            <div class="empty-preview" id="emptyPreview">Select a pet to inspect its animation states.</div>
+            <div class="sheet-block">
+              <div class="sheet-title">Sprite Sheet</div>
+              <div class="sheet-preview" id="sheetPreview">
+                <img id="sheetImage" alt="">
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="actions" id="actions"></div>
-      </section>
+          <div class="actions" id="actions"></div>
+        </section>
 
       <aside class="panel tools">
         <div class="panel-head">Tools</div>
         <div class="tools-body">
           <div class="toolbar">
             <button type="button" onclick="activateSelected()">Activate</button>
-            <button type="button" onclick="deleteSelectedPet()">Delete Custom</button>
-            <button type="button" onclick="resetPet()">Reset Cow Cat</button>
+            <button type="button" id="deleteSelectedButton" onclick="deleteSelectedPet()">Delete Custom</button>
+            <button type="button" id="resetPetButton" onclick="resetPet()">Reset Cow Cat</button>
           </div>
 
           <div class="field">
-            <label for="petName">1. Description</label>
-            <input id="petName" value="Generated Pet" maxlength="48">
-            <textarea id="petDescription" rows="5">a tiny friendly pixel pet with vertical i-like glowing eyes</textarea>
+            <label>1. Selected Pet</label>
+            <div class="read-only-info">
+              <strong id="selectedPetName">No pet selected</strong>
+              <div id="selectedPetDescription">Select a pet to inspect its built-in description.</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="generationPetName">2. Generate Custom Pet</label>
+            <input id="generationPetName" value="Generated Pet" maxlength="48">
+            <textarea id="generationPetDescription" rows="5">a tiny friendly pixel pet with vertical i-like glowing eyes</textarea>
+            <div class="hint">This prompt creates a new custom pet. It does not edit the selected default pet.</div>
             <button type="button" id="generateTextButton" onclick="generatePetFromDescription()">Generate From Text</button>
           </div>
 
           <div class="field">
-            <label>2. Image</label>
+            <label>3. Image</label>
             <button type="button" id="generateImageButton" onclick="generatePetFromImage()">Generate From Image</button>
             <button type="button" id="manualPackageButton" onclick="createImagegenRequest()">Create Manual Image Package</button>
             <div class="hint" id="generationHint">Checking image generation provider...</div>
@@ -470,7 +633,7 @@
           </div>
 
           <div class="field">
-            <label>3. File</label>
+            <label>4. File</label>
             <button type="button" onclick="importPackage()">Import Pet File</button>
             <div class="hint">Import a complete generated pet package. The built-in Cow Cat is locked and cannot be modified.</div>
           </div>
@@ -486,32 +649,42 @@
   </main>
 
   <script>
-    const stateOrder = ['idle', 'walking', 'happy', 'talking', 'thinking', 'sleepy', 'surprised', 'focused', 'offline', 'sad'];
-    const library = document.getElementById('library');
-    const actions = document.getElementById('actions');
-    const statusEl = document.getElementById('status');
+      const stateOrder = ['idle', 'walking', 'happy', 'talking', 'thinking', 'sleepy', 'surprised', 'focused', 'offline', 'sad'];
+      const studioContent = document.getElementById('studioContent');
+      const libraryToggle = document.getElementById('libraryToggle');
+      const library = document.getElementById('library');
+      const actions = document.getElementById('actions');
+      const statusEl = document.getElementById('status');
     const selectedMeta = document.getElementById('selectedMeta');
     const previewTitle = document.getElementById('previewTitle');
-    const spriteViewport = document.getElementById('spriteViewport');
-    const spriteImage = document.getElementById('spriteImage');
+    const stillViewport = document.getElementById('stillViewport');
+    const stillImage = document.getElementById('stillImage');
+    const stillCanvas = document.getElementById('stillCanvas');
+    const sheetPreview = document.getElementById('sheetPreview');
+    const sheetImage = document.getElementById('sheetImage');
     const emptyPreview = document.getElementById('emptyPreview');
-    const petName = document.getElementById('petName');
-    const petDescription = document.getElementById('petDescription');
+    const selectedPetName = document.getElementById('selectedPetName');
+    const selectedPetDescription = document.getElementById('selectedPetDescription');
+    const generationPetName = document.getElementById('generationPetName');
+    const generationPetDescription = document.getElementById('generationPetDescription');
     const generationHint = document.getElementById('generationHint');
     const generationProgress = document.getElementById('generationProgress');
     const generationProgressTitle = document.getElementById('generationProgressTitle');
     const generationProgressDetail = document.getElementById('generationProgressDetail');
-    const generateTextButton = document.getElementById('generateTextButton');
-    const generateImageButton = document.getElementById('generateImageButton');
-    const manualPackageButton = document.getElementById('manualPackageButton');
+      const generateTextButton = document.getElementById('generateTextButton');
+      const generateImageButton = document.getElementById('generateImageButton');
+      const manualPackageButton = document.getElementById('manualPackageButton');
+      const deleteSelectedButton = document.getElementById('deleteSelectedButton');
+      const resetPetButton = document.getElementById('resetPetButton');
 
-    let appState = null;
-    let pets = [];
-    let selectedPetId = 'cow-cat';
-    let selectedAction = 'idle';
-    let frameIndex = 0;
-    let frameTimer = null;
-    let generationStatus = null;
+      let appState = null;
+      let pets = [];
+      let selectedPetId = 'cow-cat';
+      let selectedAction = 'idle';
+      let frameIndex = 0;
+      let frameTimer = null;
+      let generationStatus = null;
+      let libraryCollapsed = false;
 
     function setStatus(text) {
       statusEl.textContent = text || '';
@@ -551,7 +724,11 @@
       const postprocess = result?.postprocess;
       if (!postprocess) return fallback;
       const parts = [];
+      if (postprocess.normalizedGrid) parts.push('sprite grid normalized');
       if (postprocess.cleanedBackground) parts.push('transparent background cleaned');
+      if (postprocess.repairedInteriorHoles) parts.push('interior cutout marks repaired');
+      if (postprocess.repairedCutoutMarks) parts.push('connected cutout marks repaired');
+      if (postprocess.removedCellSlivers) parts.push('neighbor-frame slivers removed');
       if (postprocess.recenteredFrames) parts.push(`${postprocess.recenteredFrames} frames centered`);
       return parts.length ? `${fallback} ${parts.join(', ')}.` : fallback;
     }
@@ -564,6 +741,152 @@
       return pets.find((pet) => pet.id === petId) || null;
     }
 
+    function toggleLibraryCollapsed() {
+      libraryCollapsed = !libraryCollapsed;
+      studioContent.classList.toggle('library-collapsed', libraryCollapsed);
+      libraryToggle.textContent = libraryCollapsed ? '>' : '<';
+      libraryToggle.title = libraryCollapsed ? 'Expand Library' : 'Collapse Library';
+      libraryToggle.setAttribute('aria-label', libraryToggle.title);
+    }
+
+    function renderSelectedPetInfo(pet) {
+      if (!pet) {
+        selectedPetName.textContent = 'No pet selected';
+        selectedPetDescription.textContent = 'Select a pet to inspect its built-in description.';
+        return;
+      }
+      const manifest = pet.manifest || {};
+      selectedPetName.textContent = pet.name || manifest.name || pet.id || 'Selected Pet';
+      selectedPetDescription.textContent = manifest.description || pet.description || 'No description provided.';
+    }
+
+    function renderToolButtons() {
+      const selectedPet = getSelectedPet();
+      const selectedIsBuiltIn = isBuiltInPet(selectedPet);
+      deleteSelectedButton.disabled = selectedIsBuiltIn;
+      resetPetButton.disabled = selectedIsBuiltIn;
+      deleteSelectedButton.title = selectedIsBuiltIn
+        ? 'Default pets are locked and cannot be deleted.'
+        : 'Delete the selected custom pet.';
+      resetPetButton.title = selectedIsBuiltIn
+        ? 'Default pets do not need to be reset.'
+        : 'Reset to the built-in Cow Cat.';
+    }
+
+    function getSpriteGrid(pet) {
+      const manifest = pet?.manifest || {};
+      return {
+        columns: manifest.layout?.columns || 8,
+        rows: manifest.layout?.rows || Object.keys(manifest.states || {}).length || 1,
+        cellWidth: manifest.cell?.width || 192,
+        cellHeight: manifest.cell?.height || 208,
+      };
+    }
+
+    function renderInitialPoseImage(pet, className = '') {
+      if (!pet?.imageUrl) return '';
+      const manifest = pet.manifest || {};
+      const escapedUrl = escapeText(pet.imageUrl);
+      if (manifest.renderer !== 'spritesheet') {
+        return `<img class="${escapeText(className)}" src="${escapedUrl}" alt="">`;
+      }
+      const grid = getSpriteGrid(pet);
+      const idle = manifest.states?.idle || {};
+      const row = typeof idle.row === 'number' ? idle.row : 0;
+      return `<img class="${escapeText(className)}" src="${escapedUrl}" alt="" style="width:${grid.columns * 100}%;height:${grid.rows * 100}%;object-fit:fill;transform:translate3d(0, ${-row * (100 / grid.rows)}%, 0);">`;
+    }
+
+    function renderLibraryThumb(pet) {
+      if (!pet?.imageUrl) return '<span class="thumb"></span>';
+      if (pet.manifest?.renderer !== 'spritesheet') {
+        return `<span class="thumb">${renderInitialPoseImage(pet)}</span>`;
+      }
+      return `
+        <span class="thumb sprite-thumb">
+          <canvas class="sprite-thumb-canvas" width="40" height="40" data-pet-id="${escapeText(pet.id)}"></canvas>
+        </span>
+      `;
+    }
+
+    function drawCenteredSpriteThumb(canvas, pet) {
+      const imageUrl = pet?.imageUrl || '';
+      const manifest = pet?.manifest || {};
+      if (!imageUrl || manifest.renderer !== 'spritesheet') return;
+
+      const image = new Image();
+      image.onload = () => {
+        const geometry = getFrameGeometry(image, manifest, 'idle', 0);
+        const scratch = document.createElement('canvas');
+        scratch.width = geometry.sourceCellWidth;
+        scratch.height = geometry.sourceCellHeight;
+        const scratchContext = scratch.getContext('2d', { willReadFrequently: true });
+        scratchContext.imageSmoothingEnabled = false;
+        scratchContext.clearRect(0, 0, scratch.width, scratch.height);
+        scratchContext.drawImage(
+          image,
+          geometry.sourceX,
+          geometry.sourceY,
+          geometry.sourceCellWidth,
+          geometry.sourceCellHeight,
+          0,
+          0,
+          geometry.sourceCellWidth,
+          geometry.sourceCellHeight
+        );
+
+        const frameData = scratchContext.getImageData(0, 0, scratch.width, scratch.height);
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        for (let y = 0; y < scratch.height; y += 1) {
+          for (let x = 0; x < scratch.width; x += 1) {
+            const alpha = frameData.data[(y * scratch.width + x) * 4 + 3];
+            if (alpha <= 40) continue;
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+          }
+        }
+
+        const context = canvas.getContext('2d');
+        const size = canvas.width;
+        context.imageSmoothingEnabled = false;
+        context.clearRect(0, 0, size, size);
+        if (!Number.isFinite(minX)) return;
+
+        const contentWidth = maxX - minX + 1;
+        const contentHeight = maxY - minY + 1;
+        const padding = 3;
+        const scale = Math.min((size - padding * 2) / contentWidth, (size - padding * 2) / contentHeight);
+        const drawWidth = Math.max(1, Math.round(contentWidth * scale));
+        const drawHeight = Math.max(1, Math.round(contentHeight * scale));
+        const dx = Math.round((size - drawWidth) / 2);
+        const dy = Math.round((size - drawHeight) / 2);
+
+        context.drawImage(
+          scratch,
+          minX,
+          minY,
+          contentWidth,
+          contentHeight,
+          dx,
+          dy,
+          drawWidth,
+          drawHeight
+        );
+      };
+      image.src = imageUrl;
+    }
+
+    function drawLibraryThumbs() {
+      library.querySelectorAll('canvas.sprite-thumb-canvas').forEach((canvas) => {
+        const pet = getPetById(canvas.dataset.petId);
+        drawCenteredSpriteThumb(canvas, pet);
+      });
+    }
+
     function escapeText(value) {
       return String(value || '').replace(/[&<>"']/g, (char) => ({
         '&': '&amp;',
@@ -572,6 +895,10 @@
         '"': '&quot;',
         "'": '&#39;',
       }[char]));
+    }
+
+    function isBuiltInPet(pet) {
+      return Boolean(pet && (pet.locked || pet.source === 'built-in'));
     }
 
     function stopAnimation() {
@@ -590,16 +917,16 @@
         const classes = ['pet-row'];
         if (pet.id === selectedPetId) classes.push('selected');
         if (pet.active) classes.push('active');
-        if (pet.id === 'cow-cat') classes.push('locked');
+        if (isBuiltInPet(pet)) classes.push('locked');
         const renderer = pet.manifest?.renderer || pet.renderer || 'unknown';
         const source = pet.source || 'package';
-        const thumb = pet.imageUrl ? `<img src="${escapeText(pet.imageUrl)}" alt="">` : '';
-        const deleteControl = pet.id === 'cow-cat'
+        const thumb = renderLibraryThumb(pet);
+        const deleteControl = isBuiltInPet(pet)
           ? '<button type="button" class="pet-delete" disabled title="Default pet is locked">Locked</button>'
           : `<button type="button" class="pet-delete" data-delete-id="${escapeText(pet.id)}" title="Delete Pet">Delete Pet</button>`;
         return `
           <div class="${classes.join(' ')}" data-id="${escapeText(pet.id)}">
-            <span class="thumb">${thumb}</span>
+            ${thumb}
             <span>
               <span class="name">${escapeText(pet.name || pet.id)}</span>
               <span class="meta">${escapeText(source)} / ${escapeText(renderer)}</span>
@@ -624,6 +951,8 @@
           deletePetById(button.dataset.deleteId);
         });
       });
+
+      drawLibraryThumbs();
     }
 
     function chooseAction(pet, preferred) {
@@ -663,7 +992,7 @@
       const current = manifest.states?.[selectedAction] || manifest.states?.idle || {};
       selectedMeta.innerHTML = `
           <div class="badge">${escapeText(manifest.renderer || pet.renderer || 'unknown')}</div>
-        ${pet.id === 'cow-cat' ? '<div class="badge">locked default</div>' : ''}
+        ${isBuiltInPet(pet) ? '<div class="badge">locked default</div>' : ''}
         <div class="badge">${states.length} states</div>
         <div class="hint">
           <strong>${escapeText(pet.name || pet.id)}</strong><br>
@@ -674,66 +1003,200 @@
       `;
     }
 
+    function getFrameGeometry(image, manifest, actionName, frame) {
+      const columns = manifest.layout?.columns || 8;
+      const rows = manifest.layout?.rows || Object.keys(manifest.states || {}).length || 1;
+      const state = manifest.states?.[actionName] || manifest.states?.idle || {};
+      const sourceCellWidth = Math.max(1, Math.floor(image.naturalWidth / columns));
+      const sourceCellHeight = Math.max(1, Math.floor(image.naturalHeight / rows));
+      const row = typeof state.row === 'number' ? state.row : 0;
+      const frames = Math.max(1, Math.min(state.frames || 1, columns));
+      return {
+        columns,
+        rows,
+        sourceCellWidth,
+        sourceCellHeight,
+        sourceX: (frame % frames) * sourceCellWidth,
+        sourceY: row * sourceCellHeight,
+        frames,
+        duration: state.duration || 140,
+      };
+    }
+
+    function clampFrameOffset(offset, min, max, size) {
+      return Math.max(-min, Math.min(size - 1 - max, offset));
+    }
+
+    function calculateFrameCoreOffset(frameData, width, height) {
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      let opaqueCount = 0;
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const alpha = frameData.data[(y * width + x) * 4 + 3];
+          if (alpha <= 40) continue;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+          opaqueCount += 1;
+        }
+      }
+      if (!Number.isFinite(minX)) return { dx: 0, dy: 0 };
+
+      const contentHeight = maxY - minY + 1;
+      const coreMaxY = minY + Math.max(2, Math.floor(contentHeight * 0.38));
+      let coreMinX = Infinity;
+      let coreMaxX = -Infinity;
+      let coreSamples = 0;
+      for (let y = minY; y <= coreMaxY; y += 1) {
+        for (let x = minX; x <= maxX; x += 1) {
+          const alpha = frameData.data[(y * width + x) * 4 + 3];
+          if (alpha <= 40) continue;
+          coreMinX = Math.min(coreMinX, x);
+          coreMaxX = Math.max(coreMaxX, x);
+          coreSamples += 1;
+        }
+      }
+
+      const coreAnchorX = coreSamples >= Math.max(4, Math.floor(opaqueCount * 0.08))
+        ? (coreMinX + coreMaxX) / 2
+        : (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      return {
+        dx: clampFrameOffset(Math.round((width - 1) / 2 - coreAnchorX), minX, maxX, width),
+        dy: clampFrameOffset(Math.round((height - 1) / 2 - centerY), minY, maxY, height),
+      };
+    }
+
+    function drawCenteredFrame(image, manifest, actionName, frame) {
+      const geometry = getFrameGeometry(image, manifest, actionName, frame);
+      const canvas = stillCanvas;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      canvas.width = geometry.sourceCellWidth;
+      canvas.height = geometry.sourceCellHeight;
+      stillViewport.style.width = `${geometry.sourceCellWidth}px`;
+      stillViewport.style.height = `${geometry.sourceCellHeight}px`;
+      context.imageSmoothingEnabled = false;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(
+        image,
+        geometry.sourceX,
+        geometry.sourceY,
+        geometry.sourceCellWidth,
+        geometry.sourceCellHeight,
+        0,
+        0,
+        geometry.sourceCellWidth,
+        geometry.sourceCellHeight
+      );
+
+      const frameData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const { dx, dy } = calculateFrameCoreOffset(frameData, canvas.width, canvas.height);
+      if (dx === 0 && dy === 0) return geometry;
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(
+        image,
+        geometry.sourceX,
+        geometry.sourceY,
+        geometry.sourceCellWidth,
+        geometry.sourceCellHeight,
+        dx,
+        dy,
+        geometry.sourceCellWidth,
+        geometry.sourceCellHeight
+      );
+      return geometry;
+    }
+
+    function startFrameAnimation(pet, manifest, imageUrl) {
+      stopAnimation();
+      const image = new Image();
+      image.onload = () => {
+        let geometry = drawCenteredFrame(image, manifest, selectedAction, frameIndex);
+        frameIndex = (frameIndex + 1) % geometry.frames;
+        frameTimer = setInterval(() => {
+          geometry = drawCenteredFrame(image, manifest, selectedAction, frameIndex);
+          frameIndex = (frameIndex + 1) % geometry.frames;
+        }, geometry.duration);
+      };
+      image.onerror = () => {
+        stillViewport.style.display = 'none';
+        emptyPreview.style.display = 'block';
+        emptyPreview.textContent = 'Missing asset. Generate or copy the spritesheet into this package.';
+      };
+      image.src = imageUrl;
+    }
+
+    function renderStillPreview(pet, manifest, imageUrl) {
+      if (!pet || !manifest || !imageUrl) {
+        stillViewport.style.display = 'none';
+        emptyPreview.style.display = 'block';
+        emptyPreview.textContent = pet ? 'This package is waiting for its spritesheet asset.' : 'Select a pet to inspect its initial pose.';
+        return;
+      }
+
+      stillViewport.style.display = 'block';
+      emptyPreview.style.display = 'none';
+
+      if (manifest.renderer !== 'spritesheet') {
+        stillViewport.style.width = '192px';
+        stillViewport.style.height = '208px';
+        stillCanvas.style.display = 'none';
+        stillImage.style.display = 'block';
+        stillImage.src = imageUrl;
+        stillImage.onerror = () => {
+          stillViewport.style.display = 'none';
+          emptyPreview.style.display = 'block';
+          emptyPreview.textContent = 'Missing asset. Generate or copy the spritesheet into this package.';
+        };
+        stillImage.style.width = '100%';
+        stillImage.style.height = '100%';
+        stillImage.style.objectFit = 'contain';
+        stillImage.style.transform = 'translate3d(0, 0, 0)';
+        return;
+      }
+
+      stillImage.style.display = 'none';
+      stillCanvas.style.display = 'block';
+      startFrameAnimation(pet, manifest, imageUrl);
+    }
+
+    function renderSpriteSheetPreview(pet, manifest, imageUrl) {
+      if (!pet || !manifest || !imageUrl) {
+        sheetPreview.style.display = 'none';
+        sheetImage.removeAttribute('src');
+        return;
+      }
+      sheetPreview.style.display = 'block';
+      sheetImage.src = imageUrl;
+      sheetImage.onerror = () => {
+        sheetPreview.style.display = 'none';
+      };
+    }
+
     function renderPreview() {
       stopAnimation();
       const pet = getSelectedPet();
       const manifest = pet?.manifest || null;
       const imageUrl = pet?.imageUrl || '';
-      previewTitle.textContent = pet ? `Preview / ${pet.name || pet.id}` : 'Preview';
-
-      if (!pet || !manifest || !imageUrl) {
-        spriteViewport.style.display = 'none';
-        emptyPreview.style.display = 'block';
-        emptyPreview.textContent = pet ? 'This package is waiting for its spritesheet asset.' : 'Select a pet to inspect its animation states.';
-        return;
-      }
-
-      spriteViewport.style.display = 'block';
-      emptyPreview.style.display = 'none';
-      spriteImage.src = imageUrl;
-      spriteImage.onerror = () => {
-        spriteViewport.style.display = 'none';
-        emptyPreview.style.display = 'block';
-        emptyPreview.textContent = 'Missing asset. Generate or copy the spritesheet into this package.';
-      };
-
-      if (manifest.renderer !== 'spritesheet') {
-        spriteViewport.style.width = '192px';
-        spriteViewport.style.height = '208px';
-        spriteImage.style.width = '100%';
-        spriteImage.style.height = '100%';
-        spriteImage.style.objectFit = 'contain';
-        spriteImage.style.transform = 'translate3d(0, 0, 0)';
-        return;
-      }
-
-      const columns = manifest.layout?.columns || 8;
-      const rows = manifest.layout?.rows || Object.keys(manifest.states || {}).length || 1;
-      spriteViewport.style.width = `${manifest.cell?.width || 192}px`;
-      spriteViewport.style.height = `${manifest.cell?.height || 208}px`;
-      const state = manifest.states?.[selectedAction] || manifest.states?.idle;
-      const frames = Math.min(state?.frames || 1, columns);
-      const duration = state?.duration || 140;
-      const row = typeof state?.row === 'number' ? state.row : 0;
-      spriteImage.style.width = `${columns * 100}%`;
-      spriteImage.style.height = `${rows * 100}%`;
-      spriteImage.style.objectFit = 'fill';
-
-      const tick = () => {
-        const frame = frameIndex % frames;
-        spriteImage.style.transform = `translate3d(${-frame * (100 / columns)}%, ${-row * (100 / rows)}%, 0)`;
-        frameIndex = (frameIndex + 1) % frames;
-      };
-      tick();
-      frameTimer = setInterval(tick, duration);
+      previewTitle.textContent = pet ? `Preview / ${selectedAction} / ${pet.name || pet.id}` : 'Preview';
+      renderStillPreview(pet, manifest, imageUrl);
+      renderSpriteSheetPreview(pet, manifest, imageUrl);
     }
 
     function renderAll() {
-      selectedAction = chooseAction(getSelectedPet(), selectedAction);
+      const selectedPet = getSelectedPet();
+      selectedAction = chooseAction(selectedPet, selectedAction);
+      renderSelectedPetInfo(selectedPet);
       renderLibrary();
       renderActions();
       renderMeta();
       renderPreview();
+      renderToolButtons();
     }
 
     async function refreshState(message) {
@@ -776,8 +1239,8 @@
     async function deletePetById(petId) {
       const pet = getPetById(petId);
       if (!pet || !window.electronAPI) return;
-      if (pet.id === 'cow-cat') {
-        setStatus('The built-in Cow Cat is locked and cannot be deleted.');
+      if (isBuiltInPet(pet)) {
+        setStatus('Built-in default pets are locked and cannot be deleted.');
         return;
       }
       if (!confirm(`Delete ${pet.name || pet.id}? This removes the local pet package.`)) return;
@@ -824,8 +1287,8 @@
 
     async function generatePetFromImage() {
       if (!window.electronAPI) return;
-      const name = petName.value.trim() || 'Generated Pet';
-      const description = petDescription.value.trim() || 'a friendly custom desktop pet';
+      const name = generationPetName.value.trim() || 'Generated Pet';
+      const description = generationPetDescription.value.trim() || 'a friendly custom desktop pet';
       try {
         beginGeneration(
           'Waiting For Reference',
@@ -854,11 +1317,11 @@
 
     async function generatePetFromDescription() {
       if (!window.electronAPI) return;
-      const name = petName.value.trim() || 'Generated Pet';
-      const description = petDescription.value.trim();
+      const name = generationPetName.value.trim() || 'Generated Pet';
+      const description = generationPetDescription.value.trim();
       if (!description) {
         setStatus('Describe the pet before generating.');
-        petDescription.focus();
+        generationPetDescription.focus();
         return;
       }
       try {
@@ -889,8 +1352,8 @@
 
     async function createImagegenRequest() {
       if (!window.electronAPI) return;
-      const name = petName.value.trim() || 'Generated Pet';
-      const description = petDescription.value.trim() || 'a friendly custom desktop pet';
+      const name = generationPetName.value.trim() || 'Generated Pet';
+      const description = generationPetDescription.value.trim() || 'a friendly custom desktop pet';
       setStatus('Choose an optional reference image...');
       try {
         const result = await window.electronAPI.invoke('appearance-create-imagegen-request', {
@@ -918,11 +1381,12 @@
       window.electronAPI.on('appearance-generation-progress', (progress) => {
         if (!progress) return;
         setGenerationProgress(progress.title || 'Generating Pet', progress.message || 'Working on the pet package...', true);
-      });
-    }
+        });
+      }
 
-    refreshGenerationStatus();
-    refreshState('Pet Studio ready.');
-  </script>
+      libraryToggle.addEventListener('click', toggleLibraryCollapsed);
+      refreshGenerationStatus();
+      refreshState('Pet Studio ready.');
+    </script>
 </body>
 </html>

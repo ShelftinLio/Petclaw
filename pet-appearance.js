@@ -1,6 +1,11 @@
 const path = require('path');
 
 const COW_CAT_ID = 'cow-cat';
+const CHAOS_DEVON_REX_ID = 'chaos-devon-rex';
+const CHINESE_VILLAGE_DOG_ID = 'chinese-village-dog';
+const LOBSTER_ID = 'lobster';
+const RETIRED_SHANKS_ID = 'shanks';
+const BUILT_IN_PET_IDS = [COW_CAT_ID, CHAOS_DEVON_REX_ID, CHINESE_VILLAGE_DOG_ID, LOBSTER_ID];
 const VALID_RENDERERS = ['dom-cow-cat', 'image', 'spritesheet', 'frames'];
 const VALID_SOURCES = ['built-in', 'local-image', 'imagegen', 'package'];
 const HATCH_STATES = [
@@ -20,10 +25,16 @@ function normalizeAppearanceConfig(appearance = {}) {
   const customPets = Array.isArray(appearance.customPets)
     ? appearance.customPets.filter(pet => pet && typeof pet.id === 'string')
     : [];
+  const mode = appearance.mode === RETIRED_SHANKS_ID
+    ? CHINESE_VILLAGE_DOG_ID
+    : appearance.mode;
+  const activePetId = appearance.activePetId === RETIRED_SHANKS_ID
+    ? CHINESE_VILLAGE_DOG_ID
+    : appearance.activePetId;
 
   return {
-    mode: typeof appearance.mode === 'string' ? appearance.mode : 'cow-cat',
-    activePetId: typeof appearance.activePetId === 'string' ? appearance.activePetId : COW_CAT_ID,
+    mode: typeof mode === 'string' ? mode : 'cow-cat',
+    activePetId: typeof activePetId === 'string' ? activePetId : COW_CAT_ID,
     customPets,
   };
 }
@@ -53,6 +64,115 @@ function createBuiltInCowCatManifest() {
       walking: { row: 9, frames: 8, duration: 90 },
     },
   };
+}
+
+function createBuiltInChaosDevonRexManifest() {
+  return {
+    id: CHAOS_DEVON_REX_ID,
+    name: 'Chaos Devon Rex',
+    description: 'A bug-eyed, big-eared pixel Devon Rex with twitchy chaotic energy.',
+    source: 'built-in',
+    renderer: 'spritesheet',
+    version: 1,
+    spritesheet: 'spritesheet.svg',
+    cell: { width: 192, height: 208 },
+    layout: { columns: 8, rows: 10 },
+    motion: { roam: true },
+    states: {
+      idle: { row: 0, frames: 8, duration: 130 },
+      happy: { row: 1, frames: 8, duration: 105 },
+      talking: { row: 2, frames: 8, duration: 95 },
+      thinking: { row: 3, frames: 8, duration: 150 },
+      sleepy: { row: 4, frames: 8, duration: 170 },
+      surprised: { row: 5, frames: 8, duration: 95 },
+      focused: { row: 6, frames: 8, duration: 130 },
+      offline: { row: 7, frames: 8, duration: 170 },
+      sad: { row: 8, frames: 8, duration: 145 },
+      walking: { row: 9, frames: 8, duration: 85 },
+    },
+  };
+}
+
+function createBuiltInChineseVillageDogManifest() {
+  return {
+    id: CHINESE_VILLAGE_DOG_ID,
+    name: 'Chinese Village Dog',
+    description: 'A sunny pixel Chinese village dog with tan fur, perked ears, a curled tail, and a tiny red collar.',
+    source: 'built-in',
+    renderer: 'spritesheet',
+    version: 1,
+    spritesheet: 'spritesheet.svg',
+    cell: { width: 192, height: 208 },
+    layout: { columns: 8, rows: 10 },
+    motion: { roam: true },
+    states: {
+      idle: { row: 0, frames: 8, duration: 125 },
+      happy: { row: 1, frames: 8, duration: 95 },
+      talking: { row: 2, frames: 8, duration: 90 },
+      thinking: { row: 3, frames: 8, duration: 145 },
+      sleepy: { row: 4, frames: 8, duration: 165 },
+      surprised: { row: 5, frames: 8, duration: 85 },
+      focused: { row: 6, frames: 8, duration: 120 },
+      offline: { row: 7, frames: 8, duration: 165 },
+      sad: { row: 8, frames: 8, duration: 135 },
+      walking: { row: 9, frames: 8, duration: 80 },
+    },
+  };
+}
+
+function createBuiltInLobsterManifest() {
+  return {
+    id: LOBSTER_ID,
+    name: 'Lobster',
+    description: 'A goofy red pixel lobster with big claws, tiny legs, and bouncy desk-crab energy.',
+    source: 'built-in',
+    renderer: 'spritesheet',
+    version: 1,
+    spritesheet: 'spritesheet.svg',
+    cell: { width: 192, height: 208 },
+    layout: { columns: 8, rows: 10 },
+    motion: { roam: true },
+    states: {
+      idle: { row: 0, frames: 8, duration: 118 },
+      happy: { row: 1, frames: 8, duration: 88 },
+      talking: { row: 2, frames: 8, duration: 92 },
+      thinking: { row: 3, frames: 8, duration: 138 },
+      sleepy: { row: 4, frames: 8, duration: 168 },
+      surprised: { row: 5, frames: 8, duration: 78 },
+      focused: { row: 6, frames: 8, duration: 118 },
+      offline: { row: 7, frames: 8, duration: 170 },
+      sad: { row: 8, frames: 8, duration: 138 },
+      walking: { row: 9, frames: 8, duration: 76 },
+    },
+  };
+}
+
+function createBuiltInPetManifests() {
+  return [
+    createBuiltInCowCatManifest(),
+    createBuiltInChaosDevonRexManifest(),
+    createBuiltInChineseVillageDogManifest(),
+    createBuiltInLobsterManifest(),
+  ];
+}
+
+function createBuiltInPetRecord(manifest) {
+  const id = manifest.id;
+  const assetDir = path.posix.join('assets', 'pets', id);
+  return {
+    id,
+    name: manifest.name,
+    source: manifest.source,
+    renderer: manifest.renderer,
+    assetDir,
+    manifestPath: path.posix.join(assetDir, 'pet.json'),
+    createdAt: '',
+    locked: true,
+  };
+}
+
+function isBuiltInPetId(petId) {
+  return BUILT_IN_PET_IDS.includes(petId);
 }
 
 function createImagePetManifest({ id, name, image = 'generated.png', source = 'local-image' }) {
@@ -268,7 +388,7 @@ function upsertCustomPet(appearance, record) {
 
 function removeCustomPet(appearance, petId) {
   const normalized = normalizeAppearanceConfig(appearance);
-  if (!petId || petId === COW_CAT_ID) return normalized;
+  if (!petId || isBuiltInPetId(petId)) return normalized;
   const customPets = normalized.customPets.filter(pet => pet.id !== petId);
   if (normalized.activePetId === petId) {
     return {
@@ -283,8 +403,8 @@ function removeCustomPet(appearance, petId) {
 
 function setActivePet(appearance, petId) {
   const normalized = normalizeAppearanceConfig(appearance);
-  if (petId === COW_CAT_ID) {
-    return { ...normalized, mode: 'cow-cat', activePetId: COW_CAT_ID };
+  if (isBuiltInPetId(petId)) {
+    return { ...normalized, mode: petId, activePetId: petId };
   }
   return { ...normalized, mode: 'custom', activePetId: petId };
 }
@@ -301,10 +421,20 @@ function inferRendererFromFiles(files = []) {
 
 module.exports = {
   COW_CAT_ID,
+  CHAOS_DEVON_REX_ID,
+  CHINESE_VILLAGE_DOG_ID,
+  LOBSTER_ID,
+  BUILT_IN_PET_IDS,
   VALID_RENDERERS,
   VALID_SOURCES,
   normalizeAppearanceConfig,
   createBuiltInCowCatManifest,
+  createBuiltInChaosDevonRexManifest,
+  createBuiltInChineseVillageDogManifest,
+  createBuiltInLobsterManifest,
+  createBuiltInPetManifests,
+  createBuiltInPetRecord,
+  isBuiltInPetId,
   createImagePetManifest,
   createImagegenPetRequest,
   createHatchPetJobs,

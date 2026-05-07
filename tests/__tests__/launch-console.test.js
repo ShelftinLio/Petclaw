@@ -9,8 +9,8 @@ const {
 
 describe('launch console helpers', () => {
   test('buildRunCommand launches the backend selector script by default', () => {
-    expect(buildRunCommand({ projectPath: '/tmp/kkclaw' })).toBe(
-      'cd "/tmp/kkclaw" && node scripts/launch-console.js'
+    expect(buildRunCommand({ projectPath: '/tmp/petclaw' })).toBe(
+      'cd "/tmp/petclaw" && node scripts/launch-console.js'
     )
   })
 
@@ -25,21 +25,21 @@ describe('launch console helpers', () => {
   })
 
   test('buildChildEnv injects the selected compat mode', () => {
-    const originalValue = process.env.KKCLAW_COMPAT_MODE
-    process.env.KKCLAW_COMPAT_MODE = 'openclaw'
+    const originalValue = process.env.PETCLAW_COMPAT_MODE
+    process.env.PETCLAW_COMPAT_MODE = 'openclaw'
 
     const hermesEnv = buildChildEnv('hermes')
     const autoEnv = buildChildEnv('auto')
     const clearEnv = buildChildEnv('invalid')
 
-    expect(hermesEnv.KKCLAW_COMPAT_MODE).toBe('hermes')
-    expect(autoEnv.KKCLAW_COMPAT_MODE).toBe('auto')
-    expect(clearEnv.KKCLAW_COMPAT_MODE).toBeUndefined()
+    expect(hermesEnv.PETCLAW_COMPAT_MODE).toBe('hermes')
+    expect(autoEnv.PETCLAW_COMPAT_MODE).toBe('auto')
+    expect(clearEnv.PETCLAW_COMPAT_MODE).toBeUndefined()
 
     if (typeof originalValue === 'undefined') {
-      delete process.env.KKCLAW_COMPAT_MODE
+      delete process.env.PETCLAW_COMPAT_MODE
     } else {
-      process.env.KKCLAW_COMPAT_MODE = originalValue
+      process.env.PETCLAW_COMPAT_MODE = originalValue
     }
   })
 

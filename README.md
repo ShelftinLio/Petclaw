@@ -1,4 +1,4 @@
-# 🦞 KKClaw Desktop Pet
+# 🦞 Petclaw Desktop Pet
 
 **[English](#-english) | [中文](#-中文)**
 
@@ -16,19 +16,19 @@
 
 *OpenClaw / Hermes + Desktop Embodiment = A living interface with emotion, voice, and presence*
 
-[![Version](https://img.shields.io/badge/version-3.7.1-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.7.1-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/petclaw/releases)
 [![Hermes Compatible](https://img.shields.io/badge/Hermes-Compatible-F7E7CE?style=for-the-badge)](https://github.com/NousResearch/hermes-agent)
-[![CI](https://img.shields.io/github/actions/workflow/status/kk43994/kkclaw/ci.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=CI)](https://github.com/kk43994/kkclaw/actions/workflows/ci.yml)
-[![Stars](https://img.shields.io/github/stars/kk43994/kkclaw?style=for-the-badge&logo=github&color=FFD700)](https://github.com/kk43994/kkclaw/stargazers)
-[![Downloads](https://img.shields.io/github/downloads/kk43994/kkclaw/total?style=for-the-badge&logo=github&color=8B5CF6)](https://github.com/kk43994/kkclaw/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/kk43994/petclaw/ci.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=CI)](https://github.com/kk43994/petclaw/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/kk43994/petclaw?style=for-the-badge&logo=github&color=FFD700)](https://github.com/kk43994/petclaw/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/kk43994/petclaw/total?style=for-the-badge&logo=github&color=8B5CF6)](https://github.com/kk43994/petclaw/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/kkclaw)
+[![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/petclaw)
 [![Electron](https://img.shields.io/badge/Electron-28.x-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Node](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Release](https://img.shields.io/github/v/release/kk43994/kkclaw?style=for-the-badge&color=34D399&logo=rocket&logoColor=white)](https://github.com/kk43994/kkclaw/releases/latest)
-[![Issues](https://img.shields.io/github/issues/kk43994/kkclaw?style=for-the-badge&logo=github&color=F97316)](https://github.com/kk43994/kkclaw/issues)
+[![Release](https://img.shields.io/github/v/release/kk43994/petclaw?style=for-the-badge&color=34D399&logo=rocket&logoColor=white)](https://github.com/kk43994/petclaw/releases/latest)
+[![Issues](https://img.shields.io/github/issues/kk43994/petclaw?style=for-the-badge&logo=github&color=F97316)](https://github.com/kk43994/petclaw/issues)
 
-[🎥 **在线演示**](https://kk43994.github.io/kkclaw/) | [📦 **下载最新版**](https://github.com/kk43994/kkclaw/releases) | [📖 **配置教程**](docs/CONFIGURATION-GUIDE.md) | [💬 **加入社群**](#-社群)
+[🎥 **在线演示**](https://kk43994.github.io/petclaw/) | [📦 **下载最新版**](https://github.com/kk43994/petclaw/releases) | [📖 **配置教程**](docs/CONFIGURATION-GUIDE.md) | [💬 **加入社群**](#-社群)
 
 </div>
 
@@ -146,28 +146,28 @@
 
 ### 🆕 v3.7.0 — Hermes 兼容模式 + 多后端启动器
 
-> 🤝 **正式适配 Hermes！** `kkclaw gateway` 现在会按兼容后端模式工作：既能拉起 OpenClaw，也能驱动 Hermes，并在启动时提供 OpenClaw / Hermes / Auto 三种入口。
+> 🤝 **正式适配 Hermes！** `petclaw gateway` 现在会按兼容后端模式工作：既能拉起 OpenClaw，也能驱动 Hermes，并在启动时提供 OpenClaw / Hermes / Auto 三种入口。
 
 <div align="center">
   <img src="docs/images/hermes-agent-banner.png" alt="Hermes Agent banner" width="100%">
   <p><sub>Hermes Agent banner adapted from <a href="https://github.com/NousResearch/hermes-agent">NousResearch/hermes-agent</a></sub></p>
 </div>
 
-- 🆕 **Hermes 兼容模式** — 支持 `KKCLAW_COMPAT_MODE=hermes`，也支持在 `pet-config.json` 中固定 `compatMode: "hermes" | "openclaw" | "auto"`
-- 🆕 **后端选择式启动** — `kkclaw gateway` / `npm start` 的终端入口现在会先让你选择兼容后端（OpenClaw / Hermes / Auto），并记住上次选择
-- 🆕 **Hermes Gateway 复用** — 如果 Hermes Gateway 已经在外部启动，KKClaw 会识别并复用，不再把它误判成端口冲突
-- 🔧 **诊断全面增强** — `kkclaw status` / `kkclaw doctor` / `kkclaw gateway status` 会显示当前兼容后端、CLI 路径、探活方式、日志路径、API Server 状态
+- 🆕 **Hermes 兼容模式** — 支持 `PETCLAW_COMPAT_MODE=hermes`，也支持在 `pet-config.json` 中固定 `compatMode: "hermes" | "openclaw" | "auto"`
+- 🆕 **后端选择式启动** — `petclaw gateway` / `npm start` 的终端入口现在会先让你选择兼容后端（OpenClaw / Hermes / Auto），并记住上次选择
+- 🆕 **Hermes Gateway 复用** — 如果 Hermes Gateway 已经在外部启动，Petclaw 会识别并复用，不再把它误判成端口冲突
+- 🔧 **诊断全面增强** — `petclaw status` / `petclaw doctor` / `petclaw gateway status` 会显示当前兼容后端、CLI 路径、探活方式、日志路径、API Server 状态
 - 🎨 **后端感知终端外观** — 启动画面和 Ready Banner 会根据当前兼容后端切换主色和标签，终端体验更统一
 
-### 🆕 v3.6.0 — 原生命令入口 + KKClaw Gateway CLI
+### 🆕 v3.6.0 — 原生命令入口 + Petclaw Gateway CLI
 
-> 🦞 **命令体验升级！** `kkclaw gateway` 现在直接打开带开场动画的终端，并补齐 `doctor / status / logs / dashboard`
+> 🦞 **命令体验升级！** `petclaw gateway` 现在直接打开带开场动画的终端，并补齐 `doctor / status / logs / dashboard`
 
-- 🆕 **`kkclaw gateway` 主入口** — 直接打开现在 `npm start` 的动画终端体验，启动习惯更接近原生命令行工作流
-- 🆕 **`kkclaw doctor`** — 增加 KKClaw 风格体检，检查兼容 CLI、Gateway 连通性、Dashboard 地址和进程归属
-- 🆕 **`kkclaw gateway status / logs / open / restart / stop`** — 提供贴近兼容后端工作流的子命令
-- 🆕 **`kkclaw dashboard`** — 直接转发到底层 `openclaw dashboard`
-- 🔧 **状态可观测性增强** — `doctor` 会提示当前 Gateway 端口是否由 KKClaw 自身占用，帮助排查旧进程/端口冲突
+- 🆕 **`petclaw gateway` 主入口** — 直接打开现在 `npm start` 的动画终端体验，启动习惯更接近原生命令行工作流
+- 🆕 **`petclaw doctor`** — 增加 Petclaw 风格体检，检查兼容 CLI、Gateway 连通性、Dashboard 地址和进程归属
+- 🆕 **`petclaw gateway status / logs / open / restart / stop`** — 提供贴近兼容后端工作流的子命令
+- 🆕 **`petclaw dashboard`** — 直接转发到底层 `openclaw dashboard`
+- 🔧 **状态可观测性增强** — `doctor` 会提示当前 Gateway 端口是否由 Petclaw 自身占用，帮助排查旧进程/端口冲突
 
 ### 🆕 v3.5.2 — Setup Wizard 修复 + 一键安装缺失依赖
 
@@ -306,11 +306,11 @@
 
 | 平台 | 架构 | 下载链接 | 大小 |
 |------|------|----------|------|
-| 🪟 **Windows** | x64 | [KKClaw-Desktop-Pet-3.7.1-Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.7.1/KKClaw-Desktop-Pet-3.7.1-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [KKClaw-Desktop-Pet-3.7.1-x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.7.1/KKClaw-Desktop-Pet-3.7.1-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [KKClaw-Desktop-Pet-3.7.1-arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.7.1/KKClaw-Desktop-Pet-3.7.1-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [Petclaw-Desktop-Pet-3.7.1-Setup.exe](https://github.com/kk43994/petclaw/releases/download/v3.7.1/Petclaw-Desktop-Pet-3.7.1-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [Petclaw-Desktop-Pet-3.7.1-x64.dmg](https://github.com/kk43994/petclaw/releases/download/v3.7.1/Petclaw-Desktop-Pet-3.7.1-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [Petclaw-Desktop-Pet-3.7.1-arm64.dmg](https://github.com/kk43994/petclaw/releases/download/v3.7.1/Petclaw-Desktop-Pet-3.7.1-arm64.dmg) | ~160MB |
 
-[📦 查看所有版本](https://github.com/kk43994/kkclaw/releases) | [🎥 在线演示](https://kk43994.github.io/kkclaw/)
+[📦 查看所有版本](https://github.com/kk43994/petclaw/releases) | [🎥 在线演示](https://kk43994.github.io/petclaw/)
 
 </div>
 
@@ -323,8 +323,8 @@
 > - 小版本的 bug 修复和功能更新不会单独推发行版，克隆仓库后 `git pull` 即可同步最新改动
 >
 > ```bash
-> git clone https://github.com/kk43994/kkclaw.git
-> cd kkclaw
+> git clone https://github.com/kk43994/petclaw.git
+> cd petclaw
 > npm install
 > npm start
 > ```
@@ -336,11 +336,11 @@
 ```bash
 npm link
 
-kkclaw gateway          # 打开带兼容后端选择器的 KKClaw Gateway 终端（OpenClaw / Hermes / Auto）
-kkclaw gateway status   # 查看网关状态 / 端口 / 当前兼容后端
-kkclaw gateway logs     # 查看 Gateway 日志
-kkclaw doctor           # 做一轮 KKClaw 体检
-kkclaw dashboard        # 打开当前兼容后端的 Dashboard / API 面板
+petclaw gateway          # 打开带兼容后端选择器的 Petclaw Gateway 终端（OpenClaw / Hermes / Auto）
+petclaw gateway status   # 查看网关状态 / 端口 / 当前兼容后端
+petclaw gateway logs     # 查看 Gateway 日志
+petclaw doctor           # 做一轮 Petclaw 体检
+petclaw dashboard        # 打开当前兼容后端的 Dashboard / API 面板
 ```
 
 ### 安装说明
@@ -458,7 +458,7 @@ kkclaw dashboard        # 打开当前兼容后端的 Dashboard / API 面板
 
 ---
 
-### 🔁 KKClaw Switch 模型热切换
+### 🔁 Petclaw Switch 模型热切换
 
 > **3秒切换AI模型，零重启，零中断**
 
@@ -466,7 +466,7 @@ kkclaw dashboard        # 打开当前兼容后端的 Dashboard / API 面板
 
 ```
 ┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│  KKClaw Switch  │  →    │  Auto Monitor   │  →    │ Compatible CLI  │
+│  Petclaw Switch  │  →    │  Auto Monitor   │  →    │ Compatible CLI  │
 │  (点击切换)      │       │  (每2秒检测)     │       │  (自动重启)      │
 └─────────────────┘       └─────────────────┘       └─────────────────┘
         ↓                         ↓                         ↓
@@ -476,14 +476,14 @@ kkclaw dashboard        # 打开当前兼容后端的 Dashboard / API 面板
 #### 功能特性
 
 ✅ **自动同步监听器** — 集成到桌面宠物生命周期
-- 启动时自动开启 `kkclaw-auto-sync.js`
+- 启动时自动开启 `petclaw-auto-sync.js`
 - 关闭时自动停止
 - 每2秒检测 `~/.cc-switch/cc-switch.db`
 
 ✅ **手动同步** （可选）
 ```bash
-node kkclaw-hotswitch.js              # 同步当前provider
-node kkclaw-hotswitch.js --restart    # 同步 + 重启Gateway
+node petclaw-hotswitch.js              # 同步当前provider
+node petclaw-hotswitch.js --restart    # 同步 + 重启Gateway
 ```
 
 ✅ **无缝切换**
@@ -621,8 +621,8 @@ npx clawhub@latest install kk43994/desktop-pet
 #### 方式二：GitHub
 
 ```bash
-git clone https://github.com/kk43994/kkclaw.git
-cd kkclaw
+git clone https://github.com/kk43994/petclaw.git
+cd petclaw
 npm install
 npm start
 ```
@@ -669,13 +669,13 @@ npm start
 - [📖 **完整配置教程**](docs/CONFIGURATION-GUIDE.md) — ⭐ 新手必看！从零开始配置
 - [📂 项目结构](PROJECT-STRUCTURE.md) — 目录组织、命名规范
 - [🎙️ 智能语音系统](docs-dev/SMART-VOICE.md) — 三级降级、情感识别
-- [🔁 KKClaw Switch](docs-dev/SYNC-GUIDE.md) — 模型热切换配置
+- [🔁 Petclaw Switch](docs-dev/SYNC-GUIDE.md) — 模型热切换配置
 - [📸 截图功能](docs-dev/SCREENSHOT-FEATURE.md) — 快捷键、自动上传
 - [🔧 开发指南](docs-dev/SETUP-GUIDE.md) — 开发环境、调试
 
 ### 在线资源
 
-- [🎥 **在线演示**](https://kk43994.github.io/kkclaw/) — 可交互的球体demo
+- [🎥 **在线演示**](https://kk43994.github.io/petclaw/) — 可交互的球体demo
 - [📦 **ClawHub主页**](https://clawhub.ai/kk43994/desktop-pet) — 国际社区
 - [📦 **OpenClaw-CN**](https://clawd.org.cn) — 中文社区技能市场
 
@@ -744,17 +744,17 @@ npm start
 
 如果你已经配好了 TTS，但 AI 回复还是完全没有声音，优先怀疑的就不只是配置问题，也可能是当前 agent 根本没有触发 bridge。
 
-### KKClaw Switch配置
+### Petclaw Switch配置
 
 桌面宠物会自动集成，无需额外配置。
 
 如需手动同步：
 ```bash
 # 同步当前 provider 到兼容后端配置
-node kkclaw-hotswitch.js
+node petclaw-hotswitch.js
 
 # 同步并重启Gateway
-node kkclaw-hotswitch.js --restart
+node petclaw-hotswitch.js --restart
 ```
 
 ---
@@ -878,7 +878,7 @@ openclaw status
 openclaw gateway start
 ```
 
-#### 4. KKClaw Switch不同步
+#### 4. Petclaw Switch不同步
 
 **原因**：
 - `~/.cc-switch/cc-switch.db` 不存在
@@ -890,7 +890,7 @@ openclaw gateway start
 ls ~/.cc-switch/cc-switch.db
 
 # 手动同步
-node kkclaw-hotswitch.js --restart
+node petclaw-hotswitch.js --restart
 ```
 
 ---
@@ -921,14 +921,14 @@ node kkclaw-hotswitch.js --restart
 ### [3.7.0] - 2026-04-11
 
 #### 🤝 Hermes 兼容模式
-- 新增 Hermes 兼容后端，支持 `KKCLAW_COMPAT_MODE` 环境变量和 `pet-config.json.compatMode` 配置
-- `kkclaw gateway` / `npm start` 新增兼容后端（OpenClaw / Hermes / Auto）选择式启动，并记住上次选择
-- 如果 Hermes Gateway 已在外部运行，KKClaw 会识别并复用，不再误报端口冲突
+- 新增 Hermes 兼容后端，支持 `PETCLAW_COMPAT_MODE` 环境变量和 `pet-config.json.compatMode` 配置
+- `petclaw gateway` / `npm start` 新增兼容后端（OpenClaw / Hermes / Auto）选择式启动，并记住上次选择
+- 如果 Hermes Gateway 已在外部运行，Petclaw 会识别并复用，不再误报端口冲突
 
 #### 🔍 诊断与启动体验
-- `kkclaw status` / `kkclaw doctor` / `kkclaw gateway status` 现在会显示当前兼容后端、CLI 路径、探活方式、日志路径、API Server 状态
+- `petclaw status` / `petclaw doctor` / `petclaw gateway status` 现在会显示当前兼容后端、CLI 路径、探活方式、日志路径、API Server 状态
 - 启动 Banner 和 Ready Banner 改为后端感知：OpenClaw 为红色主题，Hermes 为香槟金主题
-- `kkclaw dashboard` 与主进程网关配置会自动切换到当前兼容后端
+- `petclaw dashboard` 与主进程网关配置会自动切换到当前兼容后端
 
 #### 🧪 测试与文档
 - 新增后端选择启动器、Hermes 兼容模式、外部 Hermes Service 复用相关测试
@@ -936,16 +936,16 @@ node kkclaw-hotswitch.js --restart
 
 ### [3.6.0] - 2026-04-02
 
-#### 🦞 KKClaw CLI
-- 新增 `kkclaw` 命令入口，支持 `kkclaw gateway`
-- `kkclaw gateway` / `kkclaw gateway start` 直接打开带开场动画的终端（当前 `npm start` 体验）
-- 新增 `kkclaw gateway status / logs / open / restart / stop`
-- 新增 `kkclaw doctor` 和顶层 `kkclaw status`
+#### 🦞 Petclaw CLI
+- 新增 `petclaw` 命令入口，支持 `petclaw gateway`
+- `petclaw gateway` / `petclaw gateway start` 直接打开带开场动画的终端（当前 `npm start` 体验）
+- 新增 `petclaw gateway status / logs / open / restart / stop`
+- 新增 `petclaw doctor` 和顶层 `petclaw status`
 
 #### 🔍 诊断与可观测性
-- `kkclaw doctor` 增加 Gateway ownership 检查，能发现端口被旧进程或外部实例占用
-- `kkclaw gateway status` 增加 Dashboard 地址、日志路径、兼容 CLI（OpenClaw）版本和进程摘要
-- `kkclaw gateway logs` 支持查看标准日志 / 错误日志并设置 tail 行数
+- `petclaw doctor` 增加 Gateway ownership 检查，能发现端口被旧进程或外部实例占用
+- `petclaw gateway status` 增加 Dashboard 地址、日志路径、兼容 CLI（OpenClaw）版本和进程摘要
+- `petclaw gateway logs` 支持查看标准日志 / 错误日志并设置 tail 行数
 
 ### [3.5.2] - 2026-03-12
 
@@ -1125,7 +1125,7 @@ node kkclaw-hotswitch.js --restart
 ### [2.0.4] - 2026-02-10
 
 #### 新增
-- ✨ KKClaw Switch自动同步集成
+- ✨ Petclaw Switch自动同步集成
 - ✨ 7种情绪色系完整实现
 - ✨ 38个待机表情动画
 - ✨ 琉璃质感球体升级（3层高光）
@@ -1158,7 +1158,7 @@ node kkclaw-hotswitch.js --restart
 | 🐦 **Discord** | [Friends of the Crustacean](https://discord.com/invite/clawd) | OpenClaw国际社区 |
 | 🇨🇳 **OpenClaw-CN** | [clawd.org.cn](https://clawd.org.cn) | 中文论坛 |
 | 📦 **ClawHub** | [clawhub.ai](https://clawhub.ai/kk43994/desktop-pet) | 技能市场 |
-| 💡 **GitHub Discussions** | [讨论区](https://github.com/kk43994/kkclaw/discussions) | 提问、分享 |
+| 💡 **GitHub Discussions** | [讨论区](https://github.com/kk43994/petclaw/discussions) | 提问、分享 |
 
 </div>
 
@@ -1188,12 +1188,12 @@ node kkclaw-hotswitch.js --restart
 
 ![Hero Banner](docs/images/hero-banner.png)
 
-[![Version](https://img.shields.io/badge/version-3.7.1-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/kkclaw/releases)
+[![Version](https://img.shields.io/badge/version-3.7.1-FF6B4A?style=for-the-badge&logo=github)](https://github.com/kk43994/petclaw/releases)
 [![Hermes Compatible](https://img.shields.io/badge/Hermes-Compatible-F7E7CE?style=for-the-badge)](https://github.com/NousResearch/hermes-agent)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/kkclaw)
+[![Platform](https://img.shields.io/badge/platform-Windows_|_macOS-0078D6?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/kk43994/petclaw)
 
-[🎥 **Live Demo**](https://kk43994.github.io/kkclaw/) | [📦 **Download**](https://github.com/kk43994/kkclaw/releases) | [📖 **Docs**](docs/CONFIGURATION-GUIDE.md) | [💬 **Community**](#-社群)
+[🎥 **Live Demo**](https://kk43994.github.io/petclaw/) | [📦 **Download**](https://github.com/kk43994/petclaw/releases) | [📖 **Docs**](docs/CONFIGURATION-GUIDE.md) | [💬 **Community**](#-社群)
 
 </div>
 
@@ -1303,33 +1303,33 @@ If layer 3 is missing, the desktop pet may stay silent even though your TTS setu
 
 ### 🆕 What's New in v3.7.1
 
-> 🩹 **Patch release!** Tightens Hermes compatibility so KKClaw no longer reports a half-working chat setup when the Hermes API server is off, and no longer treats a leftover `~/.hermes` directory as a valid install.
+> 🩹 **Patch release!** Tightens Hermes compatibility so Petclaw no longer reports a half-working chat setup when the Hermes API server is off, and no longer treats a leftover `~/.hermes` directory as a valid install.
 
-- 🔒 **Chat readiness guard** — KKClaw now blocks Gateway startup and desktop chat sends when Hermes API server support is disabled
+- 🔒 **Chat readiness guard** — Petclaw now blocks Gateway startup and desktop chat sends when Hermes API server support is disabled
 - ✅ **Stricter install detection** — Hermes is only considered installed when the CLI executable is actually present
 - 🧪 **Regression coverage** — Added a test for the “leftover config directory but missing CLI” false-positive case
 
 ### 🆕 What's New in v3.7.0
 
-> 🤝 **Official Hermes compatibility!** `kkclaw gateway` now works in a compatibility-backend mode, so it can drive OpenClaw or Hermes with a launch-time selector for OpenClaw / Hermes / Auto.
+> 🤝 **Official Hermes compatibility!** `petclaw gateway` now works in a compatibility-backend mode, so it can drive OpenClaw or Hermes with a launch-time selector for OpenClaw / Hermes / Auto.
 
 <div align="center">
   <img src="docs/images/hermes-agent-banner.png" alt="Hermes Agent banner" width="100%">
   <p><sub>Hermes Agent banner adapted from <a href="https://github.com/NousResearch/hermes-agent">NousResearch/hermes-agent</a></sub></p>
 </div>
 
-- 🆕 **Hermes compatibility mode** — Supports `KKCLAW_COMPAT_MODE=hermes` plus a persistent `compatMode` setting in `pet-config.json`
-- 🆕 **Backend-aware launcher** — `kkclaw gateway` / `npm start` now lets you choose a compatible backend (OpenClaw / Hermes / Auto) and remembers the last backend you launched
-- 🆕 **External Hermes reuse** — If Hermes Gateway is already running, KKClaw recognizes and reuses it instead of flagging a false ownership conflict
-- 🔧 **Deeper diagnostics** — `kkclaw status` / `kkclaw doctor` / `kkclaw gateway status` now surface backend, CLI path, probe source, log paths, and Hermes API server readiness
+- 🆕 **Hermes compatibility mode** — Supports `PETCLAW_COMPAT_MODE=hermes` plus a persistent `compatMode` setting in `pet-config.json`
+- 🆕 **Backend-aware launcher** — `petclaw gateway` / `npm start` now lets you choose a compatible backend (OpenClaw / Hermes / Auto) and remembers the last backend you launched
+- 🆕 **External Hermes reuse** — If Hermes Gateway is already running, Petclaw recognizes and reuses it instead of flagging a false ownership conflict
+- 🔧 **Deeper diagnostics** — `petclaw status` / `petclaw doctor` / `petclaw gateway status` now surface backend, CLI path, probe source, log paths, and Hermes API server readiness
 - 🎨 **Backend-themed console banners** — Startup and ready banners switch labels and accent colors for the active compatible backend
 
 ### 🆕 What's New in v3.6.0
 
-> 🦞 **Native command workflow!** `kkclaw gateway` now opens the same animated console as `npm start`, with companion commands for status, logs, doctor, and dashboard access
+> 🦞 **Native command workflow!** `petclaw gateway` now opens the same animated console as `npm start`, with companion commands for status, logs, doctor, and dashboard access
 
-- 🆕 **`kkclaw gateway` entrypoint** — Opens the animated KKClaw terminal and makes startup feel closer to a native CLI workflow
-- 🆕 **`kkclaw doctor`** — Adds a KKClaw-oriented health check for the compatibility CLI, Gateway reachability, Dashboard URL, and process ownership
+- 🆕 **`petclaw gateway` entrypoint** — Opens the animated Petclaw terminal and makes startup feel closer to a native CLI workflow
+- 🆕 **`petclaw doctor`** — Adds a Petclaw-oriented health check for the compatibility CLI, Gateway reachability, Dashboard URL, and process ownership
 - 🆕 **Gateway subcommands** — `status / logs / open / restart / stop` bring a more familiar command surface
 - 🔧 **Gateway ownership diagnostics** — Detects when the Gateway port is alive but owned by an older or external process
 
@@ -1388,8 +1388,8 @@ npx clawhub@latest install kk43994/desktop-pet
 #### Install from GitHub
 
 ```bash
-git clone https://github.com/kk43994/kkclaw.git
-cd kkclaw
+git clone https://github.com/kk43994/petclaw.git
+cd petclaw
 npm install
 npm start
 ```
@@ -1401,22 +1401,22 @@ npm start
 ```bash
 npm link
 
-kkclaw gateway          # Open the backend-aware KKClaw terminal with a compatible backend selector (OpenClaw / Hermes / Auto)
-kkclaw gateway status   # Show gateway state, port, and active compatible backend
-kkclaw gateway logs     # Tail gateway logs
-kkclaw doctor           # Run a KKClaw-oriented health check
-kkclaw dashboard        # Open the active backend dashboard / API surface
+petclaw gateway          # Open the backend-aware Petclaw terminal with a compatible backend selector (OpenClaw / Hermes / Auto)
+petclaw gateway status   # Show gateway state, port, and active compatible backend
+petclaw gateway logs     # Tail gateway logs
+petclaw doctor           # Run a Petclaw-oriented health check
+petclaw dashboard        # Open the active backend dashboard / API surface
 ```
 
 ### 📦 Downloads
 
 | Platform | Arch | Download | Size |
 |----------|------|----------|------|
-| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/kkclaw/releases/download/v3.7.1/KKClaw-Desktop-Pet-3.7.1-Setup.exe) | ~150MB |
-| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.7.1/KKClaw-Desktop-Pet-3.7.1-x64.dmg) | ~160MB |
-| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/kkclaw/releases/download/v3.7.1/KKClaw-Desktop-Pet-3.7.1-arm64.dmg) | ~160MB |
+| 🪟 **Windows** | x64 | [Setup.exe](https://github.com/kk43994/petclaw/releases/download/v3.7.1/Petclaw-Desktop-Pet-3.7.1-Setup.exe) | ~150MB |
+| 🍎 **macOS** | Intel | [x64.dmg](https://github.com/kk43994/petclaw/releases/download/v3.7.1/Petclaw-Desktop-Pet-3.7.1-x64.dmg) | ~160MB |
+| 🍎 **macOS** | Apple Silicon | [arm64.dmg](https://github.com/kk43994/petclaw/releases/download/v3.7.1/Petclaw-Desktop-Pet-3.7.1-arm64.dmg) | ~160MB |
 
-[📦 All Releases](https://github.com/kk43994/kkclaw/releases)
+[📦 All Releases](https://github.com/kk43994/petclaw/releases)
 
 ### 🤝 Contributing
 
@@ -1446,6 +1446,6 @@ kkclaw dashboard        # Open the active backend dashboard / API surface
 
 **用❤️打造 by KK**
 
-[🔝 回到顶部](#-kkclaw-desktop-pet)
+[🔝 回到顶部](#-petclaw-desktop-pet)
 
 </div>

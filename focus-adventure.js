@@ -1,6 +1,6 @@
 const INTENT_TYPES = ['Code', 'Writing', 'Research', 'Learning', 'Planning', 'Admin', 'Rest']
 const STATUS_TYPES = ['completed', 'partial', 'interrupted']
-const DURATION_PRESETS = [15, 25, 45, 90]
+const DURATION_PRESETS = [5, 15, 25, 55]
 
 function pad(value) {
   return String(value).padStart(2, '0')
@@ -52,6 +52,70 @@ function calculateActualMinutes(session = {}, now = new Date()) {
   return Math.max(0, Math.ceil((ended.getTime() - started.getTime()) / 60000))
 }
 
+function formatTimerLabel(seconds, { overtime = false } = {}) {
+  const safeSeconds = Math.max(0, Math.floor(Number(seconds || 0)))
+  const minutes = Math.floor(safeSeconds / 60)
+  const remainder = safeSeconds % 60
+  const label = `${pad(minutes)}:${pad(remainder)}`
+  return overtime ? `+${label}` : label
+}
+
+function getFocusTimerState(session = {}, { now = new Date() } = {}) {
+  if (!session || session.status !== 'active') {
+    return {
+      active: false,
+      elapsedSeconds: 0,
+      elapsedMinutes: 0,
+      remainingSeconds: 0,
+      remainingMinutes: 0,
+      totalSeconds: 0,
+      progress: 0,
+      isOvertime: false,
+      label: '00:00',
+    }
+  }
+
+  const started = new Date(session.startedAt)
+  const current = now instanceof Date ? now : new Date(now)
+  const plannedMinutes = normalizeDuration(session.plannedMinutes)
+  const totalSeconds = plannedMinutes * 60
+
+  if (Number.isNaN(started.getTime()) || Number.isNaN(current.getTime())) {
+    return {
+      active: true,
+      elapsedSeconds: 0,
+      elapsedMinutes: 0,
+      remainingSeconds: totalSeconds,
+      remainingMinutes: plannedMinutes,
+      totalSeconds,
+      progress: 0,
+      isOvertime: false,
+      label: formatTimerLabel(totalSeconds),
+    }
+  }
+
+  const elapsedSeconds = Math.max(0, Math.floor((current.getTime() - started.getTime()) / 1000))
+  const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds)
+  const overtimeSeconds = Math.max(0, elapsedSeconds - totalSeconds)
+  const progress = totalSeconds > 0
+    ? Math.min(1, Number((elapsedSeconds / totalSeconds).toFixed(4)))
+    : 1
+
+  return {
+    active: true,
+    elapsedSeconds,
+    elapsedMinutes: Math.floor(elapsedSeconds / 60),
+    remainingSeconds,
+    remainingMinutes: Math.ceil(remainingSeconds / 60),
+    totalSeconds,
+    progress,
+    isOvertime: overtimeSeconds > 0,
+    label: overtimeSeconds > 0
+      ? formatTimerLabel(overtimeSeconds, { overtime: true })
+      : formatTimerLabel(remainingSeconds),
+  }
+}
+
 function calculateRewards({
   actualMinutes = 0,
   plannedMinutes = 25,
@@ -87,7 +151,7 @@ function calculateRewards({
   const focusXp = Math.max(10, minutes * 2 + (hasSummary ? 10 : 0))
   return {
     focusXp,
-    abilityFragments: Math.floor(focusXp / 30),
+    abilityFragments: hasSummary ? Math.max(1, Math.floor(focusXp / 30)) : Math.floor(focusXp / 30),
     stardust: Math.ceil(minutes / 5) + (hasSummary ? 2 : 0),
     memoryCrystal: hasSummary,
     skillSeed: Boolean(skillSeedEligible),
@@ -132,4 +196,5 @@ module.exports = {
   startFocusAdventure,
   finishFocusAdventure,
   calculateRewards,
+  getFocusTimerState,
 }

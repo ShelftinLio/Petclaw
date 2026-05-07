@@ -1008,7 +1008,7 @@ ${style}
 
     return `# AGENTS.md - ${petName}的工作手册
 
-*由 KKClaw Setup Wizard 自动生成*
+*由 Petclaw Setup Wizard 自动生成*
 
 ---
 
@@ -1157,7 +1157,7 @@ ${voiceRules}
 
 ---
 
-*由 KKClaw Desktop Pet 生成 — https://github.com/kk43994/kkclaw*
+*由 Petclaw Desktop Pet 生成 — https://github.com/kk43994/petclaw*
 `;
   }
 

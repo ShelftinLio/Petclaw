@@ -4,7 +4,7 @@
     "kind": "base",
     "output": "base-reference.png",
     "inputs": [],
-    "prompt": "Create the canonical base reference for Generated Pet, a Codex digital pet.\nSubject: 海泽王里的香克斯.\nStyle: small pixel-art-adjacent mascot, compact chibi proportions, chunky readable silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading, simple expressive face, tiny limbs.\nOutput: one centered full-body pet reference on transparent background. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background for cleanup.\nAvoid: text, watermark, scenery, shadows, gradients, glow, realistic fur, painterly rendering, 3D, detached effects, floor marks."
+    "prompt": "Create the canonical base reference for Generated Pet, a Codex digital pet.\nSubject: 海贼王里的先可是.\nStyle: small pixel-art-adjacent mascot, compact chibi proportions, chunky readable silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading, simple expressive face, tiny limbs.\nOutput: one centered full-body pet reference on transparent background. If transparency is unavailable, use perfectly flat #00ff00 chroma-key background for cleanup.\nAvoid: text, watermark, scenery, shadows, gradients, glow, realistic fur, painterly rendering, 3D, detached effects, floor marks."
   },
   {
     "id": "row-idle",

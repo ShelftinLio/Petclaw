@@ -1,5 +1,5 @@
 /* ===== model-settings.css =====
-   KKClaw Switch - OpenAI Minimal Style
+   Petclaw Switch - OpenAI Minimal Style
    ===== */
 
 /* ===== CSS Variables ===== */
@@ -633,10 +633,10 @@ body {
 .toast-error { background: var(--status-error); color: #FFFFFF; }
 .toast-info { background: #353740; color: #FFFFFF; }
 
-/* ===== KKCLAW Quota ===== */
-.kkclaw-quota { margin-top: 6px; }
+/* ===== PETCLAW Quota ===== */
+.petclaw-quota { margin-top: 6px; }
 
-.kkclaw-series {
+.petclaw-series {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -645,39 +645,39 @@ body {
   margin-bottom: 4px;
 }
 
-.kkclaw-quota-bar { margin-top: 4px; }
+.petclaw-quota-bar { margin-top: 4px; }
 
-.kkclaw-quota-label {
+.petclaw-quota-label {
   font-size: 10px;
   color: var(--text-secondary);
   margin-bottom: 3px;
 }
 
-.kkclaw-progress {
+.petclaw-progress {
   height: 4px;
   background: var(--bg-tertiary);
   border-radius: 2px;
   overflow: hidden;
 }
 
-.kkclaw-progress-fill {
+.petclaw-progress-fill {
   height: 100%;
   border-radius: 2px;
   transition: width 0.6s ease;
 }
 
-.kkclaw-progress-fill.healthy { background: var(--status-success); }
-.kkclaw-progress-fill.warning { background: var(--status-warning); }
-.kkclaw-progress-fill.critical { background: var(--status-error); }
+.petclaw-progress-fill.healthy { background: var(--status-success); }
+.petclaw-progress-fill.warning { background: var(--status-warning); }
+.petclaw-progress-fill.critical { background: var(--status-error); }
 
-.kkclaw-tip {
+.petclaw-tip {
   font-size: 9px;
   color: var(--text-tertiary);
   margin-top: 3px;
 }
 
-.kkclaw-tip.warning { color: var(--status-warning); }
-.kkclaw-tip.critical { color: var(--status-error); }
+.petclaw-tip.warning { color: var(--status-warning); }
+.petclaw-tip.critical { color: var(--status-error); }
 
 /* Status dots */
 .status-dot {

@@ -107,10 +107,37 @@ function createSkillCardFromSeed(seed = {}) {
   }
 }
 
+function createBasicConversationSkillCard() {
+  return {
+    id: 'skill-basic-conversation',
+    name: 'Basic Conversation',
+    type: 'Conversation',
+    rarity: 'starter',
+    status: 'learned',
+    level: 1,
+    xp: 0,
+    description: 'The pet can answer with basic AI conversation before OpenClaw execution abilities are unlocked.',
+    source: 'Initial companion ability',
+    inputs: ['user message'],
+    outputs: ['pet reply'],
+    requires: [],
+    sourceSeedId: '',
+    sourceSessionId: '',
+    lastUsedAt: '',
+  }
+}
+
 function listSkillCards(progress = {}) {
   const learned = Array.isArray(progress.skills) ? progress.skills : []
   const seeds = Array.isArray(progress.skillSeeds) ? progress.skillSeeds : []
-  return [...learned, ...seeds.map(seed => createSkillCardFromSeed(seed))]
+  const hasBasicConversation = (
+    (Array.isArray(progress.unlockedAbilities) && progress.unlockedAbilities.includes('warm-chat')) ||
+    !Array.isArray(progress.unlockedAbilities)
+  )
+  const learnedWithBase = hasBasicConversation && !learned.some(skill => skill.id === 'skill-basic-conversation')
+    ? [createBasicConversationSkillCard(), ...learned]
+    : learned
+  return [...learnedWithBase, ...seeds.map(seed => createSkillCardFromSeed(seed))]
 }
 
 module.exports = {
@@ -118,5 +145,6 @@ module.exports = {
   isSkillSeedEligible,
   createSkillSeed,
   createSkillCardFromSeed,
+  createBasicConversationSkillCard,
   listSkillCards,
 }

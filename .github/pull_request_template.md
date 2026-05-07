@@ -9,7 +9,7 @@
 ## Validation
 
 - [ ] `npm test`
-- [ ] Manual check in `npm start` or `kkclaw gateway`
+- [ ] Manual check in `npm start` or `petclaw gateway`
 - [ ] README / changelog updated when user-facing behavior changed
 
 ## Release notes

@@ -291,6 +291,7 @@ function largestOpaqueComponent(image, x0, y0, cellWidth, cellHeight) {
       let maxX = localX;
       let minY = localY;
       let maxY = localY;
+      const points = [];
       queue.length = 0;
       queue.push(start);
 
@@ -299,6 +300,7 @@ function largestOpaqueComponent(image, x0, y0, cellWidth, cellHeight) {
         const px = p % cellWidth;
         const py = Math.floor(p / cellWidth);
         count += 1;
+        points.push(p);
         minX = Math.min(minX, px);
         maxX = Math.max(maxX, px);
         minY = Math.min(minY, py);
@@ -321,7 +323,7 @@ function largestOpaqueComponent(image, x0, y0, cellWidth, cellHeight) {
       }
 
       if (!best || count > best.count) {
-        best = { count, minX, maxX, minY, maxY };
+        best = { count, minX, maxX, minY, maxY, points };
       }
     }
   }
@@ -329,36 +331,422 @@ function largestOpaqueComponent(image, x0, y0, cellWidth, cellHeight) {
   return best;
 }
 
-function recenterCells(image, columns, rows) {
+function opaqueComponents(image, x0, y0, cellWidth, cellHeight) {
+  const visited = new Uint8Array(cellWidth * cellHeight);
+  const components = [];
+  const queue = [];
+
+  for (let localY = 0; localY < cellHeight; localY += 1) {
+    for (let localX = 0; localX < cellWidth; localX += 1) {
+      const start = localY * cellWidth + localX;
+      if (visited[start]) continue;
+      visited[start] = 1;
+      const alpha = image.pixels[((y0 + localY) * image.width + x0 + localX) * 4 + 3];
+      if (alpha <= 40) continue;
+
+      let count = 0;
+      let minX = localX;
+      let maxX = localX;
+      let minY = localY;
+      let maxY = localY;
+      const points = [];
+      queue.length = 0;
+      queue.push(start);
+
+      for (let cursor = 0; cursor < queue.length; cursor += 1) {
+        const p = queue[cursor];
+        const px = p % cellWidth;
+        const py = Math.floor(p / cellWidth);
+        count += 1;
+        points.push(p);
+        minX = Math.min(minX, px);
+        maxX = Math.max(maxX, px);
+        minY = Math.min(minY, py);
+        maxY = Math.max(maxY, py);
+
+        const neighbors = [
+          [px - 1, py],
+          [px + 1, py],
+          [px, py - 1],
+          [px, py + 1],
+        ];
+        for (const [nx, ny] of neighbors) {
+          if (nx < 0 || ny < 0 || nx >= cellWidth || ny >= cellHeight) continue;
+          const np = ny * cellWidth + nx;
+          if (visited[np]) continue;
+          visited[np] = 1;
+          const ni = ((y0 + ny) * image.width + x0 + nx) * 4 + 3;
+          if (image.pixels[ni] > 40) queue.push(np);
+        }
+      }
+
+      components.push({ count, minX, maxX, minY, maxY, points });
+    }
+  }
+
+  return components.sort((a, b) => b.count - a.count);
+}
+
+function touchesCellEdge(component, cellWidth, cellHeight, margin = 1) {
+  return component.minX <= margin ||
+    component.minY <= margin ||
+    component.maxX >= cellWidth - 1 - margin ||
+    component.maxY >= cellHeight - 1 - margin;
+}
+
+function shouldRemoveCellComponent(component, main, cellWidth, cellHeight) {
+  if (!main || component === main) return false;
+  const smallComparedWithMain = component.count <= Math.max(24, Math.floor(main.count * 0.22));
+  const tinyComparedWithMain = component.count <= Math.max(4, Math.floor(main.count * 0.05)) &&
+    component.count / Math.max(1, main.count) <= 0.08;
+  const componentCenterX = (component.minX + component.maxX) / 2;
+  const componentCenterY = (component.minY + component.maxY) / 2;
+  const mainCenterX = (main.minX + main.maxX) / 2;
+  const mainCenterY = (main.minY + main.maxY) / 2;
+  const farFromMain = Math.abs(componentCenterX - mainCenterX) > cellWidth * 0.28 ||
+    Math.abs(componentCenterY - mainCenterY) > cellHeight * 0.28;
+  if (touchesCellEdge(component, cellWidth, cellHeight, 1)) {
+    return smallComparedWithMain || farFromMain;
+  }
+  if (tinyComparedWithMain && farFromMain) return true;
+
+  const softEdgeMargin = Math.max(1, Math.round(Math.min(cellWidth, cellHeight) * 0.03));
+  if (touchesCellEdge(component, cellWidth, cellHeight, softEdgeMargin)) {
+    return smallComparedWithMain && farFromMain;
+  }
+  return false;
+}
+
+function resizeNearestRgba(image, targetWidth, targetHeight) {
+  if (image.width === targetWidth && image.height === targetHeight) return image;
+  const pixels = Buffer.alloc(targetWidth * targetHeight * 4);
+  for (let y = 0; y < targetHeight; y += 1) {
+    const sourceY = Math.min(image.height - 1, Math.floor((y * image.height) / targetHeight));
+    for (let x = 0; x < targetWidth; x += 1) {
+      const sourceX = Math.min(image.width - 1, Math.floor((x * image.width) / targetWidth));
+      const sourceIndex = (sourceY * image.width + sourceX) * 4;
+      const targetIndex = (y * targetWidth + x) * 4;
+      image.pixels.copy(pixels, targetIndex, sourceIndex, sourceIndex + 4);
+    }
+  }
+  return { width: targetWidth, height: targetHeight, pixels };
+}
+
+function normalizeSpritesheetGrid(image, columns, rows) {
+  const safeColumns = Number(columns) || 8;
+  const safeRows = Number(rows) || 10;
+  const cellWidth = Math.max(1, Math.round(image.width / safeColumns));
+  const cellHeight = Math.max(1, Math.round(image.height / safeRows));
+  const targetWidth = cellWidth * safeColumns;
+  const targetHeight = cellHeight * safeRows;
+  if (targetWidth === image.width && targetHeight === image.height) {
+    return { image, normalized: false };
+  }
+  return {
+    image: resizeNearestRgba(image, targetWidth, targetHeight),
+    normalized: true,
+  };
+}
+
+function repairInteriorTransparentHoles(image, columns, rows) {
   const cellWidth = Math.floor(image.width / columns);
   const cellHeight = Math.floor(image.height / rows);
   if (cellWidth <= 0 || cellHeight <= 0) return 0;
 
-  let recentered = 0;
+  let repaired = 0;
+  const neighborOffsets = [
+    [-1, -1], [0, -1], [1, -1],
+    [-1, 0], [1, 0],
+    [-1, 1], [0, 1], [1, 1],
+  ];
+
   for (let row = 0; row < rows; row += 1) {
     for (let column = 0; column < columns; column += 1) {
       const x0 = column * cellWidth;
       const y0 = row * cellHeight;
-      const component = largestOpaqueComponent(image, x0, y0, cellWidth, cellHeight);
-      if (!component || component.count < 4) continue;
+      const outside = new Uint8Array(cellWidth * cellHeight);
+      const queue = [];
+      const enqueue = (x, y) => {
+        if (x < 0 || y < 0 || x >= cellWidth || y >= cellHeight) return;
+        const p = y * cellWidth + x;
+        if (outside[p]) return;
+        const i = ((y0 + y) * image.width + x0 + x) * 4;
+        if (image.pixels[i + 3] > 40) return;
+        outside[p] = 1;
+        queue.push(p);
+      };
 
-      const componentCenterX = (component.minX + component.maxX) / 2;
-      const componentCenterY = (component.minY + component.maxY) / 2;
-      const targetCenterX = (cellWidth - 1) / 2;
-      const targetCenterY = (cellHeight - 1) / 2;
-      const dx = Math.round(targetCenterX - componentCenterX);
-      const dy = Math.round(targetCenterY - componentCenterY);
-      if (dx === 0 && dy === 0) continue;
+      for (let x = 0; x < cellWidth; x += 1) {
+        enqueue(x, 0);
+        enqueue(x, cellHeight - 1);
+      }
+      for (let y = 1; y < cellHeight - 1; y += 1) {
+        enqueue(0, y);
+        enqueue(cellWidth - 1, y);
+      }
+      for (let cursor = 0; cursor < queue.length; cursor += 1) {
+        const p = queue[cursor];
+        const x = p % cellWidth;
+        const y = Math.floor(p / cellWidth);
+        enqueue(x - 1, y);
+        enqueue(x + 1, y);
+        enqueue(x, y - 1);
+        enqueue(x, y + 1);
+      }
 
+      let holes = [];
+      for (let y = 0; y < cellHeight; y += 1) {
+        for (let x = 0; x < cellWidth; x += 1) {
+          const p = y * cellWidth + x;
+          const i = ((y0 + y) * image.width + x0 + x) * 4;
+          if (image.pixels[i + 3] <= 40 && !outside[p]) holes.push(p);
+        }
+      }
+
+      let guard = cellWidth + cellHeight;
+      while (holes.length && guard > 0) {
+        const remaining = [];
+        for (const p of holes) {
+          const x = p % cellWidth;
+          const y = Math.floor(p / cellWidth);
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          let a = 0;
+          let samples = 0;
+          for (const [dx, dy] of neighborOffsets) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= cellWidth || ny >= cellHeight) continue;
+            const ni = ((y0 + ny) * image.width + x0 + nx) * 4;
+            if (image.pixels[ni + 3] <= 40) continue;
+            r += image.pixels[ni];
+            g += image.pixels[ni + 1];
+            b += image.pixels[ni + 2];
+            a += image.pixels[ni + 3];
+            samples += 1;
+          }
+          if (!samples) {
+            remaining.push(p);
+            continue;
+          }
+          const i = ((y0 + y) * image.width + x0 + x) * 4;
+          image.pixels[i] = Math.round(r / samples);
+          image.pixels[i + 1] = Math.round(g / samples);
+          image.pixels[i + 2] = Math.round(b / samples);
+          image.pixels[i + 3] = Math.round(a / samples);
+          repaired += 1;
+        }
+        if (remaining.length === holes.length) break;
+        holes = remaining;
+        guard -= 1;
+      }
+    }
+  }
+
+  return repaired;
+}
+
+function opaqueSampleInDirection(image, x0, y0, cellWidth, cellHeight, x, y, dx, dy, maxDistance) {
+  for (let distance = 1; distance <= maxDistance; distance += 1) {
+    const nx = x + dx * distance;
+    const ny = y + dy * distance;
+    if (nx < 0 || ny < 0 || nx >= cellWidth || ny >= cellHeight) return null;
+    const i = ((y0 + ny) * image.width + x0 + nx) * 4;
+    if (image.pixels[i + 3] <= 40) continue;
+    return {
+      r: image.pixels[i],
+      g: image.pixels[i + 1],
+      b: image.pixels[i + 2],
+      a: image.pixels[i + 3],
+      distance,
+    };
+  }
+  return null;
+}
+
+function sameMaterialSamples(a, b) {
+  if (!a || !b) return false;
+  return colorDistanceSquared([a.r, a.g, a.b], [b.r, b.g, b.b]) <= 95 * 95;
+}
+
+function averageOpaqueSamples(samples) {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let a = 0;
+  let totalWeight = 0;
+  for (const sample of samples) {
+    const weight = 1 / Math.max(1, sample.distance || 1);
+    r += sample.r * weight;
+    g += sample.g * weight;
+    b += sample.b * weight;
+    a += sample.a * weight;
+    totalWeight += weight;
+  }
+  return [
+    Math.round(r / totalWeight),
+    Math.round(g / totalWeight),
+    Math.round(b / totalWeight),
+    Math.round(a / totalWeight),
+  ];
+}
+
+function repairCutoutMarksNearForeground(image, columns, rows) {
+  const cellWidth = Math.floor(image.width / columns);
+  const cellHeight = Math.floor(image.height / rows);
+  if (cellWidth <= 0 || cellHeight <= 0) return 0;
+
+  const maxBridgeDistance = Math.max(4, Math.min(6, Math.round(Math.min(cellWidth, cellHeight) * 0.05)));
+  let repaired = 0;
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      const x0 = column * cellWidth;
+      const y0 = row * cellHeight;
+      let bounds = null;
+      for (let y = 0; y < cellHeight; y += 1) {
+        for (let x = 0; x < cellWidth; x += 1) {
+          const i = ((y0 + y) * image.width + x0 + x) * 4;
+          if (image.pixels[i + 3] <= 40) continue;
+          if (!bounds) bounds = { minX: x, minY: y, maxX: x, maxY: y };
+          bounds.minX = Math.min(bounds.minX, x);
+          bounds.minY = Math.min(bounds.minY, y);
+          bounds.maxX = Math.max(bounds.maxX, x);
+          bounds.maxY = Math.max(bounds.maxY, y);
+        }
+      }
+      if (!bounds) continue;
+
+      bounds = {
+        minX: Math.max(0, bounds.minX - 1),
+        minY: Math.max(0, bounds.minY - 1),
+        maxX: Math.min(cellWidth - 1, bounds.maxX + 1),
+        maxY: Math.min(cellHeight - 1, bounds.maxY + 1),
+      };
+
+      for (let pass = 0; pass < 6; pass += 1) {
+        const repairs = [];
+        for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
+          for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+            const i = ((y0 + y) * image.width + x0 + x) * 4;
+            if (image.pixels[i + 3] > 40) continue;
+
+            const left = opaqueSampleInDirection(image, x0, y0, cellWidth, cellHeight, x, y, -1, 0, maxBridgeDistance);
+            const right = opaqueSampleInDirection(image, x0, y0, cellWidth, cellHeight, x, y, 1, 0, maxBridgeDistance);
+            const up = opaqueSampleInDirection(image, x0, y0, cellWidth, cellHeight, x, y, 0, -1, maxBridgeDistance);
+            const down = opaqueSampleInDirection(image, x0, y0, cellWidth, cellHeight, x, y, 0, 1, maxBridgeDistance);
+            const samples = [];
+            if (sameMaterialSamples(left, right)) samples.push(left, right);
+            if (sameMaterialSamples(up, down)) samples.push(up, down);
+            if (!samples.length) continue;
+
+            repairs.push({
+              index: i,
+              color: averageOpaqueSamples(samples),
+            });
+          }
+        }
+
+        if (!repairs.length) break;
+        for (const repair of repairs) {
+          image.pixels[repair.index] = repair.color[0];
+          image.pixels[repair.index + 1] = repair.color[1];
+          image.pixels[repair.index + 2] = repair.color[2];
+          image.pixels[repair.index + 3] = repair.color[3];
+          repaired += 1;
+        }
+      }
+    }
+  }
+
+  return repaired;
+}
+
+function componentCoreAnchorX(component) {
+  if (!component || !component.points?.length) return null;
+  const height = component.maxY - component.minY + 1;
+  const coreMaxY = component.minY + Math.max(2, Math.floor(height * 0.38));
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let samples = 0;
+  for (const point of component.points) {
+    const x = point % component.cellWidth;
+    const y = Math.floor(point / component.cellWidth);
+    if (y > coreMaxY) continue;
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    samples += 1;
+  }
+  if (samples < Math.max(4, Math.floor(component.count * 0.08))) {
+    return null;
+  }
+  return (minX + maxX) / 2;
+}
+
+function clampOffset(offset, minX, maxX, size) {
+  return Math.max(-minX, Math.min(size - 1 - maxX, offset));
+}
+
+function recenterCells(image, columns, rows) {
+  const cellWidth = Math.floor(image.width / columns);
+  const cellHeight = Math.floor(image.height / rows);
+  if (cellWidth <= 0 || cellHeight <= 0) {
+    return { recenteredFrames: 0, removedCellSlivers: 0 };
+  }
+
+  let recentered = 0;
+  let removedCellSlivers = 0;
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      const x0 = column * cellWidth;
+      const y0 = row * cellHeight;
+      const components = opaqueComponents(image, x0, y0, cellWidth, cellHeight);
+      const main = components[0];
+      if (!main || main.count < 4) continue;
+      const kept = components.filter(component => !shouldRemoveCellComponent(component, main, cellWidth, cellHeight));
+      if (!kept.length) kept.push(main);
+
+      let opaqueCount = 0;
+      let keptCount = 0;
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
       const original = Buffer.alloc(cellWidth * cellHeight * 4);
       for (let y = 0; y < cellHeight; y += 1) {
         const sourceStart = ((y0 + y) * image.width + x0) * 4;
         image.pixels.copy(original, y * cellWidth * 4, sourceStart, sourceStart + cellWidth * 4);
+        for (let x = 0; x < cellWidth; x += 1) {
+          if (original[(y * cellWidth + x) * 4 + 3] > 0) opaqueCount += 1;
+        }
         image.pixels.fill(0, sourceStart, sourceStart + cellWidth * 4);
       }
 
-      for (let y = 0; y < cellHeight; y += 1) {
-        for (let x = 0; x < cellWidth; x += 1) {
+      for (const component of kept) {
+        keptCount += component.count;
+        minX = Math.min(minX, component.minX);
+        minY = Math.min(minY, component.minY);
+        maxX = Math.max(maxX, component.maxX);
+        maxY = Math.max(maxY, component.maxY);
+      }
+
+      const anchorSource = kept.includes(main) ? main : kept[0];
+      const coreAnchorX = componentCoreAnchorX({
+        ...anchorSource,
+        cellWidth,
+      });
+      const componentCenterX = Number.isFinite(coreAnchorX) ? coreAnchorX : (minX + maxX) / 2;
+      const componentCenterY = (minY + maxY) / 2;
+      const targetCenterX = (cellWidth - 1) / 2;
+      const targetCenterY = (cellHeight - 1) / 2;
+      const dx = clampOffset(Math.round(targetCenterX - componentCenterX), minX, maxX, cellWidth);
+      const dy = clampOffset(Math.round(targetCenterY - componentCenterY), minY, maxY, cellHeight);
+
+      for (const component of kept) {
+        for (const point of component.points || []) {
+          const x = point % cellWidth;
+          const y = Math.floor(point / cellWidth);
           const sourceIndex = (y * cellWidth + x) * 4;
           if (original[sourceIndex + 3] === 0) continue;
           const nextX = x + dx;
@@ -368,10 +756,13 @@ function recenterCells(image, columns, rows) {
           original.copy(image.pixels, targetIndex, sourceIndex, sourceIndex + 4);
         }
       }
-      recentered += 1;
+
+      const removedInCell = Math.max(0, opaqueCount - keptCount);
+      removedCellSlivers += removedInCell;
+      if (dx !== 0 || dy !== 0 || removedInCell > 0) recentered += 1;
     }
   }
-  return recentered;
+  return { recenteredFrames: recentered, removedCellSlivers };
 }
 
 function prepareGeneratedPetSpritesheet(buffer, { extension = 'png', columns = 8, rows = 10 } = {}) {
@@ -387,21 +778,36 @@ function prepareGeneratedPetSpritesheet(buffer, { extension = 'png', columns = 8
       extension: normalizedExtension || extension,
       mime: normalizedExtension === 'webp' ? 'image/webp' : 'image/png',
       cleanedBackground: false,
+      normalizedGrid: false,
+      repairedInteriorHoles: 0,
+      repairedCutoutMarks: 0,
       recenteredFrames: 0,
+      removedCellSlivers: 0,
     };
   }
 
   try {
-    const image = decodePngToRgba(buffer);
+    let image = decodePngToRgba(buffer);
+    const grid = normalizeSpritesheetGrid(image, Number(columns) || 8, Number(rows) || 10);
+    image = grid.image;
     const palette = collectBackgroundPalette(image);
     const cleanedPixels = removeConnectedBackground(image, palette);
-    const recenteredFrames = recenterCells(image, Number(columns) || 8, Number(rows) || 10);
+    const recentered = recenterCells(image, Number(columns) || 8, Number(rows) || 10);
+    let repairedInteriorHoles = repairInteriorTransparentHoles(image, Number(columns) || 8, Number(rows) || 10);
+    const repairedCutoutMarks = repairCutoutMarksNearForeground(image, Number(columns) || 8, Number(rows) || 10);
+    repairedInteriorHoles += repairInteriorTransparentHoles(image, Number(columns) || 8, Number(rows) || 10);
     return {
       buffer: encodeRgbaPng(image),
       extension: 'png',
       mime: 'image/png',
+      width: image.width,
+      height: image.height,
       cleanedBackground: cleanedPixels > 0,
-      recenteredFrames,
+      normalizedGrid: grid.normalized,
+      repairedInteriorHoles,
+      repairedCutoutMarks,
+      recenteredFrames: recentered.recenteredFrames,
+      removedCellSlivers: recentered.removedCellSlivers,
     };
   } catch (err) {
     return {
@@ -409,7 +815,11 @@ function prepareGeneratedPetSpritesheet(buffer, { extension = 'png', columns = 8
       extension: normalizedExtension || extension,
       mime: normalizedExtension === 'webp' ? 'image/webp' : 'image/png',
       cleanedBackground: false,
+      normalizedGrid: false,
+      repairedInteriorHoles: 0,
+      repairedCutoutMarks: 0,
       recenteredFrames: 0,
+      removedCellSlivers: 0,
       error: err.message,
     };
   }
@@ -630,18 +1040,27 @@ async function generatePetSpritesheet({
       message: 'Saving the pet package and activating the new virtual character.',
     });
 
+    const outputSize = prepared.width && prepared.height
+      ? `${prepared.width}x${prepared.height}`
+      : config.size;
+
     return {
       success: true,
       configured: true,
       model: config.model,
-      size: config.size,
+      size: outputSize,
+      requestedSize: config.size,
       prompt,
       mime: prepared.mime || image.mime,
       extension: prepared.extension || extension,
       buffer: prepared.buffer,
       postprocess: {
         cleanedBackground: prepared.cleanedBackground,
+        normalizedGrid: prepared.normalizedGrid,
+        repairedInteriorHoles: prepared.repairedInteriorHoles,
+        repairedCutoutMarks: prepared.repairedCutoutMarks,
         recenteredFrames: prepared.recenteredFrames,
+        removedCellSlivers: prepared.removedCellSlivers,
         error: prepared.error,
       },
     };

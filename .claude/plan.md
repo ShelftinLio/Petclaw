@@ -1,4 +1,4 @@
-# KKClaw GitHub Pages 升级计划
+# Petclaw GitHub Pages 升级计划
 
 ## 📊 当前状态分析
 
@@ -12,7 +12,7 @@
 | What's New | v3.1.2 更新卡片（6个） | ❌ 缺少 v3.5.x 内容 |
 | Wizard Demo | iframe 嵌入 demo.html | ✅ OK |
 | Features | 6个特性卡片 | ⚠️ 信息过时（还写CosyVoice） |
-| KKClaw Switch | 3步切换流程 + 对比表 | ✅ OK |
+| Petclaw Switch | 3步切换流程 + 对比表 | ✅ OK |
 | Architecture | 系统架构图 | ⚠️ 还有 CosyVoice |
 | Voice Demo | 3个语音试听卡 | ✅ OK |
 | Mood System | 7个情绪球互动 | ⚠️ 只有7种 |
@@ -121,7 +121,7 @@
 - hover 时展开详情
 
 #### 2.6 🔄 「模型热切换」增强
-**位置**：现有 KKClaw Switch section
+**位置**：现有 Petclaw Switch section
 **升级内容**：
 - 新增：失败回滚动画演示
 - 新增：延迟测速动态柱状图

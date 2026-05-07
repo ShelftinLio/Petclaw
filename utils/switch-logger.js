@@ -1,4 +1,4 @@
-// KKClaw Switch 监控日志模块
+// Petclaw Switch 监控日志模块
 const fs = require('fs');
 const path = require('path');
 

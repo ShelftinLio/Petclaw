@@ -1,10 +1,10 @@
-# KKClaw Smart Setup Phase 1 MVP Task
+# Petclaw Smart Setup Phase 1 MVP Task
 
 项目目录：C:\Users\zhouk\Desktop\02_开发项目\desktop-pet
 参考方案：`docs-dev/SMART-SETUP-IMPLEMENTATION-PLAN.md`
 
 ## 任务目标
-实现 `KKClaw Smart Setup` 的 Phase 1 MVP：
+实现 `Petclaw Smart Setup` 的 Phase 1 MVP：
 1. 新增统一路径解析器 `utils/path-resolver.js`
 2. 新增 OpenClaw 环境探测器 `utils/openclaw-detector.js`
 3. 新增依赖检测器 `utils/dependency-checker.js`

@@ -1,9 +1,9 @@
 // Mock Electron module for Jest testing
 module.exports = {
   app: {
-    getPath: (name) => `/tmp/kkclaw-test/${name}`,
+    getPath: (name) => `/tmp/petclaw-test/${name}`,
     getVersion: () => '3.1.2',
-    getName: () => 'KKClaw Desktop Pet',
+    getName: () => 'Petclaw Desktop Pet',
     quit: jest.fn(),
     on: jest.fn(),
     isReady: () => true,

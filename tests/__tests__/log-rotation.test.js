@@ -10,7 +10,7 @@ describe('LogRotationManager', () => {
   let testLogDir
 
   beforeEach(async () => {
-    testLogDir = path.join(os.tmpdir(), `kkclaw-test-logs-${Date.now()}`)
+    testLogDir = path.join(os.tmpdir(), `petclaw-test-logs-${Date.now()}`)
     await fs.mkdir(testLogDir, { recursive: true })
     manager = new LogRotationManager({
       logDir: testLogDir,

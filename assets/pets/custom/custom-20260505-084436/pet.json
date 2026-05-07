@@ -1,14 +1,14 @@
 {
-  "id": "custom-20260505-080710",
+  "id": "custom-20260505-084436",
   "name": "Generated Pet",
-  "description": "Generated with Codex $imagegen from: 海泽王里的香克斯",
+  "description": "Generated automatically from: 海贼王里的先可是",
   "source": "imagegen",
   "renderer": "spritesheet",
   "version": 1,
-  "spritesheet": "spritesheet.webp",
+  "spritesheet": "spritesheet.png",
   "cell": {
-    "width": 192,
-    "height": 208
+    "width": 128,
+    "height": 154
   },
   "layout": {
     "columns": 8,

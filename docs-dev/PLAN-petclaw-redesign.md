@@ -1,4 +1,4 @@
-# KKClaw Switch 重设计 Plan
+# Petclaw Switch 重设计 Plan
 
 ## 一、设计理念
 - **参考**: OpenAI/ChatGPT 界面风格
@@ -55,7 +55,7 @@ model-settings.js         ← 所有交互逻辑
 ### 1. 顶部导航
 ```
 ┌──────────────────────────────────────┐
-│ KKClaw Switch      服务��� 模型 日志 [+] │
+│ Petclaw Switch      服务��� 模型 日志 [+] │
 └──────────────────────────────────────┘
 ```
 - 白色背景、底部 1px 灰线
@@ -95,7 +95,7 @@ model-settings.js         ← 所有交互逻辑
 - 白色背景 + 1px 灰色边框
 - 当前使用的卡片：左边框 3px 绿色
 - 悬停：浅灰背景 + 轻微阴影
-- KKCLAW 配额条内嵌，不占额外空间
+- PETCLAW 配额条内嵌，不占额外空间
 - 用 `data-idx` 代替 `id`，解决空格问题
 
 ### 5. 配额条
@@ -137,7 +137,7 @@ model-settings.js         ← 所有交互逻辑
 
 ### Step 2: 创建 model-settings.js
 - 所有交互逻辑
-- KKCLAW 配额检测和渲染
+- PETCLAW 配额检测和渲染
 - 搜索过滤
 - 面板切换动画
 

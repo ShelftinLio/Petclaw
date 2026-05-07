@@ -119,7 +119,7 @@ class BackendCompat {
   }
 
   _resolvePreference() {
-    const envMode = String(process.env.KKCLAW_COMPAT_MODE || '').trim().toLowerCase();
+    const envMode = String(process.env.PETCLAW_COMPAT_MODE || '').trim().toLowerCase();
     if (envMode === 'openclaw' || envMode === 'hermes' || envMode === 'auto') {
       return { mode: envMode, source: 'env' };
     }
@@ -144,10 +144,14 @@ class BackendCompat {
     return {
       mode: 'openclaw',
       label: 'OpenClaw',
-      installed: Boolean(cliPath || fs.existsSync(configDir)),
+      installed: Boolean(cliPath),
       cliPath,
       configDir,
       configPath,
+      chatReady: Boolean(cliPath),
+      chatBlockReason: cliPath
+        ? null
+        : 'OpenClaw CLI not found. Install OpenClaw or add it to PATH, then restart Gateway.',
       apiHost: `http://127.0.0.1:${port}`,
       healthUrl: `http://127.0.0.1:${port}`,
       apiKey: token,

@@ -1,6 +1,7 @@
 # 依赖
 node_modules/
 .worktrees/
+.superpowers/
 npm-debug.log*
 
 # 临时文件

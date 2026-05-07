@@ -1,4 +1,4 @@
-# 🦞 KKClaw Desktop Pet 视频口播剧本
+# 🦞 Petclaw Desktop Pet 视频口播剧本
 
 **时长**：60-90秒  
 **风格**：轻松、科技感、有亲和力  
@@ -28,7 +28,7 @@
 - 拖动龙虾球，歌词窗口跟随移动
 
 **口播**：
-> "这是**KKClaw Desktop Pet**，一个像桌面歌词一样的AI伴侣。  
+> "这是**Petclaw Desktop Pet**，一个像桌面歌词一样的AI伴侣。  
 > 67像素的琉璃球体，**完全透明**，不妨碍你的任何操作。  
 > 但它始终在那里，**陪伴着你**。"
 
@@ -77,12 +77,12 @@
 ### 第四幕：模型热切换（48-58秒）
 
 **画面**：
-- 点击KKClaw Switch界面
+- 点击Petclaw Switch界面
 - 3秒内从Claude切换到GPT
 - 龙虾球无缝继续工作
 
 **口播**：
-> "**KKClaw Switch**，3秒热切换AI模型。  
+> "**Petclaw Switch**，3秒热切换AI模型。  
 > Claude、GPT、Gemini，随意切换，**零重启**。  
 > 对话不中断，思考不停歇。"
 
@@ -100,11 +100,11 @@
 - 淡出到GitHub地址和二维码
 
 **口播**：
-> "**KKClaw Desktop Pet**。  
+> "**Petclaw Desktop Pet**。  
 > 给OpenClaw一个身体，让AI真正活在你的桌面上。"
 
 **字幕**：
-- github.com/kk43994/KKClaw-Desktop-Pet
+- github.com/kk43994/Petclaw-Desktop-Pet
 - 扫码加入社群
 
 ---
@@ -190,7 +190,7 @@
 
 | 时间 | 画面 | 口播 | 字幕 | 演示动作 |
 |------|------|------|------|----------|
-| 8-11s | 球体在桌面浮动 | "这是KKClaw Desktop Pet" | KKClaw Desktop Pet | 龙虾球idle状态 |
+| 8-11s | 球体在桌面浮动 | "这是Petclaw Desktop Pet" | Petclaw Desktop Pet | 龙虾球idle状态 |
 | 11-14s | 鼠标穿过歌词窗口 | "像桌面歌词一样的AI伴侣" | 空气感UI | 鼠标穿透演示 |
 | 14-17s | 拖动龙虾球 | "67像素琉璃球体，完全透明" | 67px 琉璃质感 | 拖动 + 歌词跟随 |
 | 17-20s | 球体半透明效果 | "但它始终在那里，陪伴着你" | 始终陪伴 | - |
@@ -217,7 +217,7 @@
 
 | 时间 | 画面 | 口播 | 字幕 | 演示 |
 |------|------|------|------|------|
-| 48-51s | KKClaw Switch界面 | "KKClaw Switch" | KKClaw Switch | 打开切换面板 |
+| 48-51s | Petclaw Switch界面 | "Petclaw Switch" | Petclaw Switch | 打开切换面板 |
 | 51-54s | 点击切换 | "3秒热切换AI模型" | 3秒切换 | Claude→GPT |
 | 54-56s | 对话继续 | "零重启" | 零重启 零中断 | 无缝切换 |
 | 56-58s | 球体继续工作 | "对话不中断，思考不停歇" | - | thinking状态 |
@@ -226,7 +226,7 @@
 
 | 时间 | 画面 | 口播 | 字幕 | 动作 |
 |------|------|------|------|------|
-| 58-59s | 球体回到idle | "KKClaw Desktop Pet" | KKClaw Desktop Pet | 眼睛眨一下 |
+| 58-59s | 球体回到idle | "Petclaw Desktop Pet" | Petclaw Desktop Pet | 眼睛眨一下 |
 | 59-60s | 淡出到二维码 | "让AI真正活在你的桌面上" | github.com/kk43994/... | 露出开心表情 |
 
 ---
@@ -278,7 +278,7 @@
 
 ### 标题
 - "给OpenClaw装个身体？桌面龙虾来了！"
-- "这才是AI助手该有的样子 | KKClaw Desktop Pet"
+- "这才是AI助手该有的样子 | Petclaw Desktop Pet"
 - "7种情绪、38种表情，你的AI终于活了"
 
 ### 标签

@@ -1,15 +1,15 @@
 @echo off
 chcp 65001 >nul 2>&1
 
-title KKClaw Gateway Console
+title Petclaw Gateway Console
 
 echo.
 echo   +==========================================+
-echo   :      KKClaw Desktop Pet  v3.5.2          :
+echo   :      Petclaw Desktop Pet  v3.5.2          :
 echo   :      Gateway Console - Live Monitor       :
 echo   +==========================================+
 echo.
-echo   [%TIME%] Starting KKClaw...
+echo   [%TIME%] Starting Petclaw...
 echo   [%TIME%] Gateway logs will appear below
 echo   ------------------------------------------
 echo.

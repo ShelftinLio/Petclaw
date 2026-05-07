@@ -1,11 +1,11 @@
-# KKClaw Switch 配置同步功能
+# Petclaw Switch 配置同步功能
 
 ## 功能说明
 
-现在 KKClaw Switch（桌面龙虾的模型管理面板）新增了两个同步按钮：
+现在 Petclaw Switch（桌面龙虾的模型管理面板）新增了两个同步按钮：
 
 ### 1. ⬆ 同步到 OpenClaw
-- **功能**: 将 KKClaw Switch 中的服务商配置同步到 OpenClaw
+- **功能**: 将 Petclaw Switch 中的服务商配置同步到 OpenClaw
 - **操作**: 点击按钮即可
 - **效果**:
   - 更新 `~/.openclaw/openclaw.json`
@@ -14,13 +14,13 @@
 - **提示**: 同步后需要重启 OpenClaw 才能生效
 
 ### 2. ⬇ 从 CC Switch 导入
-- **功能**: 从 CC Switch 数据库导入服务商配置到 KKClaw Switch
+- **功能**: 从 CC Switch 数据库导入服务商配置到 Petclaw Switch
 - **操作**: 点击按钮 → 确认对话框
 - **效果**:
   - 读取 `~/.cc-switch/cc-switch.db`
   - 导入所有 Claude providers
   - 自动生成标准模型列表
-  - 刷新 KKClaw Switch 界面
+  - 刷新 Petclaw Switch 界面
 - **注意**: 会覆盖当前的服务商列表
 
 ## 使用流程
@@ -29,17 +29,17 @@
 
 ```
 1. 在 CC Switch 中配置好服务商
-2. 点击桌面龙虾右下角按钮 → 打开 KKClaw Switch
+2. 点击桌面龙虾右下角按钮 → 打开 Petclaw Switch
 3. 点击 "⬇ 从CC Switch导入"
 4. 确认导入
 5. 点击 "⬆ 同步到OpenClaw"
 6. 重启 OpenClaw
 ```
 
-### 方案 B: 直接在 KKClaw Switch 中管理
+### 方案 B: 直接在 Petclaw Switch 中管理
 
 ```
-1. 在 KKClaw Switch 中添加/编辑服务商
+1. 在 Petclaw Switch 中添加/编辑服务商
 2. 点击 "⬆ 同步到OpenClaw"
 3. 重启 OpenClaw
 ```
@@ -47,7 +47,7 @@
 ## 技术细节
 
 ### 配置文件位置
-- **KKClaw Switch**: 使用 model-switcher.js 的内存配置
+- **Petclaw Switch**: 使用 model-switcher.js 的内存配置
 - **OpenClaw**:
   - `~/.openclaw/openclaw.json` (主配置)
   - `~/.openclaw/agents/main/agent/models.json` (agent配置)
@@ -82,7 +82,7 @@ A: 导入操作会覆盖现有配置��建议在导入前做好备份。
 A: 检查 provider 的 baseUrl 和 apiKey 是否正确配置。
 
 ### Q: 如何知道当前使用哪个 provider？
-A: 在 KKClaw Switch 顶部会显示 "当前使用" 的指示器。
+A: 在 Petclaw Switch 顶部会显示 "当前使用" 的指示器。
 
 ## 更新日志
 
