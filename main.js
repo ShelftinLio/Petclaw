@@ -52,7 +52,7 @@ if (process.platform === 'darwin') {
   }
 }
 
-const { app, BrowserWindow, ipcMain, screen, Menu, Tray, Notification, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Menu, Tray, Notification, shell, dialog, clipboard } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const GatewayClient = require('./gateway-client');
@@ -62,6 +62,7 @@ const WorkLogger = require('./work-logger');
 const DesktopNotifier = require('./desktop-notifier');
 const PetConfig = require('./pet-config');
 const ScreenshotSystem = require('./screenshot-system'); // 🔥 新增
+const InboxSystem = require('./inbox-system');
 const LarkUploader = require('./lark-uploader'); // 🔥 新增
 const ServiceManager = require('./service-manager'); // 🔧 服务管理
 const CacheManager = require('./cache-manager'); // 🧹 缓存管理
@@ -278,6 +279,7 @@ let desktopNotifier;
 let petConfig;
 let petProgressStore;
 let screenshotSystem; // 🔥 新增
+let inboxSystem;
 let larkUploader; // 🔥 新增
 let serviceManager; // 🔧 服务管理
 let cacheManager; // 🧹 缓存管理
@@ -433,6 +435,11 @@ async function createWindow() {
   await petConfig.load();
   petProgressStore = new PetProgressStore(path.join(__dirname, 'pet-progress.json'));
   await petProgressStore.load();
+  inboxSystem = new InboxSystem({
+    inboxRoot: path.join(app.getPath('documents'), 'Petclaw Inbox'),
+    recordPath: path.join(app.getPath('userData'), 'pet-inbox.json')
+  });
+  await inboxSystem.load();
   
   // 初始化所有系统
   gatewayClient = new GatewayClient();
@@ -2739,6 +2746,169 @@ ipcMain.handle('install-dashscope', async (event, pythonCmd) => {
     return result;
   } catch (err) {
     return { success: false, error: err.message };
+  }
+});
+
+async function ensureInboxSystem() {
+  if (!inboxSystem) {
+    inboxSystem = new InboxSystem({
+      inboxRoot: path.join(app.getPath('documents'), 'Petclaw Inbox'),
+      recordPath: path.join(app.getPath('userData'), 'pet-inbox.json')
+    });
+    await inboxSystem.load();
+  }
+  return inboxSystem;
+}
+
+function normalizeInboxFilePaths(filePaths = []) {
+  const unique = new Set();
+  for (const filePath of filePaths) {
+    const value = String(filePath || '').trim().replace(/^file:\/\//i, '');
+    if (!value) continue;
+    try {
+      const resolved = path.resolve(decodeURIComponent(value));
+      if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+        unique.add(resolved);
+      }
+    } catch (_) {
+      // Ignore malformed clipboard values.
+    }
+  }
+  return Array.from(unique);
+}
+
+function parseClipboardFilePaths() {
+  const values = [];
+  try {
+    values.push(clipboard.read('FileNameW'));
+  } catch (_) {}
+  try {
+    values.push(clipboard.read('FileName'));
+  } catch (_) {}
+  try {
+    values.push(clipboard.readText());
+  } catch (_) {}
+
+  return normalizeInboxFilePaths(
+    values.flatMap(value => String(value || '').split(/\0|\r?\n/))
+  );
+}
+
+ipcMain.handle('inbox-get-state', async () => {
+  const inbox = await ensureInboxSystem();
+  return { success: true, state: inbox.getState() };
+});
+
+ipcMain.handle('inbox-add-files', async (event, payload = {}) => {
+  try {
+    const inbox = await ensureInboxSystem();
+    let filePaths = normalizeInboxFilePaths(payload.filePaths || []);
+
+    if (filePaths.length === 0) {
+      const result = await dialog.showOpenDialog(mainWindow, {
+        title: 'Add files to Petclaw Inbox',
+        properties: ['openFile', 'multiSelections']
+      });
+      if (result.canceled) {
+        return { success: false, canceled: true, state: inbox.getState(), records: [], failures: [] };
+      }
+      filePaths = normalizeInboxFilePaths(result.filePaths || []);
+    }
+
+    return await inbox.collectFiles(filePaths, { source: payload.source || 'picker' });
+  } catch (err) {
+    return { success: false, error: err.message, records: [], failures: [], state: inboxSystem?.getState?.() || null };
+  }
+});
+
+ipcMain.handle('inbox-capture-clipboard', async () => {
+  try {
+    const inbox = await ensureInboxSystem();
+    const filePaths = parseClipboardFilePaths();
+    if (filePaths.length > 0) {
+      return await inbox.collectFiles(filePaths, { source: 'clipboard' });
+    }
+
+    const image = clipboard.readImage();
+    if (image && !image.isEmpty()) {
+      return await inbox.collectClipboardImage(image.toPNG());
+    }
+
+    const text = clipboard.readText();
+    if (String(text || '').trim()) {
+      return await inbox.collectClipboardText(text);
+    }
+
+    return {
+      success: false,
+      error: 'Clipboard is empty',
+      records: [],
+      failures: [],
+      state: inbox.getState()
+    };
+  } catch (err) {
+    return { success: false, error: err.message, records: [], failures: [], state: inboxSystem?.getState?.() || null };
+  }
+});
+
+ipcMain.handle('inbox-open-root', async () => {
+  try {
+    const inbox = await ensureInboxSystem();
+    await fsp.mkdir(inbox.inboxRoot, { recursive: true });
+    const error = await shell.openPath(inbox.inboxRoot);
+    return { success: !error, error: error || null, state: inbox.getState() };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('inbox-open-item', async (event, id) => {
+  try {
+    const inbox = await ensureInboxSystem();
+    const record = inbox.getRecord(id);
+    if (!record) return { success: false, error: 'Inbox item not found', state: inbox.getState() };
+    const error = await shell.openPath(record.inboxPath);
+    return { success: !error, error: error || null, state: inbox.getState() };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('inbox-reveal-item', async (event, id) => {
+  try {
+    const inbox = await ensureInboxSystem();
+    const record = inbox.getRecord(id);
+    if (!record) return { success: false, error: 'Inbox item not found', state: inbox.getState() };
+    shell.showItemInFolder(record.inboxPath);
+    return { success: true, state: inbox.getState() };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('inbox-remove-record', async (event, id) => {
+  try {
+    const inbox = await ensureInboxSystem();
+    return await inbox.removeRecord(id);
+  } catch (err) {
+    return { success: false, error: err.message, state: inboxSystem?.getState?.() || null };
+  }
+});
+
+ipcMain.handle('inbox-start-drag', async (event, id) => {
+  try {
+    const inbox = await ensureInboxSystem();
+    const record = inbox.getRecord(id);
+    if (!record || !record.inboxPath || !fs.existsSync(record.inboxPath)) {
+      return { success: false, error: 'Inbox item not available', state: inbox.getState() };
+    }
+    event.sender.startDrag({
+      file: record.inboxPath,
+      icon: path.join(__dirname, 'icon.png')
+    });
+    return { success: true, state: inbox.getState() };
+  } catch (err) {
+    return { success: false, error: err.message, state: inboxSystem?.getState?.() || null };
   }
 });
 

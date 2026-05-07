@@ -46,6 +46,24 @@ describe('preload channel whitelist', () => {
     expect(source).toContain("'pet-game-tab'")
   })
 
+  test('exposes file inbox channels to renderers', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'preload.js'), 'utf8')
+    const channels = [
+      'inbox-get-state',
+      'inbox-add-files',
+      'inbox-capture-clipboard',
+      'inbox-open-root',
+      'inbox-open-item',
+      'inbox-reveal-item',
+      'inbox-remove-record',
+      'inbox-start-drag',
+    ]
+
+    for (const channel of channels) {
+      expect(source).toContain(`'${channel}'`)
+    }
+  })
+
   test('renderer includes gamified focus panel hooks', () => {
     const source = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8')
 
@@ -143,6 +161,19 @@ describe('preload channel whitelist', () => {
     expect(mainSource).toContain("recordPetAffinity('text-message'")
     expect(mainSource).toContain('renderBondItemOverlay')
     expect(mainSource).toContain('showAffinityGain')
+  })
+
+  test('main renderer replaces screenshot controls with file inbox controls', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8')
+
+    expect(source).toContain('id="btnInbox"')
+    expect(source).toContain('toggleInboxTray')
+    expect(source).toContain('id="inboxTray"')
+    expect(source).toContain('id="inboxDropZone"')
+    expect(source).toContain('captureInboxClipboard')
+    expect(source).toContain('startInboxDrag')
+    expect(source).not.toContain('id="btnScreenshot"')
+    expect(source).not.toContain('<button onclick="screenshot()">Screenshot</button>')
   })
 
   test('dedicated pet game window has a visible fallback and real timer controls', () => {

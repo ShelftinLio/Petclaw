@@ -833,6 +833,120 @@
     }
     .settings-panel button:hover { background: #111111; color: var(--hud-invert); }
     .settings-panel .wide { grid-column: 1 / -1; }
+    .inbox-tray {
+        position: absolute;
+        bottom: 174px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 244px;
+        max-height: 294px;
+        padding: 8px;
+        display: none;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        overflow-y: auto !important;
+        border: 2px solid var(--hud-line);
+        background: var(--hud-bg);
+        box-shadow: var(--pixel-shadow);
+        color: var(--hud-text);
+        font-size: 10px;
+        z-index: 32;
+        clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+    }
+    .inbox-tray.show { display: grid; }
+    .inbox-title {
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.1;
+        text-transform: uppercase;
+    }
+    .inbox-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+    }
+    .inbox-tray button {
+        min-height: 26px;
+        border: 2px solid var(--hud-line);
+        border-radius: 0;
+        background: #ffffff;
+        color: var(--hud-text);
+        font-size: 9px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.28);
+    }
+    .inbox-tray button:hover {
+        background: #111111;
+        color: var(--hud-invert);
+    }
+    .inbox-drop-zone {
+        min-height: 46px;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed rgba(0,0,0,0.55);
+        background: rgba(255,255,255,0.72);
+        font-weight: 800;
+        line-height: 1.2;
+        text-align: center;
+    }
+    .inbox-drop-zone.drag-over {
+        background: #111111;
+        color: var(--hud-invert);
+        border-style: solid;
+    }
+    .pet-wrapper.inbox-drag-over {
+        filter: brightness(1.08) drop-shadow(0 0 9px rgba(0,0,0,0.34));
+    }
+    .inbox-status {
+        min-height: 13px;
+        color: var(--hud-muted);
+        font-size: 9px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+    .inbox-status.error { color: #7a0000; }
+    .inbox-list {
+        display: grid;
+        gap: 5px;
+    }
+    .inbox-empty {
+        padding: 8px;
+        border: 2px dashed rgba(0,0,0,0.35);
+        color: var(--hud-muted);
+        line-height: 1.3;
+        background: rgba(255,255,255,0.55);
+    }
+    .inbox-record {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 6px;
+        border: 2px solid var(--hud-line);
+        background: #ffffff;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.12);
+        cursor: grab;
+    }
+    .inbox-record:active { cursor: grabbing; }
+    .inbox-record.missing { opacity: 0.55; }
+    .inbox-record-name {
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+    .inbox-record-meta {
+        color: var(--hud-muted);
+        font-size: 9px;
+        line-height: 1.2;
+    }
+    .inbox-record-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+    }
     .game-panel {
         position: absolute;
         bottom: 174px;
@@ -1051,8 +1165,8 @@
         <div class="tool-icon" id="btnVoice" title="语音" onclick="toggleVoice()">
             <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         </div>
-        <div class="tool-icon" id="btnScreenshot" title="截图" onclick="screenshot()">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+        <div class="tool-icon" id="btnInbox" title="Inbox" onclick="toggleInboxTray()">
+            <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 13h5l2 3h4l2-3h5"/></svg>
         </div>
         <div class="tool-icon" id="btnAdventure" title="Adventure" onclick="openPetGame('focus')">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-4 2 2-6 4-2z"/></svg>
@@ -1060,6 +1174,18 @@
         <div class="tool-icon" id="btnSettings" title="设置" onclick="toggleSettingsPanel()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12h3M2 12h3M12 2v3M12 19v3M17 7l2-2M5 19l2-2M7 7 5 5M17 17l2 2"/></svg>
         </div>
+    </div>
+
+    <div class="inbox-tray" id="inboxTray">
+        <div class="inbox-title">Inbox</div>
+        <div class="inbox-actions">
+            <button onclick="addInboxFiles()">Add</button>
+            <button onclick="captureInboxClipboard()">Clip</button>
+            <button onclick="openInboxRoot()">Open</button>
+        </div>
+        <div class="inbox-drop-zone" id="inboxDropZone">Drop files here</div>
+        <div class="inbox-status" id="inboxStatus"></div>
+        <div class="inbox-list" id="inboxList"></div>
     </div>
 
     <div class="settings-panel" id="settingsPanel">
@@ -1073,7 +1199,7 @@
         <button class="wide" onclick="resetAppearance()">Reset Pet</button>
         <div class="settings-section">Tools</div>
         <button id="settingsVoiceButton" onclick="toggleVoice()">Voice On</button>
-        <button onclick="screenshot()">Screenshot</button>
+        <button onclick="toggleInboxTray()">Inbox</button>
         <div class="settings-section">Adventure</div>
         <button onclick="openPetGame('focus')">Focus</button>
         <button onclick="openPetGame('abilities')">Abilities</button>
@@ -1159,6 +1285,10 @@ const customPetImage = document.getElementById('customPetImage');
 const customPetSheet = document.getElementById('customPetSheet');
 const customPetCanvas = document.getElementById('customPetCanvas');
 const settingsPanel = document.getElementById('settingsPanel');
+const inboxTray = document.getElementById('inboxTray');
+const inboxDropZone = document.getElementById('inboxDropZone');
+const inboxStatus = document.getElementById('inboxStatus');
+const inboxList = document.getElementById('inboxList');
 const appearanceCurrent = document.getElementById('appearanceCurrent');
 const settingsNote = document.getElementById('settingsNote');
 const focusAdventurePanel = document.getElementById('focusAdventurePanel');
@@ -1214,6 +1344,10 @@ function hideGamePanels() {
     [focusAdventurePanel, abilityTreePanel, skillBookPanel].forEach(panel => panel?.classList.remove('show'));
 }
 
+function hideInboxTray() {
+    inboxTray?.classList.remove('show');
+}
+
 function hasReplyConversation() {
     return Boolean(currentConversationTitle || replyBubbleFullContent || awaitingConversationReply);
 }
@@ -1257,6 +1391,7 @@ function showGamePanel(panel) {
     endConversationMode();
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
+    hideInboxTray();
     inputBar.classList.remove('show');
     panel.classList.add('show');
     pauseRoam(2500);
@@ -1268,6 +1403,7 @@ function setAppearanceNote(text) {
 
 function toggleSettingsPanel() {
     settingsPanel.classList.toggle('show');
+    hideInboxTray();
     setAppearanceNote('');
     endConversationMode();
     hideGamePanels();
@@ -1278,6 +1414,7 @@ function togglePetOptions() {
     toolbar.classList.toggle('show');
     if (!toolbar.classList.contains('show')) {
         settingsPanel.classList.remove('show');
+        hideInboxTray();
         inputBar.classList.remove('show');
         hideGamePanels();
     }
@@ -1295,6 +1432,7 @@ document.addEventListener('click', e => {
         pet.contains(e.target) ||
         toolbar.contains(e.target) ||
         settingsPanel.contains(e.target) ||
+        inboxTray.contains(e.target) ||
         inputBar.contains(e.target) ||
         replyBubble.contains(e.target) ||
         replyDockButton.contains(e.target) ||
@@ -1305,6 +1443,7 @@ document.addEventListener('click', e => {
     ) return;
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
+    hideInboxTray();
     endConversationMode();
     hideGamePanels();
 });
@@ -1517,7 +1656,7 @@ function shouldRoam() {
     if (!window.electronAPI || !hasSpritePet()) return false;
     if (activePetManifest?.motion?.roam !== true) return false;
     if (Date.now() < roamPausedUntil || isDrag) return false;
-    if (toolbar.classList.contains('show') || settingsPanel.classList.contains('show') || inputBar.classList.contains('show')) return false;
+    if (toolbar.classList.contains('show') || settingsPanel.classList.contains('show') || inboxTray.classList.contains('show') || inputBar.classList.contains('show')) return false;
     return currentMood === 'idle' || currentMood === 'walking';
 }
 
@@ -1683,6 +1822,7 @@ function enterConversationMode({ focusInput = true } = {}) {
     conversationModeActive = true;
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
+    hideInboxTray();
     hideGamePanels();
     closeReplyBubble();
     setConversationStatus('', '');
@@ -2063,6 +2203,163 @@ async function loadPetProgress() {
     }
 }
 
+function getInboxState(payload = {}) {
+    return payload.state || payload;
+}
+
+function setInboxStatus(message = '', isError = false) {
+    if (!inboxStatus) return;
+    inboxStatus.textContent = message;
+    inboxStatus.classList.toggle('error', Boolean(isError));
+}
+
+function formatInboxSize(bytes = 0) {
+    const size = Number(bytes) || 0;
+    if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`;
+    if (size >= 1024) return `${Math.ceil(size / 1024)} KB`;
+    return `${size} B`;
+}
+
+function renderInboxState(payload = {}) {
+    if (!inboxList) return;
+    const state = getInboxState(payload);
+    const records = Array.isArray(state.records) ? state.records : [];
+    if (!records.length) {
+        inboxList.innerHTML = '<div class="inbox-empty">No files yet.</div>';
+        return;
+    }
+
+    inboxList.innerHTML = records.map(record => {
+        const meta = [
+            record.type || 'other',
+            formatInboxSize(record.size),
+            record.source || 'manual'
+        ].filter(Boolean).join(' | ');
+        return `
+            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="true" data-inbox-id="${escapeHtml(record.id)}" ondragstart="startInboxDrag('${escapeHtml(record.id)}')">
+                <div class="inbox-record-name">${escapeHtml(record.name || 'Inbox item')}</div>
+                <div class="inbox-record-meta">${escapeHtml(meta)}${record.missing ? ' | Missing' : ''}</div>
+                <div class="inbox-record-actions">
+                    <button onclick="openInboxItem('${escapeHtml(record.id)}')">Open</button>
+                    <button onclick="revealInboxItem('${escapeHtml(record.id)}')">Show</button>
+                    <button onclick="removeInboxRecord('${escapeHtml(record.id)}')">Clear</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadInboxState() {
+    if (!window.electronAPI) return;
+    try {
+        const result = await electronAPI.invoke('inbox-get-state');
+        renderInboxState(result);
+        setInboxStatus('');
+    } catch (err) {
+        setInboxStatus(err.message || 'Inbox unavailable', true);
+    }
+}
+
+function toggleInboxTray() {
+    const willShow = !inboxTray.classList.contains('show');
+    inboxTray.classList.toggle('show', willShow);
+    if (willShow) {
+        settingsPanel.classList.remove('show');
+        hideGamePanels();
+        endConversationMode();
+        loadInboxState();
+    }
+    pauseRoam(2500);
+}
+
+async function addInboxFiles() {
+    if (!window.electronAPI) return;
+    setInboxStatus('Choosing files...');
+    const result = await electronAPI.invoke('inbox-add-files', { source: 'picker' });
+    renderInboxState(result);
+    setInboxStatus(result.canceled ? '' : result.success ? 'Added to inbox.' : (result.error || 'No files added.'), !result.success && !result.canceled);
+}
+
+async function captureInboxClipboard() {
+    if (!window.electronAPI) return;
+    setInboxStatus('Reading clipboard...');
+    const result = await electronAPI.invoke('inbox-capture-clipboard');
+    renderInboxState(result);
+    setInboxStatus(result.success ? 'Captured clipboard.' : (result.error || 'Clipboard empty.'), !result.success);
+}
+
+async function openInboxRoot() {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('inbox-open-root');
+    if (!result.success) setInboxStatus(result.error || 'Cannot open inbox.', true);
+}
+
+async function openInboxItem(id) {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('inbox-open-item', id);
+    if (!result.success) setInboxStatus(result.error || 'Cannot open item.', true);
+    if (result.state) renderInboxState(result);
+}
+
+async function revealInboxItem(id) {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('inbox-reveal-item', id);
+    if (!result.success) setInboxStatus(result.error || 'Cannot reveal item.', true);
+    if (result.state) renderInboxState(result);
+}
+
+async function removeInboxRecord(id) {
+    if (!window.electronAPI) return;
+    const result = await electronAPI.invoke('inbox-remove-record', id);
+    renderInboxState(result);
+    setInboxStatus(result.success ? 'Removed from list.' : (result.error || 'Item not found.'), !result.success);
+}
+
+async function startInboxDrag(id) {
+    if (!window.electronAPI) return;
+    await electronAPI.invoke('inbox-start-drag', id);
+}
+
+function getDropFilePaths(event) {
+    return Array.from(event.dataTransfer?.files || [])
+        .map(file => file.path)
+        .filter(Boolean);
+}
+
+async function collectDroppedInboxFiles(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    inboxDropZone?.classList.remove('drag-over');
+    pet?.classList.remove('inbox-drag-over');
+    const filePaths = getDropFilePaths(event);
+    if (!filePaths.length || !window.electronAPI) {
+        setInboxStatus('Drop files from your desktop.', true);
+        return;
+    }
+    const result = await electronAPI.invoke('inbox-add-files', { source: 'drop', filePaths });
+    renderInboxState(result);
+    setInboxStatus(result.success ? `Added ${result.records?.length || 0} file(s).` : (result.error || 'Drop failed.'), !result.success);
+}
+
+function bindInboxDragTargets() {
+    const targets = [inboxDropZone, pet].filter(Boolean);
+    targets.forEach(target => {
+        target.addEventListener('dragenter', event => {
+            event.preventDefault();
+            if (target === inboxDropZone) inboxDropZone.classList.add('drag-over');
+            if (target === pet) pet.classList.add('inbox-drag-over');
+        });
+        target.addEventListener('dragover', event => {
+            event.preventDefault();
+        });
+        target.addEventListener('dragleave', () => {
+            if (target === inboxDropZone) inboxDropZone.classList.remove('drag-over');
+            if (target === pet) pet.classList.remove('inbox-drag-over');
+        });
+        target.addEventListener('drop', collectDroppedInboxFiles);
+    });
+}
+
 async function useCowCat() {
     if (!window.electronAPI) return;
     renderAppearance(await electronAPI.invoke('appearance-set-active', 'cow-cat'));
@@ -2189,6 +2486,8 @@ loop();
 updateConversationModeUI();
 loadAppearance();
 loadPetProgress();
+bindInboxDragTargets();
+loadInboxState();
 if (window.electronAPI) {
     electronAPI.on('pet-progress-changed', renderPetProgress);
 }
@@ -3094,6 +3393,7 @@ function toggleInput() {
         endConversationMode();
         return;
     }
+    hideInboxTray();
     enterConversationMode();
 }
 
@@ -3146,6 +3446,7 @@ async function openPetStudio() {
 async function openPetGame(tab = 'focus') {
     if (!electronAPI) return;
     hideGamePanels();
+    hideInboxTray();
     toolbar.classList.remove('show');
     settingsPanel.classList.remove('show');
     endConversationMode();
