@@ -919,7 +919,7 @@
         overscroll-behavior: contain;
         touch-action: pan-y;
         padding-right: 1px;
-        cursor: grab;
+        cursor: default;
     }
     .inbox-list.drag-scrolling { cursor: grabbing; }
     .inbox-empty {
@@ -937,8 +937,9 @@
         border: 2px solid var(--hud-line);
         background: #ffffff;
         box-shadow: inset -2px -2px 0 rgba(0,0,0,0.12);
-        cursor: default;
+        cursor: grab;
     }
+    .inbox-record:active { cursor: grabbing; }
     .inbox-record.missing { opacity: 0.55; }
     .inbox-record-header {
         display: grid;
@@ -2277,15 +2278,15 @@ function renderInboxState(payload = {}) {
             record.source || 'manual'
         ].filter(Boolean).join(' | ');
         return `
-            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="false" data-inbox-id="${escapeHtml(record.id)}">
+            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="${record.missing ? 'false' : 'true'}" data-inbox-id="${escapeHtml(record.id)}" ondragstart="startInboxDrag(event, '${escapeHtml(record.id)}')">
                 <div class="inbox-record-header">
                     <div class="inbox-record-name">${escapeHtml(record.name || 'Inbox item')}</div>
-                    <span class="inbox-drag-handle" draggable="${record.missing ? 'false' : 'true'}" aria-disabled="${record.missing ? 'true' : 'false'}" title="Drag out" aria-label="Drag out" ondragstart="startInboxDrag(event, '${escapeHtml(record.id)}')">
+                    <span class="inbox-drag-handle" draggable="${record.missing ? 'false' : 'true'}" aria-disabled="${record.missing ? 'true' : 'false'}" title="Drag out" aria-label="Drag out">
                         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2h4M6 5h4M6 8h4M6 11h4M6 14h4"/></svg>
                     </span>
                 </div>
                 <div class="inbox-record-meta">${escapeHtml(meta)}${record.missing ? ' | Missing' : ''}</div>
-                <div class="inbox-record-actions">
+                <div class="inbox-record-actions" draggable="false" ondragstart="event.preventDefault(); event.stopPropagation();">
                     <button onclick="openInboxItem('${escapeHtml(record.id)}')">Open</button>
                     <button onclick="revealInboxItem('${escapeHtml(record.id)}')">Show</button>
                     <button onclick="removeInboxRecord('${escapeHtml(record.id)}')">Clear</button>
@@ -2362,13 +2363,11 @@ async function removeInboxRecord(id) {
 }
 
 function startInboxDrag(event, id) {
-    if (!window.electronAPI) return;
+    event?.preventDefault?.();
     event?.stopPropagation?.();
-    if (event?.dataTransfer) {
-        event.dataTransfer.effectAllowed = 'copy';
-        event.dataTransfer.setData('text/plain', id || 'inbox-item');
-    }
+    if (!window.electronAPI) return false;
     electronAPI.send('inbox-start-drag', id);
+    return false;
 }
 
 function getDropFilePaths(event) {
@@ -2450,6 +2449,19 @@ function bindInboxListScrollDrag() {
     inboxList.addEventListener('pointerup', endScrollDrag);
     inboxList.addEventListener('pointercancel', endScrollDrag);
     inboxList.addEventListener('lostpointercapture', endScrollDrag);
+}
+
+function bindInboxWheelScroll() {
+    if (!inboxTray || !inboxList) return;
+
+    inboxTray.addEventListener('wheel', event => {
+        const deltaY = event.deltaY || event.deltaX || 0;
+        const maxScrollTop = inboxList.scrollHeight - inboxList.clientHeight;
+        if (!deltaY || maxScrollTop <= 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        inboxList.scrollTop = Math.max(0, Math.min(maxScrollTop, inboxList.scrollTop + deltaY));
+    }, { passive: false });
 }
 
 async function useCowCat() {
@@ -2579,6 +2591,7 @@ updateConversationModeUI();
 loadAppearance();
 loadPetProgress();
 bindInboxListScrollDrag();
+bindInboxWheelScroll();
 bindInboxDragTargets();
 loadInboxState();
 if (window.electronAPI) {

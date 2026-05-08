@@ -13,13 +13,23 @@ describe('inbox list scrolling', () => {
     expect(source).toContain('touch-action: pan-y;')
   })
 
-  test('uses a dedicated drag-out handle so the record body can scroll', () => {
+  test('lets inbox records drag out through the native Electron path safely', () => {
     expect(source).toContain('class="inbox-drag-handle"')
-    expect(source).toContain('draggable="false" data-inbox-id=')
+    expect(source).toContain('draggable="${record.missing ? \'false\' : \'true\'}" data-inbox-id=')
     expect(source).toContain('ondragstart="startInboxDrag(event,')
+    expect(source).toContain('event?.preventDefault?.();')
     expect(source).toContain('bindInboxListScrollDrag')
     expect(source).toContain('setPointerCapture')
     expect(source).toContain('inboxList.scrollTop = inboxScrollDrag.startTop - dy;')
+  })
+
+  test('scrolls the inbox list when the mouse wheel moves over the tray', () => {
+    expect(source).toContain('function bindInboxWheelScroll()')
+    expect(source).toContain("inboxTray.addEventListener('wheel'")
+    expect(source).toContain('const maxScrollTop = inboxList.scrollHeight - inboxList.clientHeight;')
+    expect(source).toContain('inboxList.scrollTop = Math.max(0, Math.min(maxScrollTop, inboxList.scrollTop + deltaY));')
+    expect(source).toContain('{ passive: false }')
+    expect(source).toContain('bindInboxWheelScroll();')
   })
 
   test('keeps the runtime overflow guard from disabling inbox scrolling', () => {
