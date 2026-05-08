@@ -2236,7 +2236,7 @@ function renderInboxState(payload = {}) {
             record.source || 'manual'
         ].filter(Boolean).join(' | ');
         return `
-            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="true" data-inbox-id="${escapeHtml(record.id)}" ondragstart="startInboxDrag('${escapeHtml(record.id)}')">
+            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="${record.missing ? 'false' : 'true'}" data-inbox-id="${escapeHtml(record.id)}" ondragstart="startInboxDrag(event, '${escapeHtml(record.id)}')">
                 <div class="inbox-record-name">${escapeHtml(record.name || 'Inbox item')}</div>
                 <div class="inbox-record-meta">${escapeHtml(meta)}${record.missing ? ' | Missing' : ''}</div>
                 <div class="inbox-record-actions">
@@ -2315,9 +2315,13 @@ async function removeInboxRecord(id) {
     setInboxStatus(result.success ? 'Removed from list.' : (result.error || 'Item not found.'), !result.success);
 }
 
-async function startInboxDrag(id) {
+function startInboxDrag(event, id) {
     if (!window.electronAPI) return;
-    await electronAPI.invoke('inbox-start-drag', id);
+    if (event?.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'copy';
+        event.dataTransfer.setData('text/plain', id || 'inbox-item');
+    }
+    electronAPI.send('inbox-start-drag', id);
 }
 
 function getDropFilePaths(event) {
@@ -2490,6 +2494,10 @@ bindInboxDragTargets();
 loadInboxState();
 if (window.electronAPI) {
     electronAPI.on('pet-progress-changed', renderPetProgress);
+    electronAPI.on('inbox-drag-error', (result) => {
+        setInboxStatus(result?.error || 'Drag out failed.', true);
+        if (result?.state) renderInboxState(result);
+    });
 }
 
 // 深呼吸/叹气：每 20-40 秒触发一次

@@ -48,7 +48,7 @@ describe('preload channel whitelist', () => {
 
   test('exposes file inbox channels to renderers', () => {
     const source = fs.readFileSync(path.join(__dirname, '..', '..', 'preload.js'), 'utf8')
-    const channels = [
+    const invokeChannels = [
       'inbox-get-state',
       'inbox-add-files',
       'inbox-capture-clipboard',
@@ -56,12 +56,12 @@ describe('preload channel whitelist', () => {
       'inbox-open-item',
       'inbox-reveal-item',
       'inbox-remove-record',
-      'inbox-start-drag',
     ]
 
-    for (const channel of channels) {
+    for (const channel of invokeChannels) {
       expect(source).toContain(`'${channel}'`)
     }
+    expect(source).toMatch(/VALID_SEND_CHANNELS[\s\S]*'inbox-start-drag'/)
   })
 
   test('renderer includes gamified focus panel hooks', () => {
@@ -172,6 +172,8 @@ describe('preload channel whitelist', () => {
     expect(source).toContain('id="inboxDropZone"')
     expect(source).toContain('captureInboxClipboard')
     expect(source).toContain('startInboxDrag')
+    expect(source).toContain("electronAPI.send('inbox-start-drag'")
+    expect(source).not.toContain("electronAPI.invoke('inbox-start-drag'")
     expect(source).not.toContain('id="btnScreenshot"')
     expect(source).not.toContain('<button onclick="screenshot()">Screenshot</button>')
   })

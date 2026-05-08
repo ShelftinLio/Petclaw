@@ -75,6 +75,8 @@ const ModelSwitcher = require('./model-switcher'); // 🔄 模型切换器
 const SetupWizard = require('./setup-wizard'); // 🧙 首次运行向导
 const configManager = require('./utils/config-manager'); // 🔒 配置管理
 const backendCompat = require('./utils/backend-compat');
+const { focusWindowSafely } = require('./utils/window-visibility');
+const { startInboxDrag } = require('./utils/inbox-drag');
 const SecureStorage = require('./utils/secure-storage'); // 🔒 安全存储
 const pathResolver = require('./utils/openclaw-path-resolver'); // 🔧 路径解析
 const SessionLockManager = require('./utils/session-lock-manager');
@@ -1582,7 +1584,7 @@ function openModelSettings() {
 let petStudioWindow = null;
 function openPetStudio() {
   if (petStudioWindow && !petStudioWindow.isDestroyed()) {
-    petStudioWindow.focus();
+    focusWindowSafely(petStudioWindow);
     return;
   }
 
@@ -2895,20 +2897,15 @@ ipcMain.handle('inbox-remove-record', async (event, id) => {
   }
 });
 
-ipcMain.handle('inbox-start-drag', async (event, id) => {
-  try {
-    const inbox = await ensureInboxSystem();
-    const record = inbox.getRecord(id);
-    if (!record || !record.inboxPath || !fs.existsSync(record.inboxPath)) {
-      return { success: false, error: 'Inbox item not available', state: inbox.getState() };
-    }
-    event.sender.startDrag({
-      file: record.inboxPath,
-      icon: path.join(__dirname, 'icon.png')
-    });
-    return { success: true, state: inbox.getState() };
-  } catch (err) {
-    return { success: false, error: err.message, state: inboxSystem?.getState?.() || null };
+ipcMain.on('inbox-start-drag', (event, id) => {
+  const result = startInboxDrag({
+    inbox: inboxSystem,
+    sender: event.sender,
+    id,
+    iconPath: path.join(__dirname, 'icon.png')
+  });
+  if (!result.success) {
+    event.sender.send('inbox-drag-error', result);
   }
 });
 

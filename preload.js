@@ -2,7 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // Whitelisted IPC channels for security
 const VALID_SEND_CHANNELS = [
-  'drag-pet'
+  'drag-pet',
+  'inbox-start-drag'
 ];
 
 const VALID_INVOKE_CHANNELS = [
@@ -18,7 +19,6 @@ const VALID_INVOKE_CHANNELS = [
   'inbox-open-item',
   'inbox-reveal-item',
   'inbox-remove-record',
-  'inbox-start-drag',
   'direct-chat-send',
   'gateway-send',
   'openclaw-send',
@@ -96,6 +96,7 @@ const VALID_ON_CHANNELS = [
   'show-lyric',
   'appearance-changed',
   'appearance-generation-progress',
+  'inbox-drag-error',
   'pet-progress-changed',
   'pet-game-tab',
   'switch-log-entry'
