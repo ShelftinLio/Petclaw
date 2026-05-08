@@ -780,7 +780,8 @@ async function createWindow() {
       html, body, * { overflow: hidden !important; scrollbar-width: none !important; }
       ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
       .reply-bubble.expanded .reply-bubble-text,
-      .conversation-panel { overflow-y: auto !important; }
+      .conversation-panel,
+      .inbox-list { overflow-y: auto !important; }
     `);
   });
 

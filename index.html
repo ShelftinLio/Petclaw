@@ -843,8 +843,9 @@
         padding: 8px;
         display: none;
         grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto minmax(0, 1fr);
         gap: 6px;
-        overflow-y: auto !important;
+        overflow: hidden;
         border: 2px solid var(--hud-line);
         background: var(--hud-bg);
         box-shadow: var(--pixel-shadow);
@@ -910,8 +911,17 @@
     .inbox-status.error { color: #7a0000; }
     .inbox-list {
         display: grid;
+        align-content: start;
         gap: 5px;
+        min-height: 0;
+        max-height: 148px;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        padding-right: 1px;
+        cursor: grab;
     }
+    .inbox-list.drag-scrolling { cursor: grabbing; }
     .inbox-empty {
         padding: 8px;
         border: 2px dashed rgba(0,0,0,0.35);
@@ -927,15 +937,46 @@
         border: 2px solid var(--hud-line);
         background: #ffffff;
         box-shadow: inset -2px -2px 0 rgba(0,0,0,0.12);
-        cursor: grab;
+        cursor: default;
     }
-    .inbox-record:active { cursor: grabbing; }
     .inbox-record.missing { opacity: 0.55; }
+    .inbox-record-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 20px;
+        gap: 5px;
+        align-items: start;
+    }
     .inbox-record-name {
         font-size: 10px;
         font-weight: 900;
         line-height: 1.2;
         overflow-wrap: anywhere;
+    }
+    .inbox-drag-handle {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--hud-line);
+        background: #ffffff;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.16);
+        cursor: grab;
+    }
+    .inbox-drag-handle:active { cursor: grabbing; }
+    .inbox-drag-handle[aria-disabled="true"] {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+    .inbox-drag-handle svg {
+        width: 13px;
+        height: 13px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: square;
+        stroke-linejoin: miter;
+        pointer-events: none;
     }
     .inbox-record-meta {
         color: var(--hud-muted);
@@ -2236,8 +2277,13 @@ function renderInboxState(payload = {}) {
             record.source || 'manual'
         ].filter(Boolean).join(' | ');
         return `
-            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="${record.missing ? 'false' : 'true'}" data-inbox-id="${escapeHtml(record.id)}" ondragstart="startInboxDrag(event, '${escapeHtml(record.id)}')">
-                <div class="inbox-record-name">${escapeHtml(record.name || 'Inbox item')}</div>
+            <div class="inbox-record ${record.missing ? 'missing' : ''}" draggable="false" data-inbox-id="${escapeHtml(record.id)}">
+                <div class="inbox-record-header">
+                    <div class="inbox-record-name">${escapeHtml(record.name || 'Inbox item')}</div>
+                    <span class="inbox-drag-handle" draggable="${record.missing ? 'false' : 'true'}" aria-disabled="${record.missing ? 'true' : 'false'}" title="Drag out" aria-label="Drag out" ondragstart="startInboxDrag(event, '${escapeHtml(record.id)}')">
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2h4M6 5h4M6 8h4M6 11h4M6 14h4"/></svg>
+                    </span>
+                </div>
                 <div class="inbox-record-meta">${escapeHtml(meta)}${record.missing ? ' | Missing' : ''}</div>
                 <div class="inbox-record-actions">
                     <button onclick="openInboxItem('${escapeHtml(record.id)}')">Open</button>
@@ -2317,6 +2363,7 @@ async function removeInboxRecord(id) {
 
 function startInboxDrag(event, id) {
     if (!window.electronAPI) return;
+    event?.stopPropagation?.();
     if (event?.dataTransfer) {
         event.dataTransfer.effectAllowed = 'copy';
         event.dataTransfer.setData('text/plain', id || 'inbox-item');
@@ -2362,6 +2409,47 @@ function bindInboxDragTargets() {
         });
         target.addEventListener('drop', collectDroppedInboxFiles);
     });
+}
+
+let inboxScrollDrag = null;
+
+function bindInboxListScrollDrag() {
+    if (!inboxList) return;
+
+    const endScrollDrag = (event) => {
+        if (!inboxScrollDrag || event.pointerId !== inboxScrollDrag.pointerId) return;
+        try {
+            if (inboxList.hasPointerCapture?.(event.pointerId)) {
+                inboxList.releasePointerCapture(event.pointerId);
+            }
+        } catch (_) {}
+        inboxScrollDrag = null;
+        inboxList.classList.remove('drag-scrolling');
+    };
+
+    inboxList.addEventListener('pointerdown', event => {
+        if (typeof event.button === 'number' && event.button !== 0) return;
+        if (event.target?.closest?.('.inbox-drag-handle, button, a')) return;
+        inboxScrollDrag = {
+            pointerId: event.pointerId,
+            startY: event.clientY,
+            startTop: inboxList.scrollTop
+        };
+        inboxList.classList.add('drag-scrolling');
+        try { inboxList.setPointerCapture(event.pointerId); } catch (_) {}
+    });
+
+    inboxList.addEventListener('pointermove', event => {
+        if (!inboxScrollDrag || event.pointerId !== inboxScrollDrag.pointerId) return;
+        const dy = event.clientY - inboxScrollDrag.startY;
+        if (Math.abs(dy) < 2) return;
+        event.preventDefault();
+        inboxList.scrollTop = inboxScrollDrag.startTop - dy;
+    }, { passive: false });
+
+    inboxList.addEventListener('pointerup', endScrollDrag);
+    inboxList.addEventListener('pointercancel', endScrollDrag);
+    inboxList.addEventListener('lostpointercapture', endScrollDrag);
 }
 
 async function useCowCat() {
@@ -2490,6 +2578,7 @@ loop();
 updateConversationModeUI();
 loadAppearance();
 loadPetProgress();
+bindInboxListScrollDrag();
 bindInboxDragTargets();
 loadInboxState();
 if (window.electronAPI) {
