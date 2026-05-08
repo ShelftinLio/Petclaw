@@ -52,7 +52,7 @@ if (process.platform === 'darwin') {
   }
 }
 
-const { app, BrowserWindow, ipcMain, screen, Menu, Tray, Notification, shell, dialog, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Menu, Tray, Notification, shell, dialog, clipboard, nativeImage } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const GatewayClient = require('./gateway-client');
@@ -2903,7 +2903,7 @@ ipcMain.on('inbox-start-drag', (event, id) => {
     inbox: inboxSystem,
     sender: event.sender,
     id,
-    iconPath: path.join(__dirname, 'icon.png')
+    iconPath: nativeImage.createEmpty()
   });
   if (!result.success) {
     event.sender.send('inbox-drag-error', result);

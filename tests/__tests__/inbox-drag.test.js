@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs')
 const { startInboxDrag } = require('../../utils/inbox-drag')
 
 function createInbox(records = []) {
@@ -42,5 +43,17 @@ describe('inbox drag-out bridge', () => {
     })).toMatchObject({ success: false, error: 'Inbox item not available' })
 
     expect(sender.startDrag).not.toHaveBeenCalled()
+  })
+
+  test('main process uses an empty drag image for inbox drag-out', () => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'main.js'), 'utf8')
+    const start = source.indexOf("ipcMain.on('inbox-start-drag'")
+    const end = source.indexOf('\n});', start) + '\n});'.length
+    const handler = source.slice(start, end)
+
+    expect(start).toBeGreaterThanOrEqual(0)
+    expect(end).toBeGreaterThan(start)
+    expect(handler).toContain('nativeImage.createEmpty()')
+    expect(handler).not.toContain('icon.png')
   })
 })
