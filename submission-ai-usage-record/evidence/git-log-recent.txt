@@ -1,0 +1,30 @@
+﻿bbfb550 (HEAD -> master) feat: restore file inbox helper
+83b932d feat: update latest petclaw workspace
+e16d2e0 docs: add pet affinity design
+dc22d43 docs: plan file inbox helper
+47ae8c4 docs: design file inbox helper
+4e739ad docs: add lifelike pet gamification design
+270cfb7 Fix pet click reactions
+c00b6ba Fix custom pet generation and management
+3ff3079 fix: compact pet adventure window
+7e799e6 fix: move pet adventure UI to dedicated window
+626521f fix: surface focus adventure toolbar entry
+6d584cd (origin/master, origin/HEAD) chore: add custom pet assets
+392b7f6 feat: support image api base url
+791d9e7 merge p0 gamified focus skill
+0daf842 fix: surface pet generation failures
+2d28d7f (feature/p0-gamified-focus-skill) feat: add focus adventure pet ui
+c60045d feat: support three pet creation inputs
+24e2f13 feat: expose pet focus progress ipc
+0a01164 feat: persist pet game progress
+8725117 feat: add focus adventure reward lifecycle
+bd55c2d feat: generate pet spritesheets from references
+5cb8c24 feat: add pet skill seed helpers
+cc8dec7 feat: add pet ability progression rules
+0ad5b62 chore: ignore local worktrees
+08c4c99 docs: add p0 focus skill implementation plan
+60a815c feat: add pet studio
+30bd725 docs: add p0 gamified focus skill design
+c8217cf feat: consolidate pet settings panel
+4f451ba fix: separate pet hud panels
+4873e02 style: simplify pet hud monochrome
