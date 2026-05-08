@@ -825,7 +825,7 @@ async function createWindow() {
     setTimeout(() => {
       // 在歌词窗口显示欢迎消息
       sendLyric({
-        text: '龙虾待命 🦞',
+        text: 'Petclaw待命',
         type: 'system',
         sender: '系统'
       });
